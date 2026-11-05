@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,8 +38,15 @@ fun VisitCheckRoute(
 ) {
     val check = rememberVisitCheck(latitude, longitude, onAllowed = {})
     val result = check.status
-    // null(들어온 직후) · 확인 중에는 직전 판정(범위 안)을 유지한다
-    val outside = result == LocationUiState.Outside || result == LocationUiState.Denied || result == LocationUiState.Unavailable
+    // 들어온 직후는 범위 안. 다시 확인하는 동안에는 직전 판정을 그대로 보여준다 (04-E 에서 잠깐 04 로 바뀌지 않게)
+    var outside by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(result) {
+        when (result) {
+            LocationUiState.Available -> outside = false
+            LocationUiState.Outside, LocationUiState.Denied, LocationUiState.Unavailable -> outside = true
+            LocationUiState.Checking, null -> Unit
+        }
+    }
 
     VisitCheckScreen(
         state = VisitCheckUiState(placeName, visitorName, stampCount, if (outside) VisitCheckStatus.Outside else VisitCheckStatus.Available),
