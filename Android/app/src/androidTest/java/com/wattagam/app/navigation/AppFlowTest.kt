@@ -15,7 +15,7 @@ class AppFlowTest {
 
     @Test fun sampleFlowReachesNicknameAndBackReturnsToLogin() {
         compose.setContent { WattagamTheme { WattagamApp() } }
-        compose.onNodeWithText("앱 화면 흐름 보기 (샘플 데이터)").performClick()
+        compose.onNodeWithText("앱 화면 흐름 보기 (샘플 데이터)").performScrollTo().performClick()
         compose.onNodeWithText("카카오로 시작하기").assertIsDisplayed().performClick()
         compose.onNodeWithText("닉네임 정하기").assertIsDisplayed()
         compose.onNodeWithText("뒤로").performClick()
@@ -24,7 +24,7 @@ class AppFlowTest {
 
     @Test fun laterPermissionOpensMapAndPlaceOpensDescription() {
         compose.setContent { WattagamTheme { WattagamApp() } }
-        compose.onNodeWithText("앱 화면 흐름 보기 (샘플 데이터)").performClick()
+        compose.onNodeWithText("앱 화면 흐름 보기 (샘플 데이터)").performScrollTo().performClick()
         compose.onNodeWithText("카카오로 시작하기").performClick()
         compose.onNodeWithText("닉네임").performTextInput("하늘")
         compose.onNodeWithText("다음 · 위치 권한 설정").performClick()
