@@ -3,7 +3,6 @@ package com.wattagam.app.feature.guestbook
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -12,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -37,67 +35,33 @@ data class PublishUiState(
 fun PublishScreen(state: PublishUiState, onBack: () -> Unit, onMessageChange: (String) -> Unit, onEditPhoto: () -> Unit, onRecheck: () -> Unit, onPublish: () -> Unit,
     modifier: Modifier = Modifier, photo: @Composable (Modifier) -> Unit,
 ) {
-    val largeText = LocalDensity.current.fontScale > 1.2f
-    val failed = state.status == PublishStatus.Failed
-    val busy = state.status == PublishStatus.CheckingLocation || state.status == PublishStatus.Uploading
+    if (state.status != PublishStatus.Failed) {
+        FocusPublishScreen(state, onBack, onMessageChange, onEditPhoto, onRecheck, onPublish, modifier, photo)
+        return
+    }
     val messageLength = state.message.codePointCount(0, state.message.length)
     RecordingScaffold(stringResource(R.string.bc_publish_title), onBack, modifier, contentSpacing = 8.dp, bottom = {
-        if (failed) RecordingCaption(stringResource(R.string.bc_retry_help))
-        WattagamButton(stringResource(when (state.status) {
-            PublishStatus.CheckingLocation -> R.string.bc_checking_location
-            PublishStatus.Uploading -> R.string.bc_uploading
-            PublishStatus.Failed -> R.string.bc_retry_publish
-            PublishStatus.Ready -> R.string.bc_publish
-        }), onPublish, Modifier.fillMaxWidth(), enabled = state.location != PublishLocation.Outside && messageLength <= state.messageLimit, loading = busy)
-        if (failed) WattagamButton(stringResource(R.string.bc_return_draft), onEditPhoto, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary)
+        RecordingCaption(stringResource(R.string.bc_retry_help))
+        WattagamButton(stringResource(R.string.bc_retry_publish), onPublish, Modifier.fillMaxWidth(),
+            enabled = state.location != PublishLocation.Outside && messageLength <= state.messageLimit)
+        WattagamButton(stringResource(R.string.bc_return_draft), onEditPhoto, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary)
     }) {
-        if (failed) {
-            RecordingNotice(stringResource(R.string.bc_publish_failed), stringResource(R.string.bc_publish_failed_body), R.drawable.bc_alert, danger = true)
-            RecordingAuthor(state.authorName, state.placeName, stringResource(R.string.bc_draft_badge))
-        } else {
-            CreationSteps(2)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RecordingIcon(R.drawable.bc_pin, size = 19.dp)
-                Text(state.placeName, Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
-                if (!largeText) RecordingCaption(stringResource(if (state.location == PublishLocation.Verified) R.string.bc_visit_verified else R.string.bc_location_required))
-            }
-            if (largeText) RecordingCaption(stringResource(if (state.location == PublishLocation.Verified) R.string.bc_visit_verified else R.string.bc_location_required))
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                RecordingCaption(state.authorName, Modifier.weight(1f))
-                TextButton(onClick = onEditPhoto, enabled = !busy) { Text(stringResource(R.string.bc_edit_photo), style = MaterialTheme.typography.bodySmall) }
-            }
-        }
-        photo(Modifier.fillMaxWidth().height(if (failed) 192.dp else 170.dp))
+        RecordingNotice(stringResource(R.string.bc_publish_failed), stringResource(R.string.bc_publish_failed_body), R.drawable.bc_alert, danger = true)
+        RecordingAuthor(state.authorName, state.placeName, stringResource(R.string.bc_draft_badge))
+        photo(Modifier.fillMaxWidth().height(192.dp))
         val label = stringResource(R.string.bc_message_label)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(label, Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
-                if (failed) RecordingCaption(stringResource(R.string.bc_message_count, messageLength, state.messageLimit))
+                RecordingCaption(stringResource(R.string.bc_message_count, messageLength, state.messageLimit))
             }
-            BasicTextField(value = state.message, onValueChange = onMessageChange, enabled = !busy,
-                modifier = Modifier.fillMaxWidth().heightIn(min = if (failed) 48.dp else 96.dp).clip(WattagamShapes.Field)
+            BasicTextField(value = state.message, onValueChange = onMessageChange,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(WattagamShapes.Field)
                     .background(WattagamColors.Soft).border(1.dp, if (messageLength > state.messageLimit) WattagamColors.Danger else WattagamColors.Border, WattagamShapes.Field)
                     .padding(14.dp).semantics { contentDescription = label },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = WattagamColors.Ink), cursorBrush = SolidColor(WattagamColors.Primary))
-            if (!failed) RecordingCaption(stringResource(R.string.bc_message_count_optional, messageLength, state.messageLimit), color = if (messageLength > state.messageLimit) WattagamColors.Danger else WattagamColors.Muted)
         }
-        if (failed) {
-            RecordingNotice(stringResource(R.string.bc_stamp_missing, state.stampCount, state.placeName), stringResource(R.string.bc_stamp_on_success), R.drawable.bc_stamp)
-        } else {
-            Row(Modifier.fillMaxWidth().clip(WattagamShapes.Field).background(WattagamColors.PrimarySoft).padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                RecordingIcon(if (state.location == PublishLocation.Verified) R.drawable.bc_check_circle else R.drawable.bc_pin_off)
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(if (state.location == PublishLocation.Verified) R.string.bc_location_rechecked else R.string.bc_location_required), style = MaterialTheme.typography.labelMedium)
-                    RecordingCaption(if (state.location == PublishLocation.Verified) stringResource(R.string.bc_location_recent, state.placeName) else stringResource(R.string.bc_location_unverified))
-                }
-                TextButton(onClick = onRecheck, enabled = !busy, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.bc_recheck), style = MaterialTheme.typography.bodySmall) }
-            }
-            RecordingNotice(stringResource(R.string.bc_public_title), stringResource(R.string.bc_public_body), R.drawable.bc_globe)
-            Row(Modifier.fillMaxWidth().border(1.dp, WattagamColors.Border, RoundedCornerShape(12.dp)).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RecordingIcon(R.drawable.bc_info, size = 16.dp)
-                RecordingCaption(stringResource(R.string.bc_publish_draft_help))
-            }
-        }
+        RecordingNotice(stringResource(R.string.bc_stamp_missing, state.stampCount, state.placeName), stringResource(R.string.bc_stamp_on_success), R.drawable.bc_stamp)
     }
 }
 

@@ -17,6 +17,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.wattagam.app.feature.capture.VisitCheckScreen
 import com.wattagam.app.feature.capture.VisitCheckStatus
 import com.wattagam.app.feature.capture.VisitCheckUiState
+import com.wattagam.app.feature.guestbook.PublishLocation
 import com.wattagam.app.feature.guestbook.PublishScreen
 import com.wattagam.app.feature.guestbook.PublishStatus
 import com.wattagam.app.feature.guestbook.PublishUiState
@@ -67,6 +68,31 @@ class BcScreensTest {
         compose.runOnIdle { assertEquals(1, retries) }
     }
 
+    @Test fun studioOutsideLocationBlocksUploadButAllowsRecheck() {
+        var submissions = 0
+        var rechecks = 0
+        compose.setContent {
+            WattagamTheme {
+                PublishScreen(PublishUiState("중앙도서관", "하늘", "초안", 1, location = PublishLocation.Outside),
+                    {}, {}, {}, { rechecks++ }, { submissions++ }, photo = { Box(it.height(10.dp)) })
+            }
+        }
+        compose.onNode(hasText("공개 업로드") and hasClickAction()).assertIsNotEnabled().performClick()
+        compose.onNodeWithText("다시 확인").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals(0, submissions); assertEquals(1, rechecks) }
+    }
+
+    @Test fun studioMessageLimitBlocksUploadWithoutDiscardingText() {
+        val message = "가".repeat(81)
+        compose.setContent {
+            WattagamTheme {
+                PublishScreen(PublishUiState("중앙도서관", "하늘", message, 1), {}, {}, {}, {}, {}, photo = { Box(it.height(10.dp)) })
+            }
+        }
+        compose.onNode(hasText("공개 업로드") and hasClickAction()).assertIsNotEnabled()
+        compose.onNodeWithText(message).assertExists()
+    }
+
     @Test fun cameraSampleExplainsThatCaptureIsNotConnected() {
         compose.setContent { WattagamTheme { BcSampleScreen(BcSample.Camera, {}, {}) } }
         compose.onNodeWithContentDescription("사진 찍기").performClick()
@@ -97,8 +123,8 @@ class BcScreensTest {
             if (small) {
                 when (item) {
                     BcSample.Mode -> compose.onNodeWithText("일반 사진으로 찍기").performScrollTo().assertIsDisplayed()
-                    BcSample.Editor -> compose.onNodeWithText("글자 추가 · 선택").performScrollTo().assertIsDisplayed()
-                    BcSample.Publish -> compose.onNodeWithText("앱 사용자에게 공개").performScrollTo().assertIsDisplayed()
+                    BcSample.Editor -> compose.onNodeWithText("글자").performScrollTo().assertIsDisplayed()
+                    BcSample.Publish -> compose.onNodeWithText("로그인한 사용자에게 공개돼요", substring = true).performScrollTo().assertIsDisplayed()
                     else -> Unit
                 }
             }

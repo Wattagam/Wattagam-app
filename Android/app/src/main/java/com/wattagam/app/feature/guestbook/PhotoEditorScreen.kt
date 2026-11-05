@@ -29,34 +29,34 @@ data class PhotoEditorUiState(val placeName: String, val tool: DrawingTool = Dra
 
 @Composable
 fun PhotoEditorScreen(state: PhotoEditorUiState, onBack: () -> Unit, onClear: () -> Unit, onTool: (DrawingTool) -> Unit, onColor: (DrawingColor) -> Unit,
-    onAddText: () -> Unit, onDone: () -> Unit, modifier: Modifier = Modifier, canvas: @Composable () -> Unit,
+    onAddText: () -> Unit, onDone: () -> Unit, modifier: Modifier = Modifier, canvas: @Composable (Modifier) -> Unit,
 ) {
-    RecordingScaffold(stringResource(R.string.bc_editor_title), onBack, modifier, dark = true, contentSpacing = 16.dp,
-        topAction = { TextButton(onClick = onClear) { Text(stringResource(R.string.bc_clear_drawing), color = Color.White, style = MaterialTheme.typography.bodyMedium) } },
-        bottom = {
-            RecordingCaption(stringResource(R.string.bc_editor_optional), color = Color(0xFFAFBDD0))
-            WattagamButton(stringResource(R.string.bc_editor_done), onDone, Modifier.fillMaxWidth())
-        },
+    FocusStudioScaffold(stringResource(R.string.bc_editor_title), onBack, modifier,
+        action = { TextButton(onClick = onClear) { Text(stringResource(R.string.bc_clear_drawing), style = MaterialTheme.typography.bodySmall) } },
+        bottom = { StudioPrimaryButton(stringResource(R.string.bc_studio_next), onDone) },
     ) {
-        CreationSteps(1, dark = true)
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                RecordingIcon(R.drawable.bc_pin_light, size = 16.dp)
-                RecordingCaption(state.placeName, color = Color(0xFFAFBDD0))
-            }
-        }
-        canvas()
-        Row(Modifier.fillMaxWidth().selectableGroup().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = .06f)).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        StudioLocation(state.placeName)
+        canvas(Modifier.fillMaxWidth().aspectRatio(.96f))
+        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             DrawingTool.entries.forEach { tool ->
-                Row(Modifier.weight(1f).heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp)).background(if (tool == state.tool) Color.White.copy(alpha = .16f) else Color.Transparent)
-                    .selectable(tool == state.tool, role = Role.RadioButton, onClick = { onTool(tool) }).padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
-                    RecordingIcon(if (tool == DrawingTool.Pen) R.drawable.bc_pen else R.drawable.bc_eraser)
-                    Text(stringResource(if (tool == DrawingTool.Pen) R.string.bc_pen else R.string.bc_eraser), color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                Column(Modifier.weight(1f).heightIn(min = 64.dp).clip(RoundedCornerShape(12.dp))
+                    .background(if (tool == state.tool) StudioColors.Surface else Color.Transparent)
+                    .selectable(tool == state.tool, role = Role.RadioButton, onClick = { onTool(tool) }).padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
+                    Icon(painterResource(if (tool == DrawingTool.Pen) R.drawable.bc_pen else R.drawable.bc_eraser), null,
+                        Modifier.size(20.dp), tint = if (tool == state.tool) Color.White else StudioColors.Muted)
+                    Text(stringResource(if (tool == DrawingTool.Pen) R.string.bc_studio_pen else R.string.bc_eraser),
+                        color = if (tool == state.tool) Color.White else StudioColors.Muted, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            TextButton(onClick = onAddText, modifier = Modifier.weight(1f).heightIn(min = 64.dp), contentPadding = PaddingValues(8.dp)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.bc_studio_text_symbol), color = StudioColors.Muted, style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.bc_studio_text), color = StudioColors.Muted, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
-        Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 32.dp).padding(bottom = 12.dp).selectableGroup(), horizontalArrangement = Arrangement.SpaceBetween) {
             DrawingColor.entries.forEach { color ->
                 val (fill, label) = when (color) {
                     DrawingColor.Blue -> WattagamColors.Primary to R.string.bc_blue
@@ -76,9 +76,6 @@ fun PhotoEditorScreen(state: PhotoEditorUiState, onBack: () -> Unit, onClear: ()
                     }
                 }
             }
-        }
-        TextButton(onClick = onAddText, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).border(1.dp, Color.White.copy(alpha = .22f), RoundedCornerShape(16.dp))) {
-            Text(stringResource(R.string.bc_add_text), color = Color.White)
         }
     }
 }

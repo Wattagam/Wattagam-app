@@ -10,7 +10,7 @@ Figma B·C의 10개 프레임을 Compose 화면 및 상태로 구현한다. 이 
 
 앱 실행 → **B · C 화면 미리보기** → 원하는 화면을 선택한다. 모든 상세 화면 상단에 `UI 샘플`을 표시한다. 실제 연동이 필요한 버튼은 준비 중 안내를 표시하며, 다른 상태는 목록에서 직접 선택한다.
 
-Android Studio에서 `app/src/main/java/com/wattagam/app/feature/showcase/BcScreenSamples.kt`를 열고 **Split** 또는 **Design**을 선택한다. `B · 촬영`, `C · 업로드` 그룹에 기본 Preview 10개가 있고, GPS 확인과 공개 업로드에는 320dp·글자 1.5배 Preview도 있다. 기본 Preview는 412 × 916dp이며 시스템 UI는 Android가 그린다.
+Android Studio에서 `app/src/main/java/com/wattagam/app/feature/showcase/BcScreenSamples.kt`를 열고 **Split** 또는 **Design**을 선택한다. `B · 촬영`, `C · 업로드` 그룹에 기본 Preview 10개가 있고, GPS 확인, 사진 꾸미기, 공개 업로드에는 320dp·글자 1.5배 Preview도 있다. 기본 Preview는 412 × 916dp이며 시스템 UI는 Android가 그린다.
 
 | Figma 프레임 | 구현 | Preview |
 | --- | --- | --- |
@@ -49,4 +49,14 @@ BcScreensTest는 범위 밖 작성 진입 차단, 전송 중 중복 요청 차�
 
 실제 GPS 판정, 이미지 파일 보존, 업로드 재시도와 중복 저장 방지, AR 결과물은 이 UI 검증으로 검증됐다고 간주하지 않는다.
 
-이번 구현 검증: assembleDebug, assembleDebugAndroidTest, lintDebug 통과. 에뮬레이터에서 기존 3개와 신규 5개를 포함한 UI 테스트 8개 통과. 기본/작은 화면 총 20회 렌더링을 수행하고 캡처를 검토했다. Lint는 오류 0개, 기존 의존성 버전 안내 5개이며 순수 JVM 테스트는 NO-SOURCE다. 실기기 및 Android Studio Preview 창 자체의 렌더링은 별도로 검증하지 않았다.
+이번 구현 검증: assembleDebug, assembleDebugAndroidTest, lintDebug 통과. 에뮬레이터에서 기존 공통 컨트롤 3개와 B·C 화면 7개를 포함한 UI 테스트 10개 통과. 기본/작은 화면 총 20회 렌더링을 수행하고 캡처를 검토했다. Lint는 오류 0개, 기존 의존성 버전 안내 5개이며 순수 JVM 테스트는 NO-SOURCE다. 실기기 및 Android Studio Preview 창 자체의 렌더링은 별도로 검증하지 않았다.
+
+## 포커스 스튜디오 적용 범위
+
+사용자가 선택한 포커스 스튜디오 방향은 사진 꾸미기와 공개 업로드(Ready/CheckingLocation/Uploading)에만 적용한다. 검정 배경, 가로 폭을 채우는 사진, 흰색 주요 버튼, 간결한 공개·위치 안내를 사용한다. 실패 및 완료 화면, B 촬영 화면은 기존 표현을 유지한다.
+
+`feature/guestbook/FocusStudioComponents.kt`의 내부 스캐폴드와 색상은 두 화면의 composition 안에서만 사용한다. `ui/theme`와 `ui/components`는 이번 포커스 스튜디오 적용에서 수정하지 않는다. 브랜치의 이전 커밋에 포함된 공통 단계 표시 개선과는 별개다.
+
+사진 꾸미기의 canvas 슬롯은 `(Modifier) -> Unit`을 받아 화면이 지정한 비율을 따른다. 공개 업로드는 기존 상태/콜백을 유지하고, 위치 범위 밖·글자 수 초과 시 제출을 막으며 위치 확인/업로드 중 입력 및 재요청을 막는다. 다크 화면의 시스템 바 아이콘은 showcase 진입/이탈 때 복원된다. 실제 드로잉 엔진과 API는 아직 연결하지 않는다.
+
+포커스 스튜디오 적용 후에도 촬영·방문·사진 확인·실패·완료의 나머지 8개 기본 화면 PNG가 적용 전과 파일 단위로 동일함을 수동 비교했다. 새 UI 테스트는 위치 범위 밖의 제출 차단/재확인 허용과 80자 초과 입력의 제출 차단/문구 유지를 검증한다.

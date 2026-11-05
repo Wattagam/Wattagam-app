@@ -56,7 +56,7 @@ fun BcSampleScreen(sample: BcSample, onBack: () -> Unit, onNavigate: (BcSample) 
     var flash by rememberSaveable { mutableStateOf(false) }
     var notice by rememberSaveable { mutableStateOf(false) }
     val action = { notice = true }
-    val dark = sample in listOf(BcSample.Mode, BcSample.Ar, BcSample.Camera, BcSample.Editor)
+    val dark = sample in listOf(BcSample.Mode, BcSample.Ar, BcSample.Camera, BcSample.Editor, BcSample.Publish)
     val view = LocalView.current
     if (!view.isInEditMode) {
         DisposableEffect(dark, view) {
@@ -87,7 +87,7 @@ fun BcSampleScreen(sample: BcSample, onBack: () -> Unit, onNavigate: (BcSample) 
             BcSample.Photo -> PhotoPreviewScreen(place, painterResource(R.drawable.bc_photo_sample), onBack, { onNavigate(BcSample.Mode) }, action,
                 { onNavigate(BcSample.Editor) }, { onNavigate(BcSample.Publish) })
             BcSample.Editor -> PhotoEditorScreen(PhotoEditorUiState(place, tool, color), onBack, { drawing = false }, { tool = it }, { color = it }, action,
-                { onNavigate(BcSample.Publish) }, canvas = { DecoratedPhotoSample(Modifier.fillMaxWidth().height(336.dp), DecorationSample.Editor, drawing) })
+                { onNavigate(BcSample.Publish) }, canvas = { DecoratedPhotoSample(it, DecorationSample.Editor, drawing) })
             BcSample.Publish, BcSample.Failure -> PublishScreen(
                 PublishUiState(place, author, message, 1, if (sample == BcSample.Failure) PublishStatus.Failed else PublishStatus.Ready),
                 onBack, { message = it }, { onNavigate(BcSample.Editor) }, action, action,
@@ -123,9 +123,10 @@ private enum class DecorationSample { Editor, Publish, Failure, Success }
 
 @Composable
 private fun DecoratedPhotoSample(modifier: Modifier, mode: DecorationSample, drawing: Boolean = true) {
-    BoxWithConstraints(modifier.clip(WattagamShapes.Card)) {
+    val studio = mode == DecorationSample.Editor || mode == DecorationSample.Publish
+    BoxWithConstraints(if (studio) modifier.clip(RoundedCornerShape(0.dp)) else modifier.clip(WattagamShapes.Card)) {
         val scale = maxWidth / 364
-        val innerHeight = if (mode == DecorationSample.Editor) 420.dp else maxHeight
+        val innerHeight = maxHeight
         Image(painterResource(R.drawable.bc_photo_sample), stringResource(R.string.bc_selected_photo), Modifier.fillMaxWidth().height(innerHeight), contentScale = ContentScale.Crop)
         if (drawing) {
             val asset = when (mode) {
@@ -136,10 +137,10 @@ private fun DecoratedPhotoSample(modifier: Modifier, mode: DecorationSample, dra
             }
             val y = when (mode) { DecorationSample.Editor -> 60.3f; DecorationSample.Publish -> 21.15f; DecorationSample.Failure -> 28.5f; DecorationSample.Success -> 38.07f }
             val h = when (mode) { DecorationSample.Editor -> 227.877f; DecorationSample.Publish -> 102.006f; DecorationSample.Failure -> 120.634f; DecorationSample.Success -> 173.625f }
-            Image(painterResource(asset), null, Modifier.offset(x = scale * if (mode == DecorationSample.Failure) 26 else 24, y = y.dp).size(scale * if (mode == DecorationSample.Failure) 285.011f else 287f, h.dp), contentScale = ContentScale.FillBounds)
+            Image(painterResource(asset), null, Modifier.offset(x = scale * if (mode == DecorationSample.Failure) 26 else 24, y = if (studio) maxHeight * .14f else y.dp).size(scale * if (mode == DecorationSample.Failure) 285.011f else 287f, if (studio) maxHeight * .63f else h.dp), contentScale = ContentScale.FillBounds)
         }
         val captionY = when (mode) { DecorationSample.Editor -> 291.dp; DecorationSample.Publish -> 116.dp; DecorationSample.Failure -> 152.dp; DecorationSample.Success -> 164.dp }
-        Text(stringResource(R.string.bc_sample_caption), Modifier.offset(12.dp, captionY).clip(RoundedCornerShape(8.dp)).background(RecordingNavy).padding(10.dp, 5.dp), color = Color.White,
+        Text(stringResource(R.string.bc_sample_caption), Modifier.offset(12.dp, if (studio) maxHeight - 52.dp else captionY).clip(RoundedCornerShape(8.dp)).background(if (studio) Color(0xFF161616) else RecordingNavy).padding(10.dp, 5.dp), color = Color.White,
             style = if (mode == DecorationSample.Editor) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall)
     }
 }

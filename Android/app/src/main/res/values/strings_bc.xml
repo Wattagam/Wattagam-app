@@ -132,4 +132,13 @@
     <string name="bc_step_current">현재 단계</string>
     <string name="bc_step_complete">완료한 단계</string>
     <string name="bc_step_upcoming">다음 단계</string>
+    <string name="bc_studio_next">다음 · 메시지 남기기</string>
+    <string name="bc_studio_pen">펜</string>
+    <string name="bc_studio_text">글자</string>
+    <string name="bc_studio_text_symbol">T</string>
+    <string name="bc_studio_edit">사진 편집</string>
+    <string name="bc_studio_public">%1$s 님의 기록 · 로그인한 사용자에게 공개돼요</string>
+    <string name="bc_studio_location_verified">현재 위치 확인됨</string>
+    <string name="bc_studio_location_outside">장소 범위 밖이에요. 위치를 다시 확인해 주세요.</string>
+    <string name="bc_studio_stamp">처음 기록하는 장소라면 업로드 완료 후 도장을 받아요.</string>
 </resources>
