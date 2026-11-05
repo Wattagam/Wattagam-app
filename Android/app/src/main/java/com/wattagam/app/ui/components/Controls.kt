@@ -84,14 +84,22 @@ fun WattagamTextField(
 }
 
 @Composable
-fun AppTopBar(title: String, backLabel: String?, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun AppTopBar(
+    title: String,
+    backLabel: String?,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onAction: () -> Unit = {},
+) {
     Row(
         modifier.fillMaxWidth().heightIn(min = WattagamSizes.TopBar).padding(horizontal = WattagamSpacing.Content),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(WattagamSpacing.Small),
     ) {
         if (backLabel != null) TextButton(onClick = onBack, modifier = Modifier.heightIn(min = WattagamSizes.TouchTarget)) { Text(backLabel) }
-        Text(title, style = MaterialTheme.typography.titleLarge)
+        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+        if (actionLabel != null) TextButton(onClick = onAction, modifier = Modifier.heightIn(min = WattagamSizes.TouchTarget)) { Text(actionLabel) }
     }
 }
 
