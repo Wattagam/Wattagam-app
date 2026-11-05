@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
 import com.wattagam.app.ui.components.AppTopBar
 import com.wattagam.app.ui.components.ButtonKind
+import com.wattagam.app.ui.components.LocationStatus
+import com.wattagam.app.ui.components.LocationUiState
 import com.wattagam.app.ui.components.PhotoPlaceholder
 import com.wattagam.app.ui.components.StatusCard
 import com.wattagam.app.ui.components.WattagamButton
@@ -51,6 +53,7 @@ fun PlaceDetailScreen(
     onGalleryClick: () -> Unit,
     onWriteClick: () -> Unit,
     modifier: Modifier = Modifier,
+    locationStatus: LocationUiState? = null,
 ) {
     Scaffold(
         modifier,
@@ -62,7 +65,12 @@ fun PlaceDetailScreen(
                     style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,
                     textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
                 )
-                WattagamButton(stringResource(R.string.place_write), onWriteClick, Modifier.fillMaxWidth())
+                // 작성 시작 위치 확인 결과 (확인 중 / 범위 밖 / 권한 없음 / 확인 실패 / 작성 가능)
+                if (locationStatus != null) LocationStatus(locationStatus, Modifier.fillMaxWidth())
+                WattagamButton(
+                    stringResource(R.string.place_write), onWriteClick, Modifier.fillMaxWidth(),
+                    loading = locationStatus == LocationUiState.Checking,
+                )
             }
         },
     ) { insets ->
@@ -120,6 +128,7 @@ private fun PlaceDetailPreview() {
                 "도서관 앞 계단", stamped = false, publicCount = 6,
             ),
             onBack = {}, onGalleryClick = {}, onWriteClick = {},
+            locationStatus = LocationUiState.Outside,
         )
     }
 }

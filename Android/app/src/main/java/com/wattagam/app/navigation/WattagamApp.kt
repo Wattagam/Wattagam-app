@@ -9,10 +9,12 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.wattagam.app.data.auth.KakaoLogin
 import com.wattagam.app.data.sample.SampleData
 import com.wattagam.app.data.sample.SampleGuestbook
+import com.wattagam.app.data.sample.SamplePlace
 import com.wattagam.app.feature.auth.LocationPermissionRoute
-import com.wattagam.app.feature.auth.LoginScreen
+import com.wattagam.app.feature.auth.LoginRoute
 import com.wattagam.app.feature.auth.NicknameScreen
 import com.wattagam.app.feature.gallery.GalleryScreen
 import com.wattagam.app.feature.gallery.GalleryUiState
@@ -27,6 +29,7 @@ import com.wattagam.app.feature.mypage.MyPageUiState
 import com.wattagam.app.feature.mypage.SettingsScreen
 import com.wattagam.app.feature.place.PlaceDetailScreen
 import com.wattagam.app.feature.place.PlaceDetailUiState
+import com.wattagam.app.feature.place.rememberVisitCheck
 import com.wattagam.app.feature.showcase.BcSample
 import com.wattagam.app.feature.showcase.BcSampleIndex
 import com.wattagam.app.feature.showcase.BcSampleScreen
@@ -62,7 +65,7 @@ private data class BcDetail(val sample: BcSample) : NavKey
 
 /**
  * 시작은 개발용 부품 목록. '앱 화면 흐름 보기'로 샘플 데이터 화면 흐름에 들어간다.
- * 로그인·GPS·업로드·도장은 연결 전이며 화면 상태는 [SampleData] 에서 만든다.
+ * 카카오 로그인(앱 키가 있을 때)과 작성 시작 GPS 확인은 실제로 동작한다. 서버·업로드·도장은 연결 전이며 화면 상태는 [SampleData] 에서 만든다.
  */
 @Composable
 fun WattagamApp() {
@@ -93,7 +96,7 @@ fun WattagamApp() {
             }
 
             entry<Login> {
-                LoginScreen(onKakaoLogin = { backStack.add(Nickname(isEdit = false)) })
+                LoginRoute(onLoggedIn = { backStack.add(Nickname(isEdit = false)) })
             }
             entry<Nickname> { key ->
                 NicknameScreen(
@@ -117,26 +120,30 @@ fun WattagamApp() {
                 )
             }
             entry<PlaceDetail> { key ->
-                val state = samplePlaceState(key.placeId) ?: return@entry
+                val place = SampleData.place(key.placeId) ?: return@entry
+                val visitCheck = rememberVisitCheck(place.latitude, place.longitude, onAllowed = { onWriteAllowed(place.id) })
                 PlaceDetailScreen(
-                    uiState = state,
+                    uiState = place.toDetailState(),
                     onBack = { backStack.removeLastOrNull() },
                     onGalleryClick = { backStack.add(Gallery(key.placeId)) },
-                    onWriteClick = { /* B 담당 촬영·방명록 흐름 연결 예정: placeId 를 넘긴다 */ },
+                    onWriteClick = visitCheck.start,
+                    locationStatus = visitCheck.status,
                 )
             }
             entry<Gallery> { key ->
-                val state = sampleGalleryState(key.placeId, nickname) ?: return@entry
+                val place = SampleData.place(key.placeId) ?: return@entry
+                val visitCheck = rememberVisitCheck(place.latitude, place.longitude, onAllowed = { onWriteAllowed(place.id) })
                 GalleryScreen(
-                    uiState = state,
+                    uiState = sampleGalleryState(place, nickname),
                     onBack = { backStack.removeLastOrNull() },
                     onPlaceInfoClick = {
                         // 장소 설명에서 왔으면 뒤로, 아니면 새로 연다
                         if (backStack.getOrNull(backStack.size - 2) == PlaceDetail(key.placeId)) backStack.removeLastOrNull()
                         else backStack.add(PlaceDetail(key.placeId))
                     },
-                    onWriteClick = { /* B 담당 촬영·방명록 흐름 연결 예정 */ },
+                    onWriteClick = visitCheck.start,
                     onGuestbookClick = { backStack.add(GuestbookDetail(it)) },
+                    locationStatus = visitCheck.status,
                 )
             }
             entry<GuestbookDetail> { key ->
@@ -162,13 +169,28 @@ fun WattagamApp() {
                     guestbookCount = SampleData.myGuestbooks().size,
                     onBack = { backStack.removeLastOrNull() },
                     onEditNickname = { backStack.add(Nickname(isEdit = true)) },
-                    onLogout = { backStack.startFlowAt(Login) },
-                    onWithdraw = { backStack.startFlowAt(Login) },
+                    onLogout = {
+                        KakaoLogin.logout()
+                        backStack.startFlowAt(Login)
+                    },
+                    // 탈퇴 API 연결 전: 지금은 카카오 토큰만 지우고 로그인으로 돌아간다
+                    onWithdraw = {
+                        KakaoLogin.logout()
+                        backStack.startFlowAt(Login)
+                    },
                 )
             }
         },
     )
 }
+
+/**
+ * 현재 위치가 장소 범위 안일 때 작성 흐름으로 넘기는 연결 지점.
+ * 촬영·작성 화면(B 흐름)이 추가되면 여기서 그 경로로 placeId 를 넘긴다.
+ * 등록할 때도 위치를 다시 확인해야 한다 (작성 시작 확인만으로 등록 자격이 생기지 않음).
+ */
+@Suppress("UNUSED_PARAMETER")
+private fun onWriteAllowed(placeId: String) = Unit
 
 /** 개발용 부품 목록만 남기고 [key] 부터 새로 시작 (로그인 완료·로그아웃) */
 private fun MutableList<NavKey>.startFlowAt(key: NavKey) {
@@ -191,21 +213,16 @@ private fun sampleMapState() = MapUiState(
     places = SampleData.places.map { MapPlaceUiState(it.id, it.order, it.name, it.checkpoint, it.stamped) },
 )
 
-private fun samplePlaceState(placeId: String): PlaceDetailUiState? {
-    val p = SampleData.place(placeId) ?: return null
-    return PlaceDetailUiState(
-        SampleData.COURSE, p.order, p.name, p.description, p.highlight, p.writingPrompt,
-        p.directions, p.checkpoint, p.stamped, SampleData.guestbooksAt(placeId).size,
-    )
-}
+private fun SamplePlace.toDetailState() = PlaceDetailUiState(
+    SampleData.COURSE, order, name, description, highlight, writingPrompt,
+    directions, checkpoint, stamped, SampleData.guestbooksAt(id).size,
+)
 
 private fun SampleGuestbook.card(nickname: String) =
     GuestbookCardUiState(id, title, "${if (mine) nickname else author} · ${createdAt.substringBeforeLast(' ')}")
 
-private fun sampleGalleryState(placeId: String, nickname: String): GalleryUiState? {
-    val place = SampleData.place(placeId) ?: return null
-    return GalleryUiState(place.name, SampleData.guestbooksAt(placeId).map { it.card(nickname) })
-}
+private fun sampleGalleryState(place: SamplePlace, nickname: String) =
+    GalleryUiState(place.name, SampleData.guestbooksAt(place.id).map { it.card(nickname) })
 
 private fun SampleGuestbook.toDetailState(nickname: String) = GuestbookDetailUiState(
     author = if (mine) nickname else author,

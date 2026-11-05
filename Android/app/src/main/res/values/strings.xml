@@ -2,7 +2,7 @@
     <string name="app_name">왔다감</string>
     <string name="showcase_title">왔다감 공통 디자인</string>
     <string name="showcase_description">피그마 기준의 Compose 부품을 확인해보세요.</string>
-    <string name="sample_notice">개발용 샘플 화면입니다. 로그인·위치 확인·업로드는 연결되지 않았어요.</string>
+    <string name="sample_notice">개발용 샘플 화면입니다. 서버·업로드·도장은 아직 연결되지 않았고 보이는 기록은 샘플이에요.</string>
     <string name="buttons">버튼</string>
     <string name="inputs">입력창</string>
     <string name="states">위치와 기록 상태</string>
@@ -28,6 +28,8 @@
     <string name="location_checking_body">정확한 위치를 확인하고 있어요.</string>
     <string name="location_denied">위치 권한이 필요해요</string>
     <string name="location_denied_body">설정에서 위치 권한을 허용해주세요.</string>
+    <string name="location_unavailable">위치를 확인하지 못했어요</string>
+    <string name="location_unavailable_body">위치 서비스가 켜져 있는지 확인하고, 하늘이 보이는 곳에서 다시 시도해주세요.</string>
     <string name="empty_title">아직 남겨진 기록이 없어요</string>
     <string name="empty_body">이 장소의 첫 추억을 남겨보세요.</string>
     <string name="error_title">기록을 불러오지 못했어요</string>
@@ -55,6 +57,9 @@
     <string name="auth_login_body">로그인 후 지도에서 정문, 도서관, 청룡탕, 310관을 확인하고, 도장 수집 상태를 한 번에 볼 수 있어요.</string>
     <string name="auth_login_hero">네 곳의 장소를 확인하고, 도장을 모아봐요.</string>
     <string name="auth_login_kakao">카카오로 시작하기</string>
+    <string name="auth_login_failed">카카오 로그인에 실패했어요</string>
+    <string name="auth_login_failed_body">네트워크를 확인하고 다시 시도해주세요.</string>
+    <string name="auth_login_server_pending">카카오 로그인만 연결된 상태예요. 서버 연결 전까지 이후 화면은 샘플 데이터예요.</string>
     <string name="auth_login_terms">시작하면 서비스 이용약관 및 개인정보 처리방침을 확인하고 동의한 것으로 간주해요.</string>
     <string name="auth_nickname_title">닉네임 정하기</string>
     <string name="auth_nickname_edit_title">닉네임 수정</string>

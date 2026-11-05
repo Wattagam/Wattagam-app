@@ -23,6 +23,8 @@ import com.wattagam.app.ui.components.AppTopBar
 import com.wattagam.app.ui.components.ButtonKind
 import com.wattagam.app.ui.components.GuestbookCardUiState
 import com.wattagam.app.ui.components.GuestbookGrid
+import com.wattagam.app.ui.components.LocationStatus
+import com.wattagam.app.ui.components.LocationUiState
 import com.wattagam.app.ui.components.StatusCard
 import com.wattagam.app.ui.components.WattagamButton
 import com.wattagam.app.ui.theme.WattagamColors
@@ -45,6 +47,7 @@ fun GalleryScreen(
     onWriteClick: () -> Unit,
     onGuestbookClick: (guestbookId: String) -> Unit,
     modifier: Modifier = Modifier,
+    locationStatus: LocationUiState? = null,
 ) {
     var shown by rememberSaveable { mutableIntStateOf(PAGE_SIZE) }
     val visible = uiState.items.take(shown)
@@ -60,7 +63,11 @@ fun GalleryScreen(
             Text(uiState.placeName, style = MaterialTheme.typography.headlineLarge)
             Text(stringResource(R.string.gallery_description), style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
             WattagamButton(stringResource(R.string.gallery_place_info), onPlaceInfoClick, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary)
-            WattagamButton(stringResource(R.string.place_write), onWriteClick, Modifier.fillMaxWidth())
+            WattagamButton(
+                stringResource(R.string.place_write), onWriteClick, Modifier.fillMaxWidth(),
+                loading = locationStatus == LocationUiState.Checking,
+            )
+            if (locationStatus != null) LocationStatus(locationStatus, Modifier.fillMaxWidth())
             Text(stringResource(R.string.gallery_public_records), style = MaterialTheme.typography.titleLarge)
             if (visible.isEmpty()) {
                 StatusCard(stringResource(R.string.empty_title), stringResource(R.string.empty_body), Modifier.fillMaxWidth())

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.ui.components.StatusCard
 import com.wattagam.app.ui.theme.WattagamColors
 import com.wattagam.app.ui.theme.WattagamShapes
 import com.wattagam.app.ui.theme.WattagamSizes
@@ -37,12 +39,21 @@ private val KakaoYellow = Color(0xFFFEE500)
 private val KakaoText = Color(0xFF191919)
 private val HeroGradient = Brush.horizontalGradient(listOf(Color(0xFF1848D5), Color(0xFF3B7CFC)))
 
+/** 로그인 버튼 상태. 진행 중과 실패는 동시에 일어나지 않는다 */
+enum class LoginStatus { Idle, Loading, Failed }
+
 /**
  * 01 · 카카오 로그인.
- * 카카오 SDK 연결 전이라 버튼은 [onKakaoLogin] 이벤트만 전달한다 (실제 로그인 아님).
+ * [sampleMode] 는 카카오 앱 키가 없어 실제 로그인 없이 샘플 흐름으로 넘어가는 상태다.
  */
 @Composable
-fun LoginScreen(onKakaoLogin: () -> Unit, modifier: Modifier = Modifier) {
+fun LoginScreen(
+    onKakaoLogin: () -> Unit,
+    modifier: Modifier = Modifier,
+    status: LoginStatus = LoginStatus.Idle,
+    sampleMode: Boolean = true,
+) {
+    val loading = status == LoginStatus.Loading
     Scaffold(modifier, containerColor = WattagamColors.Soft) { insets ->
         Column(Modifier.fillMaxSize().padding(insets)) {
             Column(
@@ -65,17 +76,28 @@ fun LoginScreen(onKakaoLogin: () -> Unit, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium),
             ) {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
+                if (status == LoginStatus.Failed) {
+                    StatusCard(stringResource(R.string.auth_login_failed), stringResource(R.string.auth_login_failed_body), Modifier.fillMaxWidth())
+                }
                 Button(
                     onClick = onKakaoLogin,
                     modifier = Modifier.fillMaxWidth().heightIn(min = WattagamSizes.Button),
+                    enabled = !loading,
                     shape = WattagamShapes.Field,
-                    colors = ButtonDefaults.buttonColors(containerColor = KakaoYellow, contentColor = KakaoText),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = KakaoYellow, contentColor = KakaoText,
+                        disabledContainerColor = KakaoYellow, disabledContentColor = KakaoText,
+                    ),
                     elevation = null,
                 ) {
-                    Text(stringResource(R.string.auth_login_kakao), style = MaterialTheme.typography.labelLarge)
+                    if (loading) {
+                        CircularProgressIndicator(Modifier.height(20.dp), color = KakaoText, strokeWidth = 2.dp)
+                    } else {
+                        Text(stringResource(R.string.auth_login_kakao), style = MaterialTheme.typography.labelLarge)
+                    }
                 }
                 Text(
-                    stringResource(R.string.sample_notice),
+                    stringResource(if (sampleMode) R.string.sample_notice else R.string.auth_login_server_pending),
                     style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,
                     textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
                 )
@@ -94,4 +116,10 @@ fun LoginScreen(onKakaoLogin: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 private fun LoginPreview() {
     WattagamTheme { LoginScreen(onKakaoLogin = {}) }
+}
+
+@Preview(showBackground = true, widthDp = 412, heightDp = 916, name = "실패")
+@Composable
+private fun LoginFailedPreview() {
+    WattagamTheme { LoginScreen(onKakaoLogin = {}, status = LoginStatus.Failed, sampleMode = false) }
 }
