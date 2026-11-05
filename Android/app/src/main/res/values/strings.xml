@@ -91,6 +91,7 @@
     <string name="place_directions">찾아가는 길</string>
     <string name="place_checkpoint">방문 확인 지점 · %1$s</string>
     <string name="place_open_gallery">장소 갤러리 열기 · 공개 기록 %1$d개</string>
+    <string name="place_visit_ok">확인</string>
     <string name="place_write">GPS 방문 확인하고 방명록 쓰기</string>
 
     <!-- gallery: 03-A·09-A 장소 갤러리 · 09-A-1 기록 보기 -->
