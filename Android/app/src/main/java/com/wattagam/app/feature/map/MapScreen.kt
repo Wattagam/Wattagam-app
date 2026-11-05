@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -62,7 +63,7 @@ fun MapScreen(
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
-        topBar = { AppTopBar(uiState.courseName, backLabel = null, onBack = {}) },
+        topBar = { AppTopBar(uiState.courseName, backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding()) },
         bottomBar = { BottomNavigation(MainTab.Map, onTabSelect) },
     ) { insets ->
         Column(

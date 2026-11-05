@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -60,12 +62,13 @@ fun GuestbookDetailScreen(
             AppTopBar(
                 stringResource(if (uiState.mine) R.string.gallery_detail_mine_title else R.string.gallery_detail_title),
                 stringResource(R.string.back), onBack,
+                Modifier.statusBarsPadding(),
                 actionLabel = if (uiState.mine) null else stringResource(R.string.gallery_report),
                 onAction = { confirmReport = true },
             )
         },
         bottomBar = {
-            Column(Modifier.padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium)) {
+            Column(Modifier.navigationBarsPadding().padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium)) {
                 if (!uiState.mine) {
                     Text(
                         stringResource(R.string.gallery_detail_notice, uiState.placeName, uiState.author),

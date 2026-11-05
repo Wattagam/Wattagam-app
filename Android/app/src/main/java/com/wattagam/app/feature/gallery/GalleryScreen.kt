@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,7 @@ fun GalleryScreen(
 
     Scaffold(
         modifier,
-        topBar = { AppTopBar(stringResource(R.string.gallery_title), stringResource(R.string.back), onBack) },
+        topBar = { AppTopBar(stringResource(R.string.gallery_title), stringResource(R.string.back), onBack, Modifier.statusBarsPadding()) },
     ) { insets ->
         Column(
             Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(WattagamSpacing.Screen),

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -57,9 +59,9 @@ fun PlaceDetailScreen(
 ) {
     Scaffold(
         modifier,
-        topBar = { AppTopBar(stringResource(R.string.place_title), stringResource(R.string.back), onBack) },
+        topBar = { AppTopBar(stringResource(R.string.place_title), stringResource(R.string.back), onBack, Modifier.statusBarsPadding()) },
         bottomBar = {
-            Column(Modifier.padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small)) {
+            Column(Modifier.navigationBarsPadding().padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small)) {
                 Text(
                     stringResource(R.string.stamp_rule),
                     style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,

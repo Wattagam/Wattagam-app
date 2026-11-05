@@ -4,8 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -59,11 +64,12 @@ fun NicknameScreen(
             AppTopBar(
                 stringResource(if (isEdit) R.string.auth_nickname_edit_title else R.string.auth_nickname_title),
                 stringResource(R.string.back), onBack,
+                Modifier.statusBarsPadding(),
             )
         },
         bottomBar = {
             Column(
-                Modifier.imePadding().padding(WattagamSpacing.Screen),
+                Modifier.windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars)).padding(WattagamSpacing.Screen),
                 verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium),
             ) {
                 if (!isEdit) {

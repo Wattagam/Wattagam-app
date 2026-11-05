@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -45,9 +47,9 @@ fun LocationPermissionScreen(onBack: () -> Unit, onAllow: () -> Unit, onLater: (
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
-        topBar = { AppTopBar(stringResource(R.string.auth_permission_title), stringResource(R.string.back), onBack) },
+        topBar = { AppTopBar(stringResource(R.string.auth_permission_title), stringResource(R.string.back), onBack, Modifier.statusBarsPadding()) },
         bottomBar = {
-            Column(Modifier.padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small)) {
+            Column(Modifier.navigationBarsPadding().padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small)) {
                 WattagamButton(stringResource(R.string.auth_permission_allow), onAllow, Modifier.fillMaxWidth())
                 WattagamButton(stringResource(R.string.auth_permission_later), onLater, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
             }
