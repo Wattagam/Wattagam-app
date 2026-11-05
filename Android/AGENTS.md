@@ -66,3 +66,11 @@
 - Give common components useful previews: default, disabled/loading/error where applicable, and narrow/large-font cases. Inspect rendered output when device or preview tooling is available.
 - Run instrumented tests only on an explicitly selected compatible device. Preserve existing emulators and containers; stop task-owned resources after verification. Follow parent Docker cleanup rules if Docker is actually needed.
 - Distinguish compilation, tests, lint, screenshot review and real-device verification in reports. State honestly which were not run.
+
+## Two-developer collaboration
+- Follow `docs/architecture-and-collaboration.md`. Keep one app module and organize new screens by feature; create folders and layers only when consumed.
+- Own complete feature flows, including UI, state, integration and validation. A/B assignments in the guide are proposals until agreed by the developers.
+- Keep feature-only UI local. Promote it to `ui/components` when another feature actually needs it; shared UI must not depend on feature packages.
+- Pass IDs, file URIs and callbacks across screen boundaries. Keep route wiring in `navigation`; never share feature ViewModels directly.
+- Use short feature branches and PRs. Coordinate edits to navigation, theme, shared components and dependency versions; identify affected callers in the PR.
+- Use feature-prefixed resource names for new strings. Avoid unrelated renaming and formatting in another developer's files.

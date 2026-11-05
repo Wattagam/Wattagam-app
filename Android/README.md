@@ -2,6 +2,11 @@
 
 Kotlin + Jetpack Compose 네이티브 앱. Android Studio에서 이 `Android/` 폴더를 엽니다. 백엔드와 Gradle 프로젝트를 분리합니다.
 
+## 개발 가이드
+
+- [파일 구조와 2인 협업 가이드](docs/architecture-and-collaboration.md)
+- [Android 에이전트 작업 규칙](AGENTS.md)
+
 ## 현재 범위
 
 - [공통 디자인 Figma](https://www.figma.com/design/YPHFpqR55vNmkvEd4T9t5I?node-id=247-101)의 색상·타이포그래피·크기 기준
@@ -13,6 +18,7 @@ Kotlin + Jetpack Compose 네이티브 앱. Android Studio에서 이 `Android/` �
 ## 환경
 
 - Android SDK Platform 37, Build Tools 36.0.0, JDK 17 이상 (Gradle 호환 JDK)
+- Gradle 데몬은 `gradle/gradle-daemon-jvm.properties`에서 JDK 25로 지정합니다. Java/Kotlin 바이트코드 타깃은 17입니다.
 - AGP 9.3.2, Gradle 9.5.1, Kotlin/Compose compiler 2.4.10
 - 최소 Android 8.0 / API 26: 가변 폰트 지원을 포함한 초기 기준. 지원 기기는 실제 기능 검증 시 확인합니다.
 - SDK 경로는 개인 `local.properties`의 `sdk.dir` 또는 `ANDROID_HOME`으로 지정합니다. 저장소에는 경로를 커밋하지 않습니다.
