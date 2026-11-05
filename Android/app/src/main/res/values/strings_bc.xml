@@ -51,10 +51,10 @@
     <string name="bc_selected_photo">선택한 사진</string>
     <string name="bc_retake">다시 촬영</string>
     <string name="bc_decoration_optional">꾸미기는 선택이에요.\n사진과 그림·글은 한 장으로 저장돼요.</string>
-    <string name="bc_step_photo">01  사진 선택</string>
-    <string name="bc_step_draw">02  손그림</string>
-    <string name="bc_step_message">03  메시지</string>
-    <string name="bc_editor_title">사진 위에 그리기</string>
+    <string name="bc_step_photo">사진</string>
+    <string name="bc_step_draw">꾸미기</string>
+    <string name="bc_step_message">메시지</string>
+    <string name="bc_editor_title">사진 꾸미기</string>
     <string name="bc_clear_drawing">그림만 지우기</string>
     <string name="bc_editor_done">편집 완료</string>
     <string name="bc_draw_freely">사진 위에 자유롭게</string>
@@ -129,4 +129,7 @@
     <string name="bc_ar_position">위치를 조정한 뒤 사진을 찍어보세요</string>
     <string name="bc_puang_place">중앙도서관의 푸앙이</string>
     <string name="bc_sample_caption">햇살 가득한 오후</string>
+    <string name="bc_step_current">현재 단계</string>
+    <string name="bc_step_complete">완료한 단계</string>
+    <string name="bc_step_upcoming">다음 단계</string>
 </resources>

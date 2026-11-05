@@ -20,6 +20,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -47,7 +49,7 @@ fun RecordingTopBar(
         Column {
             Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(onClick = onBack, modifier = Modifier.size(48.dp).background(if (dark) RecordingNavy else WattagamColors.Soft, CircleShape)) {
+                IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
                     Image(painterResource(if (dark) R.drawable.bc_arrow_light else R.drawable.bc_arrow), stringResource(R.string.back), Modifier.size(22.dp))
                 }
                 Text(title, Modifier.weight(1f), color = if (dark) Color.White else WattagamColors.Ink, style = MaterialTheme.typography.titleLarge)
@@ -107,13 +109,31 @@ fun RecordingNotice(title: String, body: String, @DrawableRes icon: Int, modifie
 }
 
 @Composable
-fun CreationSteps(active: Int, modifier: Modifier = Modifier) {
+fun CreationSteps(active: Int, modifier: Modifier = Modifier, dark: Boolean = false) {
     val labels = listOf(R.string.bc_step_photo, R.string.bc_step_draw, R.string.bc_step_message)
-    Row(modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    val ink = if (dark) Color.White else WattagamColors.Ink
+    val muted = if (dark) Color(0xFFAFBDD0) else WattagamColors.Muted
+    val track = if (dark) Color.White.copy(alpha = .16f) else WattagamColors.Border
+    Row(modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         labels.forEachIndexed { index, label ->
-            Text(stringResource(label), Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(if (active == index) WattagamColors.PrimarySoft else Color.Transparent).padding(horizontal = 10.dp, vertical = 6.dp),
-                color = if (active == index) WattagamColors.Primary else WattagamColors.Muted,
-                style = MaterialTheme.typography.bodySmall, fontWeight = if (active == index) FontWeight.Medium else FontWeight.Normal)
+            val current = active == index
+            val completed = index < active
+            val status = stringResource(when {
+                current -> R.string.bc_step_current
+                completed -> R.string.bc_step_complete
+                else -> R.string.bc_step_upcoming
+            })
+            Column(Modifier.weight(1f).semantics(mergeDescendants = true) { stateDescription = status },
+                verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (completed) Icon(painterResource(R.drawable.bc_check), null, Modifier.size(14.dp), tint = muted)
+                    Text(stringResource(label), color = if (current) ink else muted,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = if (current) FontWeight.Bold else FontWeight.Normal)
+                }
+                Box(Modifier.fillMaxWidth().height(3.dp).clip(CircleShape)
+                    .background(if (current) (if (dark) Color.White else WattagamColors.Primary) else if (completed) muted else track))
+            }
         }
     }
 }

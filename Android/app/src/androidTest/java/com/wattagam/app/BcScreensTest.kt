@@ -90,6 +90,10 @@ class BcScreensTest {
             compose.runOnIdle { sample.value = item }
             compose.waitForIdle()
             compose.onNodeWithText("UI 샘플").assertIsDisplayed()
+            if (small && item == BcSample.Editor) {
+                val initial = compose.onRoot().captureToImage().asAndroidBitmap()
+                File(output, "Editor-compact-top.png").outputStream().use { initial.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            }
             if (small) {
                 when (item) {
                     BcSample.Mode -> compose.onNodeWithText("일반 사진으로 찍기").performScrollTo().assertIsDisplayed()

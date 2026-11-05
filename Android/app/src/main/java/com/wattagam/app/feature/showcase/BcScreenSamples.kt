@@ -87,7 +87,7 @@ fun BcSampleScreen(sample: BcSample, onBack: () -> Unit, onNavigate: (BcSample) 
             BcSample.Photo -> PhotoPreviewScreen(place, painterResource(R.drawable.bc_photo_sample), onBack, { onNavigate(BcSample.Mode) }, action,
                 { onNavigate(BcSample.Editor) }, { onNavigate(BcSample.Publish) })
             BcSample.Editor -> PhotoEditorScreen(PhotoEditorUiState(place, tool, color), onBack, { drawing = false }, { tool = it }, { color = it }, action,
-                { onNavigate(BcSample.Publish) }, canvas = { DecoratedPhotoSample(Modifier.fillMaxWidth().height(376.dp), DecorationSample.Editor, drawing) })
+                { onNavigate(BcSample.Publish) }, canvas = { DecoratedPhotoSample(Modifier.fillMaxWidth().height(336.dp), DecorationSample.Editor, drawing) })
             BcSample.Publish, BcSample.Failure -> PublishScreen(
                 PublishUiState(place, author, message, 1, if (sample == BcSample.Failure) PublishStatus.Failed else PublishStatus.Ready),
                 onBack, { message = it }, { onNavigate(BcSample.Editor) }, action, action,
@@ -135,10 +135,10 @@ private fun DecoratedPhotoSample(modifier: Modifier, mode: DecorationSample, dra
                 DecorationSample.Success -> R.drawable.bc_drawing_success
             }
             val y = when (mode) { DecorationSample.Editor -> 60.3f; DecorationSample.Publish -> 21.15f; DecorationSample.Failure -> 28.5f; DecorationSample.Success -> 38.07f }
-            val h = when (mode) { DecorationSample.Editor -> 267.877f; DecorationSample.Publish -> 102.006f; DecorationSample.Failure -> 120.634f; DecorationSample.Success -> 173.625f }
+            val h = when (mode) { DecorationSample.Editor -> 227.877f; DecorationSample.Publish -> 102.006f; DecorationSample.Failure -> 120.634f; DecorationSample.Success -> 173.625f }
             Image(painterResource(asset), null, Modifier.offset(x = scale * if (mode == DecorationSample.Failure) 26 else 24, y = y.dp).size(scale * if (mode == DecorationSample.Failure) 285.011f else 287f, h.dp), contentScale = ContentScale.FillBounds)
         }
-        val captionY = when (mode) { DecorationSample.Editor -> 331.dp; DecorationSample.Publish -> 116.dp; DecorationSample.Failure -> 152.dp; DecorationSample.Success -> 164.dp }
+        val captionY = when (mode) { DecorationSample.Editor -> 291.dp; DecorationSample.Publish -> 116.dp; DecorationSample.Failure -> 152.dp; DecorationSample.Success -> 164.dp }
         Text(stringResource(R.string.bc_sample_caption), Modifier.offset(12.dp, captionY).clip(RoundedCornerShape(8.dp)).background(RecordingNavy).padding(10.dp, 5.dp), color = Color.White,
             style = if (mode == DecorationSample.Editor) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall)
     }
@@ -157,6 +157,7 @@ private fun DecoratedPhotoSample(modifier: Modifier, mode: DecorationSample, dra
 @Composable private fun CameraPreview() { WattagamTheme { BcSampleScreen(BcSample.Camera, {}, {}) } }
 @Preview(name = "06 · 사진 확인", group = "B · 촬영", widthDp = 412, heightDp = 916, showSystemUi = true)
 @Composable private fun PhotoPreview() { WattagamTheme { BcSampleScreen(BcSample.Photo, {}, {}) } }
+@Preview(name = "06-A · 큰 글자", group = "C · 접근성", widthDp = 320, heightDp = 720, fontScale = 1.5f)
 @Preview(name = "06-A · 사진 꾸미기", group = "C · 업로드", widthDp = 412, heightDp = 916, showSystemUi = true)
 @Composable private fun EditorPreview() { WattagamTheme { BcSampleScreen(BcSample.Editor, {}, {}) } }
 @Preview(name = "07 · 공개 업로드", group = "C · 업로드", widthDp = 412, heightDp = 916, showSystemUi = true)
