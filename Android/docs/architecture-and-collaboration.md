@@ -29,6 +29,7 @@ Android/
     │   │   ├── guestbook/       # 방명록 작성·등록
     │   │   ├── gallery/         # 기록 목록·상세
     │   │   ├── stamps/          # 내 도장
+    │   │   ├── mypage/          # 마이페이지(도장판·내 기록)·계정 설정
     │   │   └── showcase/        # 개발용 컴포넌트 확인 화면
     │   └── data/                # API 연결 시 기능별로 추가
     │       ├── auth/
@@ -37,7 +38,7 @@ Android/
     └── res/                     # 문자열·이미지·폰트
 ```
 
-현재 구현된 패키지는 `navigation`, `ui/theme`, `ui/components`, `feature/showcase`다. 나머지는 향후 구현 계획이다. `data`에는 실제 소비자가 생길 때 API, DTO, Repository 구현을 추가한다. 별도의 domain 계층이나 UseCase는 단순 전달만을 위해 만들지 않는다.
+현재 구현된 패키지는 `navigation`, `ui/theme`, `ui/components`, `feature/showcase`, `feature/auth`, `feature/map`, `feature/place`, `feature/gallery`, `feature/mypage`, `data/sample`(API 연결 전 샘플 데이터)이다. 나머지는 향후 구현 계획이다. `data`에는 실제 소비자가 생길 때 API, DTO, Repository 구현을 추가한다. 별도의 domain 계층이나 UseCase는 단순 전달만을 위해 만들지 않는다.
 
 ## 기능 내부의 책임
 
