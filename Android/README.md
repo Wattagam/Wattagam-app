@@ -6,6 +6,7 @@ Kotlin + Jetpack Compose 네이티브 앱. Android Studio에서 이 `Android/` �
 
 - [파일 구조와 2인 협업 가이드](docs/architecture-and-collaboration.md)
 - [Android 에이전트 작업 규칙](AGENTS.md)
+- [B·C 화면 및 Preview 사용법](docs/bc-screen-preview.md)
 
 ## 현재 범위
 
@@ -13,6 +14,7 @@ Kotlin + Jetpack Compose 네이티브 앱. Android Studio에서 이 `Android/` �
 - Noto Sans KR 로컬 가변 폰트 (400/500/700), 라이선스: `licenses/NotoSansKR-OFL.txt`
 - 버튼·입력창·상단바·위치 상태·도장판의 첫 구현
 - Navigation 3 기반 개발용 부품 목록과 상세 화면, 입력 상태 보존, 좁은 화면·큰 글자 Preview
+- B·C의 방문 확인·촬영·사진 확인·편집·업로드 화면과 정상/범위 밖/실패/성공 상태 Preview
 - 실제 로그인·GPS·카메라·AR·API 연결 없음. 샘플 상태를 실제 기능으로 간주하지 않습니다.
 
 ## 환경

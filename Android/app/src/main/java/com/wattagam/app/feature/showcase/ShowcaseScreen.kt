@@ -35,6 +35,7 @@ fun ShowcaseScreen(
     section: ShowcaseSection?,
     onSection: (ShowcaseSection) -> Unit = {},
     onBack: () -> Unit = {},
+    onBcSamples: () -> Unit = {},
 ) {
     Scaffold { insets ->
         Column(Modifier.fillMaxSize().padding(insets).imePadding()) {
@@ -48,6 +49,7 @@ fun ShowcaseScreen(
                     null -> {
                         Text(stringResource(R.string.showcase_title), style = MaterialTheme.typography.headlineLarge)
                         Text(stringResource(R.string.showcase_description), style = MaterialTheme.typography.bodyMedium)
+                        WattagamButton(stringResource(R.string.bc_samples_title), onBcSamples, Modifier.fillMaxWidth())
                         ShowcaseSection.entries.forEach { item ->
                             WattagamButton(stringResource(item.title), { onSection(item) }, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary)
                         }
