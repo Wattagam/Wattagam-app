@@ -29,6 +29,7 @@ import com.wattagam.app.feature.mypage.MyPageUiState
 import com.wattagam.app.feature.mypage.SettingsScreen
 import com.wattagam.app.feature.place.PlaceDetailScreen
 import com.wattagam.app.feature.place.PlaceDetailUiState
+import com.wattagam.app.feature.place.VisitCheckRoute
 import com.wattagam.app.feature.place.rememberVisitCheck
 import com.wattagam.app.feature.showcase.BcSample
 import com.wattagam.app.feature.showcase.BcSampleIndex
@@ -59,6 +60,7 @@ private data class BcDetail(val sample: BcSample) : NavKey
 @Serializable private data object MapHome : NavKey                                // 02
 @Serializable private data class PlaceDetail(val placeId: String) : NavKey        // 03, E
 @Serializable private data class Gallery(val placeId: String) : NavKey            // 03-A, 09-A
+@Serializable private data class VisitCheck(val placeId: String) : NavKey         // 04, 04-E
 @Serializable private data class GuestbookDetail(val guestbookId: String) : NavKey // 09-A-1
 @Serializable private data object MyPage : NavKey                                 // 09-B
 @Serializable private data object Settings : NavKey                               // 09-B-3
@@ -121,7 +123,7 @@ fun WattagamApp() {
             }
             entry<PlaceDetail> { key ->
                 val place = SampleData.place(key.placeId) ?: return@entry
-                val visitCheck = rememberVisitCheck(place.latitude, place.longitude, onAllowed = { onWriteAllowed(place.id) })
+                val visitCheck = rememberVisitCheck(place.latitude, place.longitude, onAllowed = { backStack.add(VisitCheck(place.id)) })
                 PlaceDetailScreen(
                     uiState = place.toDetailState(),
                     onBack = { backStack.removeLastOrNull() },
@@ -132,7 +134,7 @@ fun WattagamApp() {
             }
             entry<Gallery> { key ->
                 val place = SampleData.place(key.placeId) ?: return@entry
-                val visitCheck = rememberVisitCheck(place.latitude, place.longitude, onAllowed = { onWriteAllowed(place.id) })
+                val visitCheck = rememberVisitCheck(place.latitude, place.longitude, onAllowed = { backStack.add(VisitCheck(place.id)) })
                 GalleryScreen(
                     uiState = sampleGalleryState(place, nickname),
                     onBack = { backStack.removeLastOrNull() },
@@ -144,6 +146,20 @@ fun WattagamApp() {
                     onWriteClick = visitCheck.start,
                     onGuestbookClick = { backStack.add(GuestbookDetail(it)) },
                     locationStatus = visitCheck.status,
+                )
+            }
+            entry<VisitCheck> { key ->
+                val place = SampleData.place(key.placeId) ?: return@entry
+                VisitCheckRoute(
+                    placeName = place.name,
+                    visitorName = nickname,
+                    stampCount = SampleData.places.count { it.stamped },
+                    latitude = place.latitude,
+                    longitude = place.longitude,
+                    onBack = { backStack.removeLastOrNull() },
+                    // 촬영(05)부터는 카메라·AR 연결 전이라 B·C 샘플 화면으로 이어진다. 등록 직전 위치 재확인은 업로드 연결 때 추가
+                    onContinue = { backStack.add(BcDetail(BcSample.Mode)) },
+                    onMap = { backStack.selectTab(MainTab.Map) },
                 )
             }
             entry<GuestbookDetail> { key ->
@@ -183,14 +199,6 @@ fun WattagamApp() {
         },
     )
 }
-
-/**
- * 현재 위치가 장소 범위 안일 때 작성 흐름으로 넘기는 연결 지점.
- * 촬영·작성 화면(B 흐름)이 추가되면 여기서 그 경로로 placeId 를 넘긴다.
- * 등록할 때도 위치를 다시 확인해야 한다 (작성 시작 확인만으로 등록 자격이 생기지 않음).
- */
-@Suppress("UNUSED_PARAMETER")
-private fun onWriteAllowed(placeId: String) = Unit
 
 /** 개발용 부품 목록만 남기고 [key] 부터 새로 시작 (로그인 완료·로그아웃) */
 private fun MutableList<NavKey>.startFlowAt(key: NavKey) {
