@@ -73,7 +73,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
-/** 푸앙이 3D 모델 (assets). 지금은 임시 모델이라 다듬은 모델이 오면 같은 이름으로 바꾼다 */
+/** 푸앙이 3D 모델 (assets, 앞이 +Z·발이 원점). 모델을 바꿀 때는 같은 이름으로 넣는다 */
 private const val PUANG_MODEL = "models/puang.glb"
 
 /** 바닥에 놓았을 때 푸앙이 키 (m) */
