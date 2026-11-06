@@ -3,7 +3,9 @@ package com.wattagam.app.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -12,7 +14,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.wattagam.app.data.auth.KakaoLogin
+import com.wattagam.app.data.auth.LocalProfile
 import com.wattagam.app.data.draft.DraftStore
+import com.wattagam.app.data.location.CurrentLocationProvider
+import com.wattagam.app.data.location.LocationFix
 import com.wattagam.app.data.map.KakaoMapSupport
 import com.wattagam.app.data.sample.SampleData
 import com.wattagam.app.data.sample.SampleGuestbook
@@ -25,6 +30,7 @@ import com.wattagam.app.feature.gallery.GalleryUiState
 import com.wattagam.app.feature.gallery.GuestbookDetailScreen
 import com.wattagam.app.feature.gallery.GuestbookDetailUiState
 import com.wattagam.app.feature.map.MapPlaceUiState
+import com.wattagam.app.feature.map.MapPoint
 import com.wattagam.app.feature.map.MapScreen
 import com.wattagam.app.feature.map.MapUiState
 import com.wattagam.app.feature.mypage.MyGuestbookUiState
@@ -48,6 +54,7 @@ import com.wattagam.app.feature.write.WritePublishRoute
 import com.wattagam.app.ui.components.GuestbookCardUiState
 import com.wattagam.app.ui.components.MainTab
 import com.wattagam.app.ui.components.StampUiState
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -91,6 +98,9 @@ fun WattagamApp() {
     var nickname by rememberSaveable { mutableStateOf(SampleData.NICKNAME) }
     val context = LocalContext.current
     val drafts = remember { DraftStore(context) }
+    val profile = remember { LocalProfile(context) }
+    val locationProvider = remember { CurrentLocationProvider(context) }
+    val scope = rememberCoroutineScope()
     val stampCount = SampleData.places.count { it.stamped }
 
     NavDisplay(
@@ -116,7 +126,20 @@ fun WattagamApp() {
             }
 
             entry<Login> {
-                LoginRoute(onLoggedIn = { backStack.add(Nickname(isEdit = false)) })
+                LoginRoute(
+                    onLoggedIn = {
+                        // 이 기기에 닉네임이 저장돼 있으면(이전에 가입을 마쳤으면) 바로 지도로, 아니면 닉네임부터
+                        scope.launch {
+                            val saved = profile.nickname()
+                            if (saved != null) {
+                                nickname = saved
+                                backStack.startFlowAt(MapHome)
+                            } else {
+                                backStack.add(Nickname(isEdit = false))
+                            }
+                        }
+                    },
+                )
             }
             entry<Nickname> { key ->
                 NicknameScreen(
@@ -125,6 +148,7 @@ fun WattagamApp() {
                     onBack = { backStack.removeLastOrNull() },
                     onSubmit = {
                         nickname = it
+                        scope.launch { profile.saveNickname(it) }
                         if (key.isEdit) backStack.removeLastOrNull() else backStack.add(LocationPermission)
                     },
                 )
@@ -133,11 +157,19 @@ fun WattagamApp() {
                 LocationPermissionRoute(onBack = { backStack.removeLastOrNull() }, onDone = { backStack.startFlowAt(MapHome) })
             }
             entry<MapHome> {
+                // 지도를 열 때 한 번 현재 위치를 재서 내 위치 점을 찍는다 (권한을 허용한 경우만, 따로 요청하지 않음)
+                val myLocation by produceState<MapPoint?>(null) {
+                    if (KakaoMapSupport.isAvailable) {
+                        val fix = locationProvider.current()
+                        if (fix is LocationFix.Found) value = MapPoint(fix.latitude, fix.longitude)
+                    }
+                }
                 MapScreen(
                     uiState = sampleMapState(),
                     onPlaceClick = { backStack.add(PlaceDetail(it)) },
                     onTabSelect = { backStack.selectTab(it) },
                     useKakaoMap = KakaoMapSupport.isAvailable,
+                    myLocation = myLocation,
                 )
             }
             entry<PlaceDetail> { key ->
@@ -265,11 +297,13 @@ fun WattagamApp() {
                     onEditNickname = { backStack.add(Nickname(isEdit = true)) },
                     onLogout = {
                         KakaoLogin.logout()
+                        scope.launch { profile.clear() }
                         backStack.startFlowAt(Login)
                     },
-                    // 탈퇴 API 연결 전: 지금은 카카오 토큰만 지우고 로그인으로 돌아간다
+                    // 탈퇴 API 연결 전: 지금은 카카오 토큰과 이 기기의 닉네임만 지우고 로그인으로 돌아간다
                     onWithdraw = {
                         KakaoLogin.logout()
+                        scope.launch { profile.clear() }
                         backStack.startFlowAt(Login)
                     },
                 )

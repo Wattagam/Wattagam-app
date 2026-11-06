@@ -9,9 +9,12 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +29,8 @@ import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.MapView
+import com.kakao.vectormap.label.CompetitionType
+import com.kakao.vectormap.label.LabelLayerOptions
 import com.kakao.vectormap.label.LabelOptions
 import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelStyles
@@ -35,6 +40,8 @@ import com.wattagam.app.ui.theme.WattagamColors
 /** 서울캠퍼스 네 장소가 한 화면에 들어오는 중심과 확대 수준 */
 private val CampusCenter = LatLng.from(37.50540, 126.95730)
 private const val CAMPUS_ZOOM = 16
+private const val MY_LOCATION_LAYER = "my_location"
+private const val MY_LOCATION_LABEL = "me"
 
 /**
  * 02 · 카카오맵으로 그리는 캠퍼스 지도. 네 장소에 번호·이름 라벨을 달고, 라벨을 누르면 장소 설명을 연다.
@@ -46,12 +53,32 @@ fun KakaoCampusMap(
     onPlaceClick: (placeId: String) -> Unit,
     onError: () -> Unit,
     modifier: Modifier = Modifier,
+    myLocation: MapPoint? = null,
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val currentOnPlaceClick by rememberUpdatedState(onPlaceClick)
     val currentOnError by rememberUpdatedState(onError)
     val mapView = remember { MapView(context) }
+    var readyMap by remember { mutableStateOf<KakaoMap?>(null) }
+
+    // 내 위치 점: 지도가 준비되고 위치가 바뀔 때마다 옮긴다. 장소 핀과 겹쳐도 숨지 않게 경쟁 없는 별도 층에 둔다
+    LaunchedEffect(readyMap, myLocation) {
+        val labels = readyMap?.labelManager ?: return@LaunchedEffect
+        val layer = labels.getLayer(MY_LOCATION_LAYER)
+            ?: labels.addLayer(LabelLayerOptions.from(MY_LOCATION_LAYER).setCompetitionType(CompetitionType.None).setClickable(false))
+            ?: return@LaunchedEffect
+        val point = myLocation
+        val existing = layer.getLabel(MY_LOCATION_LABEL)
+        when {
+            point == null -> existing?.let { layer.remove(it) }
+            existing != null -> existing.moveTo(LatLng.from(point.latitude, point.longitude))
+            else -> layer.addLabel(
+                LabelOptions.from(MY_LOCATION_LABEL, LatLng.from(point.latitude, point.longitude))
+                    .setStyles(labels.addLabelStyles(LabelStyles.from(LabelStyle.from(myLocationBitmap(context)).setApplyDpScale(false)))),
+            )
+        }
+    }
 
     // 지도는 화면 수명주기에 맞춰 멈추고 다시 켜야 한다 (안 하면 SDK 가 비정상 종료될 수 있음)
     DisposableEffect(lifecycle, mapView) {
@@ -93,6 +120,7 @@ fun KakaoCampusMap(
                                         .setClickable(true),
                                 )
                             }
+                            readyMap = kakaoMap
                             kakaoMap.setOnLabelClickListener { _, _, label ->
                                 val placeId = label.tag as? String ?: return@setOnLabelClickListener false
                                 currentOnPlaceClick(placeId)
@@ -173,5 +201,19 @@ private fun placePinBitmap(context: Context, order: Int, name: String, stamped: 
     val baseline = cy - (namePaint.ascent() + namePaint.descent()) / 2
     canvas.drawText(name, textX, baseline, namePaint)
     if (badge != null) canvas.drawText(badge, textX + namePaint.measureText(name) + gap * 0.75f, baseline, badgePaint)
+    return bitmap
+}
+
+/** 내 위치 점: 파란 원에 흰 테두리, 옅은 파란 테두리로 지도 위에서 잘 보이게 한다 */
+private fun myLocationBitmap(context: Context): Bitmap {
+    val d = context.resources.displayMetrics.density
+    val size = (28 * d).toInt()
+    val bitmap = createBitmap(size, size)
+    val canvas = Canvas(bitmap)
+    val c = size / 2f
+    val primary = WattagamColors.Primary.toArgb()
+    canvas.drawCircle(c, c, 14 * d, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primary; alpha = 60 })
+    canvas.drawCircle(c, c, 8 * d, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.WHITE })
+    canvas.drawCircle(c, c, 6 * d, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primary })
     return bitmap
 }

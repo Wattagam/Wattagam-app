@@ -1,10 +1,12 @@
 package com.wattagam.app.data.auth
 
 import android.content.Context
+import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.KakaoSdk
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
+import com.kakao.sdk.common.model.KakaoSdkError
 import com.kakao.sdk.user.UserApiClient
 import com.wattagam.app.BuildConfig
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -55,6 +57,20 @@ object KakaoLogin {
             }
         } else {
             client.loginWithKakaoAccount(context, callback = accountCallback)
+        }
+    }
+
+    /**
+     * 이전에 로그인해 저장된 카카오 토큰이 아직 쓸 수 있는지 확인한다 (자동 로그인).
+     * 토큰이 만료·해지됐으면 false. 네트워크 오류처럼 판단할 수 없을 때는 저장된 토큰을 믿는다 (서버 로그인 단계에서 다시 검증).
+     */
+    suspend fun hasSession(): Boolean {
+        if (!isConfigured || !AuthApiClient.instance.hasToken()) return false
+        return suspendCancellableCoroutine { continuation ->
+            UserApiClient.instance.accessTokenInfo { info, error ->
+                val valid = info != null || !(error is KakaoSdkError && error.isInvalidTokenError())
+                if (continuation.isActive) continuation.resume(valid)
+            }
         }
     }
 

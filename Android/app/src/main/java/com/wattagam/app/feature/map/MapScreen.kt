@@ -57,6 +57,9 @@ data class MapPlaceUiState(
     val longitude: Double,
 )
 
+/** 지도 위 한 점 (위도·경도) */
+data class MapPoint(val latitude: Double, val longitude: Double)
+
 data class MapUiState(val courseName: String, val places: List<MapPlaceUiState>) {
     val stampedCount: Int get() = places.count { it.stamped }
 }
@@ -72,6 +75,7 @@ fun MapScreen(
     onTabSelect: (MainTab) -> Unit,
     modifier: Modifier = Modifier,
     useKakaoMap: Boolean = false,
+    myLocation: MapPoint? = null,
 ) {
     var mapFailed by remember { mutableStateOf(false) }
     Scaffold(
@@ -92,6 +96,7 @@ fun MapScreen(
                 KakaoCampusMap(
                     uiState.places, onPlaceClick, onError = { mapFailed = true },
                     Modifier.fillMaxWidth().aspectRatio(MAP_W / MAP_H),
+                    myLocation = myLocation,
                 )
             } else {
                 CampusMap(uiState.places, onPlaceClick)
