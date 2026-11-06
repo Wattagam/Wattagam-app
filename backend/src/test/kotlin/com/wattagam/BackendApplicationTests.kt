@@ -16,7 +16,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @SpringBootTest(
-	properties = ["spring.flyway.locations=classpath:db/migration,classpath:db/test-migration"],
+	properties = [
+		"spring.flyway.locations=classpath:db/migration,classpath:db/test-migration",
+		"app.auth.jwt.secret=d2F0dGFnYW0tdGVzdC1vbmx5LXNpZ25pbmcta2V5LTAx",
+		"app.auth.kakao.app-id=12345",
+	],
 )
 @Testcontainers
 class BackendApplicationTests {
