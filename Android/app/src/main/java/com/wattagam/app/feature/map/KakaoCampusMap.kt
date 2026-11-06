@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -135,7 +136,7 @@ private fun placePinBitmap(context: Context, order: Int, name: String, stamped: 
     val textWidth = namePaint.measureText(name) + (badge?.let { gap * 0.75f + badgePaint.measureText(it) } ?: 0f)
     val width = padding + circle + gap + textWidth + padding * 2
 
-    val bitmap = Bitmap.createBitmap((width + shadow * 2).toInt(), (height + tail + shadow * 2).toInt(), Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap((width + shadow * 2).toInt(), (height + tail + shadow * 2).toInt())
     val canvas = Canvas(bitmap)
     val left = shadow
     val top = shadow
