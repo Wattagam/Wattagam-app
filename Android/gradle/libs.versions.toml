@@ -11,6 +11,9 @@ espresso = "3.7.0"
 playServicesLocation = "21.4.0"
 kakao = "2.26.0"
 junit = "4.13.2"
+camerax = "1.6.2"
+exifinterface = "1.4.2"
+kakaoMap = "2.15.2"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -32,6 +35,11 @@ test-espresso = { module = "androidx.test.espresso:espresso-core", version.ref =
 test-junit4 = { module = "junit:junit", version.ref = "junit" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao" }
+kakao-map = { module = "com.kakao.maps.open:android", version.ref = "kakaoMap" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
+camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
+exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

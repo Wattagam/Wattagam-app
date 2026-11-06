@@ -3,13 +3,17 @@ package com.wattagam.app.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.wattagam.app.data.auth.KakaoLogin
+import com.wattagam.app.data.draft.DraftStore
+import com.wattagam.app.data.map.KakaoMapSupport
 import com.wattagam.app.data.sample.SampleData
 import com.wattagam.app.data.sample.SampleGuestbook
 import com.wattagam.app.data.sample.SamplePlace
@@ -36,6 +40,11 @@ import com.wattagam.app.feature.showcase.BcSampleIndex
 import com.wattagam.app.feature.showcase.BcSampleScreen
 import com.wattagam.app.feature.showcase.ShowcaseScreen
 import com.wattagam.app.feature.showcase.ShowcaseSection
+import com.wattagam.app.feature.write.WriteCameraRoute
+import com.wattagam.app.feature.write.WriteEditorRoute
+import com.wattagam.app.feature.write.WriteModeRoute
+import com.wattagam.app.feature.write.WritePreviewRoute
+import com.wattagam.app.feature.write.WritePublishRoute
 import com.wattagam.app.ui.components.GuestbookCardUiState
 import com.wattagam.app.ui.components.MainTab
 import com.wattagam.app.ui.components.StampUiState
@@ -61,19 +70,28 @@ private data class BcDetail(val sample: BcSample) : NavKey
 @Serializable private data class PlaceDetail(val placeId: String) : NavKey        // 03, E
 @Serializable private data class Gallery(val placeId: String) : NavKey            // 03-A, 09-A
 @Serializable private data class VisitCheck(val placeId: String) : NavKey         // 04, 04-E
+@Serializable private data class WriteMode(val placeId: String) : NavKey          // 05
+@Serializable private data class WriteCamera(val placeId: String) : NavKey        // 05-B
+@Serializable private data class WritePreview(val placeId: String) : NavKey       // 06
+@Serializable private data class WriteEditor(val placeId: String) : NavKey        // 06-A
+@Serializable private data class WritePublish(val placeId: String) : NavKey       // 07
 @Serializable private data class GuestbookDetail(val guestbookId: String) : NavKey // 09-A-1
 @Serializable private data object MyPage : NavKey                                 // 09-B
 @Serializable private data object Settings : NavKey                               // 09-B-3
 
 /**
  * 시작은 개발용 부품 목록. '앱 화면 흐름 보기'로 샘플 데이터 화면 흐름에 들어간다.
- * 카카오 로그인(앱 키가 있을 때)과 작성 시작 GPS 확인은 실제로 동작한다. 서버·업로드·도장은 연결 전이며 화면 상태는 [SampleData] 에서 만든다.
+ * 카카오 로그인·카카오맵(앱 키가 있을 때), GPS 확인, 촬영·갤러리·꾸미기·초안 저장은 실제로 동작한다.
+ * 서버·업로드·도장은 연결 전이며 장소·기록 화면 상태는 [SampleData] 에서 만든다.
  */
 @Composable
 fun WattagamApp() {
     val backStack = rememberNavBackStack(ShowcaseHome)
     // 샘플 단계에서 닉네임 수정 결과를 화면에 반영하기 위한 작은 상태 (계정 API 연결 시 대체)
     var nickname by rememberSaveable { mutableStateOf(SampleData.NICKNAME) }
+    val context = LocalContext.current
+    val drafts = remember { DraftStore(context) }
+    val stampCount = SampleData.places.count { it.stamped }
 
     NavDisplay(
         backStack = backStack,
@@ -119,6 +137,7 @@ fun WattagamApp() {
                     uiState = sampleMapState(),
                     onPlaceClick = { backStack.add(PlaceDetail(it)) },
                     onTabSelect = { backStack.selectTab(it) },
+                    useKakaoMap = KakaoMapSupport.isAvailable,
                 )
             }
             entry<PlaceDetail> { key ->
@@ -153,13 +172,72 @@ fun WattagamApp() {
                 VisitCheckRoute(
                     placeName = place.name,
                     visitorName = nickname,
-                    stampCount = SampleData.places.count { it.stamped },
+                    stampCount = stampCount,
                     latitude = place.latitude,
                     longitude = place.longitude,
                     onBack = { backStack.removeLastOrNull() },
-                    // 촬영(05)부터는 카메라·AR 연결 전이라 B·C 샘플 화면으로 이어진다. 등록 직전 위치 재확인은 업로드 연결 때 추가
-                    onContinue = { backStack.add(BcDetail(BcSample.Mode)) },
+                    onContinue = { backStack.add(WriteMode(place.id)) },
                     onMap = { backStack.selectTab(MainTab.Map) },
+                )
+            }
+            entry<WriteMode> { key ->
+                WriteModeRoute(
+                    placeId = key.placeId,
+                    stampCount = stampCount,
+                    drafts = drafts,
+                    onBack = { backStack.removeLastOrNull() },
+                    onPhoto = { backStack.add(WriteCamera(key.placeId)) },
+                    onResumeDraft = { backStack.add(WritePublish(key.placeId)) },
+                )
+            }
+            entry<WriteCamera> { key ->
+                val place = SampleData.place(key.placeId) ?: return@entry
+                WriteCameraRoute(
+                    placeId = place.id,
+                    placeName = place.name,
+                    drafts = drafts,
+                    onBack = { backStack.removeLastOrNull() },
+                    onPhotoReady = { backStack.add(WritePreview(place.id)) },
+                )
+            }
+            entry<WritePreview> { key ->
+                val place = SampleData.place(key.placeId) ?: return@entry
+                WritePreviewRoute(
+                    placeId = place.id,
+                    placeName = place.name,
+                    drafts = drafts,
+                    onBack = { backStack.removeLastOrNull() },
+                    onRetake = { backStack.backOrAdd(WriteCamera(place.id)) },
+                    onEdit = { backStack.add(WriteEditor(place.id)) },
+                    onNext = { backStack.add(WritePublish(place.id)) },
+                )
+            }
+            entry<WriteEditor> { key ->
+                val place = SampleData.place(key.placeId) ?: return@entry
+                WriteEditorRoute(
+                    placeId = place.id,
+                    placeName = place.name,
+                    drafts = drafts,
+                    onBack = { backStack.removeLastOrNull() },
+                    // 업로드 화면에서 '수정'으로 왔다면 예전 업로드 화면을 치우고 새 사진으로 다시 연다
+                    onDone = {
+                        backStack.remove(WritePublish(place.id))
+                        backStack.add(WritePublish(place.id))
+                    },
+                )
+            }
+            entry<WritePublish> { key ->
+                val place = SampleData.place(key.placeId) ?: return@entry
+                WritePublishRoute(
+                    placeId = place.id,
+                    placeName = place.name,
+                    authorName = nickname,
+                    stampCount = stampCount,
+                    latitude = place.latitude,
+                    longitude = place.longitude,
+                    drafts = drafts,
+                    onBack = { backStack.removeLastOrNull() },
+                    onEditPhoto = { backStack.backOrAdd(WriteEditor(place.id)) },
                 )
             }
             entry<GuestbookDetail> { key ->
@@ -200,6 +278,11 @@ fun WattagamApp() {
     )
 }
 
+/** 바로 앞 화면이 [key] 면 그리로 돌아가고, 아니면 새로 연다 (다시 찍기·사진 편집으로 돌아가기) */
+private fun MutableList<NavKey>.backOrAdd(key: NavKey) {
+    if (getOrNull(size - 2) == key) removeAt(lastIndex) else add(key)
+}
+
 /** 개발용 부품 목록만 남기고 [key] 부터 새로 시작 (로그인 완료·로그아웃) */
 private fun MutableList<NavKey>.startFlowAt(key: NavKey) {
     removeAll { it != ShowcaseHome }
@@ -218,7 +301,7 @@ private fun MutableList<NavKey>.selectTab(tab: MainTab) {
 
 private fun sampleMapState() = MapUiState(
     courseName = SampleData.COURSE,
-    places = SampleData.places.map { MapPlaceUiState(it.id, it.order, it.name, it.checkpoint, it.stamped) },
+    places = SampleData.places.map { MapPlaceUiState(it.id, it.order, it.name, it.checkpoint, it.stamped, it.latitude, it.longitude) },
 )
 
 private fun SamplePlace.toDetailState() = PlaceDetailUiState(

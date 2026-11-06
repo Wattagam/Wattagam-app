@@ -38,7 +38,7 @@ Android/
     └── res/                     # 문자열·이미지·폰트
 ```
 
-현재 구현된 패키지는 `navigation`, `ui/theme`, `ui/components`, `feature/showcase`, `feature/auth`, `feature/map`, `feature/place`, `feature/gallery`, `feature/mypage`, `data/sample`(API 연결 전 샘플 데이터)이다. 나머지는 향후 구현 계획이다. `data`에는 실제 소비자가 생길 때 API, DTO, Repository 구현을 추가한다. 별도의 domain 계층이나 UseCase는 단순 전달만을 위해 만들지 않는다.
+현재 구현된 패키지는 `navigation`, `ui/theme`, `ui/components`, `feature/showcase`, `feature/auth`, `feature/map`, `feature/place`, `feature/gallery`, `feature/mypage`, `feature/write`(05~07 촬영·꾸미기·업로드 연동), `data/sample`(API 연결 전 샘플 데이터), `data/location`, `data/auth`, `data/map`, `data/draft`(작성 초안 파일)이다. 나머지는 향후 구현 계획이다. `data`에는 실제 소비자가 생길 때 API, DTO, Repository 구현을 추가한다. 별도의 domain 계층이나 UseCase는 단순 전달만을 위해 만들지 않는다.
 
 ## 기능 내부의 책임
 

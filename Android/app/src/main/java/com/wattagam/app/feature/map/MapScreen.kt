@@ -20,6 +20,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,7 +47,15 @@ import com.wattagam.app.ui.theme.WattagamSizes
 import com.wattagam.app.ui.theme.WattagamSpacing
 import com.wattagam.app.ui.theme.WattagamTheme
 
-data class MapPlaceUiState(val id: String, val order: Int, val name: String, val hint: String, val stamped: Boolean)
+data class MapPlaceUiState(
+    val id: String,
+    val order: Int,
+    val name: String,
+    val hint: String,
+    val stamped: Boolean,
+    val latitude: Double,
+    val longitude: Double,
+)
 
 data class MapUiState(val courseName: String, val places: List<MapPlaceUiState>) {
     val stampedCount: Int get() = places.count { it.stamped }
@@ -51,7 +63,7 @@ data class MapUiState(val courseName: String, val places: List<MapPlaceUiState>)
 
 /**
  * 02 · 지도에서 장소 선택.
- * 지도 SDK 연결 전이라 피그마 안내 지도 일러스트를 Canvas 로 그리고, 핀 위치는 장소 순서로 고정한다.
+ * [useKakaoMap] 이면 카카오맵을 쓰고, 아니면(앱 키 없음·지원하지 않는 기기·지도 오류) 피그마 안내 지도 그림을 Canvas 로 그린다.
  */
 @Composable
 fun MapScreen(
@@ -59,7 +71,9 @@ fun MapScreen(
     onPlaceClick: (placeId: String) -> Unit,
     onTabSelect: (MainTab) -> Unit,
     modifier: Modifier = Modifier,
+    useKakaoMap: Boolean = false,
 ) {
+    var mapFailed by remember { mutableStateOf(false) }
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
@@ -74,7 +88,14 @@ fun MapScreen(
                 stringResource(R.string.map_summary, uiState.places.size, uiState.stampedCount, uiState.places.size),
                 style = MaterialTheme.typography.labelMedium, color = WattagamColors.Primary,
             )
-            CampusMap(uiState.places, onPlaceClick)
+            if (useKakaoMap && !mapFailed) {
+                KakaoCampusMap(
+                    uiState.places, onPlaceClick, onError = { mapFailed = true },
+                    Modifier.fillMaxWidth().aspectRatio(MAP_W / MAP_H),
+                )
+            } else {
+                CampusMap(uiState.places, onPlaceClick)
+            }
             Surface(color = WattagamColors.Surface, shape = WattagamShapes.Card) {
                 Column(Modifier.padding(horizontal = WattagamSpacing.Medium, vertical = WattagamSpacing.Small)) {
                     uiState.places.forEach { place ->
@@ -149,7 +170,7 @@ private fun MapPreview() {
             MapUiState(
                 "푸른캠퍼스 산책",
                 listOf("정문", "도서관", "청룡탕", "310관").mapIndexed { i, name ->
-                    MapPlaceUiState("p$i", i + 1, name, "장소 설명과 공개 기록 보기", stamped = i < 2)
+                    MapPlaceUiState("p$i", i + 1, name, "장소 설명과 공개 기록 보기", stamped = i < 2, latitude = 0.0, longitude = 0.0)
                 },
             ),
             onPlaceClick = {},

@@ -3,7 +3,10 @@
     <!-- 방명록 작성 시작·등록 때 현재 위치 확인용 (앱 사용 중에만, 백그라운드 위치 없음) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!-- 카카오 로그인 -->
+    <!-- 05-B 일반 촬영. 카메라가 없는 기기도 갤러리로 쓸 수 있게 필수 기능으로 두지 않는다 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- 카카오 로그인·카카오맵 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".WattagamApplication"
