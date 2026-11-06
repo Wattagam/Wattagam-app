@@ -13,7 +13,7 @@ data class SamplePlace(
     val writingPrompt: String,
     val directions: String,
     val checkpoint: String,
-    /** 방문 확인 지점 좌표. 지도에서 대략 잡은 값이라 현장에서 측정해 바꿔야 함 (반경 30 m 판정에 쓰임) */
+    /** 방문 확인 지점 좌표 (반경 30 m 판정). 지도 검색의 건물 위치라 현장에서 확인 지점 기준으로 다시 맞춰야 함 */
     val latitude: Double,
     val longitude: Double,
     val stamped: Boolean,
@@ -42,7 +42,7 @@ object SampleData {
             writingPrompt = "오늘 산책을 시작하는 마음을 한 문장으로 남겨보세요.",
             directions = "정문 안내석에서 안쪽으로 30m, 첫 번째 벤치 옆이에요.",
             checkpoint = "정문 안내석",
-            latitude = 37.50475, longitude = 126.95765,
+            latitude = 37.50683, longitude = 126.95848,
             stamped = true,
         ),
         SamplePlace(
@@ -52,7 +52,7 @@ object SampleData {
             writingPrompt = "오늘의 풍경에 손그림과 짧은 메시지를 더해보세요.",
             directions = "정문에서 본관 오른쪽으로 가면 넓은 계단이 보여요.",
             checkpoint = "도서관 앞 계단",
-            latitude = 37.50620, longitude = 126.95810,
+            latitude = 37.50475, longitude = 126.95797,
             stamped = true,
         ),
         SamplePlace(
@@ -62,7 +62,7 @@ object SampleData {
             writingPrompt = "산책 중 마음에 남은 풍경은 무엇인가요?",
             directions = "도서관 옆 길을 따라 내려오면 연못이 보여요.",
             checkpoint = "청룡탕 연못 앞",
-            latitude = 37.50560, longitude = 126.95740,
+            latitude = 37.50562, longitude = 126.95729,
             stamped = false,
         ),
         SamplePlace(
@@ -72,7 +72,7 @@ object SampleData {
             writingPrompt = "수업 사이 쉬어가던 풍경에 짧은 마음을 남겨요.",
             directions = "청룡탕에서 언덕길을 따라 올라가면 310관 앞 광장이에요.",
             checkpoint = "310관 정문 앞 광장",
-            latitude = 37.50395, longitude = 126.95400,
+            latitude = 37.50364, longitude = 126.95602,
             stamped = false,
         ),
     )
