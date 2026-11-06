@@ -13,6 +13,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.wattagam.app.BuildConfig
 import com.wattagam.app.data.auth.KakaoLogin
 import com.wattagam.app.data.auth.LocalProfile
 import com.wattagam.app.data.draft.DraftStore
@@ -115,6 +116,12 @@ fun WattagamApp() {
                     onSection = { backStack.add(ShowcaseDetail(it)) },
                     onBcSamples = { backStack.add(BcIndex) },
                     onStartFlow = { backStack.add(Login) },
+                    // 개발용: 학교 밖에서도 촬영을 시험할 수 있게 위치 확인 없이 첫 장소의 촬영 화면으로 간다 (디버그 빌드에만, 등록 단계는 위치를 다시 확인)
+                    onCaptureTest = if (BuildConfig.DEBUG) {
+                        { ar -> SampleData.places.first().id.let { backStack.add(if (ar) WriteAr(it) else WriteCamera(it)) } }
+                    } else {
+                        null
+                    },
                 )
             }
             entry<BcIndex> {
