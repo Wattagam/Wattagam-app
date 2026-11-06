@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -162,6 +163,17 @@ fun WriteArRoute(
     var hint by remember { mutableIntStateOf(R.string.write_ar_hint_place) }
     var capturing by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
+    // 일반 촬영으로 바꿀 때는 AR 화면을 먼저 내려 ARCore 가 쥔 카메라를 놓은 뒤 넘어간다.
+    // 바로 넘어가면 화면 전환 중에 AR 과 일반 카메라가 같은 카메라를 동시에 열게 된다.
+    var switchingToPhoto by remember { mutableStateOf(false) }
+    LaunchedEffect(switchingToPhoto) {
+        if (switchingToPhoto) {
+            withFrameNanos {}
+            withFrameNanos {}
+            onSwitchToPhoto()
+        }
+    }
+    val switchToPhoto = { switchingToPhoto = true }
     var showHelp by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
 
@@ -258,9 +270,9 @@ fun WriteArRoute(
         onBack = onBack,
         onHelp = { showHelp = true },
         onCapture = ::capture,
-        onSwitchToPhoto = onSwitchToPhoto,
+        onSwitchToPhoto = switchToPhoto,
         background = {
-            if (granted && !failed) {
+            if (granted && !failed && !switchingToPhoto) {
                 ARScene(
                     modifier = Modifier.matchParentSize().onGloballyPositioned { sceneOrigin = it.positionInRoot() },
                     engine = engine,
@@ -330,7 +342,7 @@ fun WriteArRoute(
             onDismissRequest = {},
             title = { Text(stringResource(R.string.write_ar_failed_title)) },
             text = { Text(stringResource(R.string.write_ar_failed_body)) },
-            confirmButton = { TextButton(onClick = onSwitchToPhoto) { Text(stringResource(R.string.write_ar_photo)) } },
+            confirmButton = { TextButton(onClick = switchToPhoto) { Text(stringResource(R.string.write_ar_photo)) } },
             dismissButton = { TextButton(onClick = onBack) { Text(stringResource(R.string.write_cancel)) } },
         )
     }
