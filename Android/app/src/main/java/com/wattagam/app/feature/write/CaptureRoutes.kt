@@ -2,6 +2,7 @@ package com.wattagam.app.feature.write
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,6 +11,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,13 +34,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -127,6 +138,8 @@ fun WriteModeRoute(
 /**
  * 05-B · 일반 촬영 (CameraX). 찍은 사진과 갤러리에서 고른 사진은 앱 내부 초안 파일로 저장한 뒤 [onPhotoReady].
  * 카메라 권한은 이 화면에 들어올 때 요청하고, 거절해도 갤러리로 고를 수 있다.
+ * 미리보기에 사진에 담길 칸(꾸미기·업로드와 같은 비율)을 보여주고, 찍은 사진도 그 칸만큼 잘라 저장한다.
+ * 손전등 버튼은 휴대폰 손전등(토치)을 켜고 끈다.
  */
 @Composable
 fun WriteCameraRoute(
@@ -159,6 +172,8 @@ fun WriteCameraRoute(
 
     LightSystemBarIcons()
     var flash by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(flash, granted) { if (granted) controller.enableTorch(flash) }
+    var previewSize by remember { mutableStateOf(IntSize.Zero) }
     var capturing by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
     val picker = rememberGalleryPicker(placeId, drafts, onImported = onPhotoReady, onFailed = { error = R.string.write_photo_failed })
@@ -172,14 +187,19 @@ fun WriteCameraRoute(
                 capturing -> Unit // 저장 중 중복 촬영 방지
                 else -> {
                     capturing = true
-                    controller.imageCaptureFlashMode = if (flash) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
+                    val viewAspect = if (previewSize.height > 0) previewSize.width.toFloat() / previewSize.height else EDITOR_ASPECT
                     val options = ImageCapture.OutputFileOptions.Builder(drafts.captureTempFile(placeId)).build()
                     controller.takePicture(options, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                             scope.launch {
-                                drafts.commitCapture(placeId)
+                                val cropped = withContext(Dispatchers.IO) { cropToGuide(drafts.captureTempFile(placeId), viewAspect) }
                                 capturing = false
-                                onPhotoReady()
+                                if (cropped) {
+                                    drafts.commitCapture(placeId)
+                                    onPhotoReady()
+                                } else {
+                                    error = R.string.write_capture_failed
+                                }
                             }
                         }
 
@@ -198,8 +218,9 @@ fun WriteCameraRoute(
             if (granted) {
                 AndroidView(
                     factory = { PreviewView(it).apply { this.controller = controller; scaleType = PreviewView.ScaleType.FILL_CENTER } },
-                    modifier = Modifier.matchParentSize(),
+                    modifier = Modifier.matchParentSize().onSizeChanged { previewSize = it },
                 )
+                CaptureGuide(Modifier.matchParentSize())
             } else {
                 Box(Modifier.matchParentSize().background(RecordingNavy)) {
                     Text(
@@ -213,6 +234,37 @@ fun WriteCameraRoute(
     )
     error?.let { MessageDialog(null, it) { error = null } }
 }
+
+/** 미리보기 위에 사진에 담길 칸(가로 꽉, [EDITOR_ASPECT] 비율, 가운데)을 보여주고 칸 밖은 어둡게 한다 */
+@Composable
+private fun CaptureGuide(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val frameHeight = size.width / EDITOR_ASPECT
+        val top = (size.height - frameHeight) / 2
+        val corner = CornerRadius(16.dp.toPx())
+        val frame = RoundRect(0f, top, size.width, top + frameHeight, corner)
+        val outside = Path().apply {
+            fillType = PathFillType.EvenOdd
+            addRect(Rect(Offset.Zero, size))
+            addRoundRect(frame)
+        }
+        drawPath(outside, Color.Black.copy(alpha = .45f))
+        drawPath(Path().apply { addRoundRect(frame) }, Color.White.copy(alpha = .8f), style = Stroke(2.dp.toPx()))
+    }
+}
+
+/**
+ * 찍은 사진을 미리보기의 칸([CaptureGuide])만큼 잘라 같은 파일에 다시 저장한다 (백그라운드 스레드에서 호출).
+ * 미리보기는 사진 가운데를 화면 비율([viewAspect])로 채워 보여주므로, 보이던 영역의 가로 전체를 칸 비율로 자른다.
+ */
+private fun cropToGuide(file: java.io.File, viewAspect: Float): Boolean = runCatching {
+    val source = decodePhoto(file, OUTPUT_MAX_SIDE) ?: return false
+    val visibleWidth = minOf(source.width.toFloat(), source.height * viewAspect)
+    val cropWidth = visibleWidth.toInt()
+    val cropHeight = minOf(source.height.toFloat(), visibleWidth / EDITOR_ASPECT).toInt()
+    val cropped = Bitmap.createBitmap(source, (source.width - cropWidth) / 2, (source.height - cropHeight) / 2, cropWidth, cropHeight)
+    file.outputStream().use { cropped.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+}.getOrDefault(false)
 
 /** 06 · 사진 확인. 갤러리에서 바꾸면 같은 초안 파일을 다시 읽는다 */
 @Composable
