@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.wattagam.app.BuildConfig
+import com.wattagam.app.DebugCrashDialog
 import com.wattagam.app.data.auth.KakaoLogin
 import com.wattagam.app.data.auth.LocalProfile
 import com.wattagam.app.data.draft.DraftStore
@@ -105,6 +106,7 @@ fun WattagamApp() {
     val locationProvider = remember { CurrentLocationProvider(context) }
     val scope = rememberCoroutineScope()
     val stampCount = SampleData.places.count { it.stamped }
+    if (BuildConfig.DEBUG) DebugCrashDialog()
 
     NavDisplay(
         backStack = backStack,

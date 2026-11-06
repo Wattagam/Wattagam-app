@@ -55,6 +55,9 @@
     <string name="showcase_capture_test_body">위치 확인 없이 정문 촬영 화면으로 바로 들어가요. 테스트 빌드에만 보이고, 등록 단계에서는 위치를 다시 확인해요.</string>
     <string name="showcase_capture_test_ar">AR 촬영 테스트</string>
     <string name="showcase_capture_test_photo">일반 촬영 테스트</string>
+    <string name="debug_crash_title">직전 앱 종료 기록 (개발용)</string>
+    <string name="debug_crash_clear">확인했어요 (지우기)</string>
+    <string name="debug_crash_close">닫기</string>
 
     <!-- auth: 01 로그인 · 01-A 닉네임 · 01-B 위치 허용 -->
     <string name="auth_login_title">카카오로 시작하고,\n4곳의 장소를 확인해봐요.</string>

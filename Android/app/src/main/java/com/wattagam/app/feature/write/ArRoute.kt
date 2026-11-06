@@ -193,7 +193,8 @@ fun WriteArRoute(
         val frame = arView.frame ?: return false
         if (frame.camera.trackingState != TrackingState.TRACKING) return false
         val hit = frame.hitTest(x, y).firstOrNull {
-            it.isValid(planeTypes = setOf(Plane.Type.HORIZONTAL_UPWARD_FACING), point = false, depthPoint = false)
+            // 인식한 바닥 조각 밖이어도 같은 바닥면의 연장선이면 놓을 수 있게 한다 (멀리 있는 바닥에 바로 놓기)
+            it.isValid(planeTypes = setOf(Plane.Type.HORIZONTAL_UPWARD_FACING), point = false, depthPoint = false, planePoseInPolygon = false)
         } ?: return false
         // 바닥 위 위치의 +Z 는 휴대폰 쪽을 향하고, 푸앙이 모델의 앞도 +Z 라 그대로 놓으면 카메라를 바라본다
         val anchor = hit.createAnchorOrNull() ?: return false
