@@ -77,7 +77,7 @@ import kotlin.math.roundToInt
 private const val PUANG_MODEL = "models/puang.glb"
 
 /** 바닥에 놓았을 때 푸앙이 키 (m) */
-private const val PUANG_HEIGHT_METERS = 0.4f
+private const val PUANG_HEIGHT_METERS = 0.7f
 
 /**
  * 이 기기에서 AR 촬영(ARCore)을 쓸 수 있는지. 첫 확인은 잠깐 '확인 중'일 수 있어 몇 번 다시 본다.
@@ -130,6 +130,8 @@ fun WriteArRoute(
     val puang = remember(modelLoader) {
         ModelNode(modelInstance = modelLoader.createModelInstance(PUANG_MODEL), scaleToUnits = PUANG_HEIGHT_METERS).apply {
             isShadowCaster = true
+            // 자기 그림자가 얼굴에 얼룩처럼 지지 않게 그림자는 바닥에만 드리운다
+            isShadowReceiver = false
         }
     }
     var anchorNode by remember { mutableStateOf<AnchorNode?>(null) }
