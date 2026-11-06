@@ -14,8 +14,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -38,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +44,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
@@ -81,6 +82,21 @@ import kotlin.math.roundToInt
 
 /** 푸앙이 3D 모델 (assets, 앞이 +Z·발이 원점). 모델을 바꿀 때는 같은 이름으로 넣는다 */
 private const val PUANG_MODEL = "models/puang.glb"
+
+/** 촬영 칸을 화면 여백(24dp) 안쪽으로 양옆 더 넓히는 폭. 사진 비율은 그대로라 높이도 같이 늘어난다 */
+private val FRAME_EXTRA_WIDTH = 12.dp
+
+/**
+ * 부모 폭보다 양옆으로 [extra] 만큼 넓게, [EDITOR_ASPECT] 비율로 그린다 (부모가 준 안쪽 여백을 일부 쓴다).
+ * 늘어난 높이만큼 아래 버튼·안내는 그대로 아래로 밀려 겹치지 않는다.
+ */
+private fun Modifier.widerThanParent(extra: Dp) = layout { measurable, constraints ->
+    val extraPx = extra.roundToPx()
+    val width = constraints.maxWidth + extraPx * 2
+    val height = (width / EDITOR_ASPECT).roundToInt()
+    val placeable = measurable.measure(Constraints.fixed(width, height))
+    layout(constraints.maxWidth, height) { placeable.place(-extraPx, 0) }
+}
 
 /** 바닥에 놓았을 때 푸앙이 키 (m) */
 private const val PUANG_HEIGHT_METERS = 0.7f
@@ -306,8 +322,7 @@ fun WriteArRoute(
             val description = stringResource(R.string.write_ar_frame)
             Box(
                 Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(EDITOR_ASPECT)
+                    .widerThanParent(FRAME_EXTRA_WIDTH)
                     .border(2.dp, Color.White.copy(alpha = .7f), RoundedCornerShape(16.dp))
                     .onGloballyPositioned { frameInRoot = it.boundsInRoot() }
                     .semantics { contentDescription = description }
