@@ -152,19 +152,25 @@ internal fun DrawingCanvas(
     }
 }
 
+/** 잘라낼 영역 (px) */
+internal data class CropBox(val left: Int, val top: Int, val width: Int, val height: Int)
+
+/** [width]×[height] 사진에서 가로:세로 [aspect] 비율로 가장 크게, 가운데를 잘라낼 영역. 화면의 ContentScale.Crop 과 같은 영역이다 */
+internal fun centerCrop(width: Int, height: Int, aspect: Float): CropBox {
+    val (cropW, cropH) = if (width.toFloat() / height > aspect) {
+        (height * aspect).toInt() to height
+    } else {
+        width to (width / aspect).toInt()
+    }
+    return CropBox((width - cropW) / 2, (height - cropH) / 2, cropW, cropH)
+}
+
 /**
  * 원본 사진을 편집 영역 비율로 가운데를 잘라 선과 글자를 그려 넣은 한 장을 만든다 (백그라운드 스레드에서 호출).
  */
 internal fun composeDecoratedPhoto(source: Bitmap, strokes: List<DrawnStroke>, texts: List<PlacedText>): Bitmap {
-    val sourceAspect = source.width.toFloat() / source.height
-    val (cropW, cropH) = if (sourceAspect > EDITOR_ASPECT) {
-        (source.height * EDITOR_ASPECT).toInt() to source.height
-    } else {
-        source.width to (source.width / EDITOR_ASPECT).toInt()
-    }
-    val left = (source.width - cropW) / 2
-    val top = (source.height - cropH) / 2
-    val output = Bitmap.createBitmap(source, left, top, cropW, cropH).copy(Bitmap.Config.ARGB_8888, true)
+    val crop = centerCrop(source.width, source.height, EDITOR_ASPECT)
+    val output = Bitmap.createBitmap(source, crop.left, crop.top, crop.width, crop.height).copy(Bitmap.Config.ARGB_8888, true)
     val canvas = android.graphics.Canvas(output)
     val w = output.width.toFloat()
     val h = output.height.toFloat()
