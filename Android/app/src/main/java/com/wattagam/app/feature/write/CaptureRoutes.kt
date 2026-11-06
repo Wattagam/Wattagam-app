@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * 05 · 촬영 방식 선택. AR 은 푸앙이 3D 모델·AR 연결 전이라 일반 촬영으로 안내한다.
+ * 05 · 촬영 방식 선택. AR 을 고르면 이 기기가 AR 을 지원하는지 확인하고, 지원하지 않으면 일반 촬영으로 안내한다.
  * 이 장소에 남겨둔 초안이 있으면 이어서 쓸지 먼저 묻는다.
  */
 @Composable
@@ -64,13 +64,16 @@ fun WriteModeRoute(
     stampCount: Int,
     drafts: DraftStore,
     onBack: () -> Unit,
+    onAr: () -> Unit,
     onPhoto: () -> Unit,
     onResumeDraft: () -> Unit,
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val hasDraft by produceState<Boolean?>(null, placeId) { value = withContext(Dispatchers.IO) { drafts.hasPhoto(placeId) } }
     LightSystemBarIcons()
     var draftAnswered by rememberSaveable { mutableStateOf(false) }
+    var checkingAr by remember { mutableStateOf(false) }
     var showAr by remember { mutableStateOf(false) }
     var showHelp by remember { mutableStateOf(false) }
 
@@ -78,7 +81,20 @@ fun WriteModeRoute(
         stampCount = stampCount,
         onBack = onBack,
         onHelp = { showHelp = true },
-        onSelectMode = { if (it == CaptureMode.Ar) showAr = true else onPhoto() },
+        onSelectMode = { mode ->
+            when {
+                mode == CaptureMode.Photo -> onPhoto()
+                checkingAr -> Unit // 확인 중 중복 선택 방지
+                else -> {
+                    checkingAr = true
+                    scope.launch {
+                        val supported = isArSupported(context)
+                        checkingAr = false
+                        if (supported) onAr() else showAr = true
+                    }
+                }
+            }
+        },
         background = { Box(Modifier.matchParentSize().background(RecordingNavy)) },
         character = { Image(painterResource(R.drawable.bc_puang), stringResource(R.string.bc_puang), Modifier.size(240.dp)) },
     )

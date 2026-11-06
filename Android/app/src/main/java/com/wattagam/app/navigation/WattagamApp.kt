@@ -46,6 +46,7 @@ import com.wattagam.app.feature.showcase.BcSampleIndex
 import com.wattagam.app.feature.showcase.BcSampleScreen
 import com.wattagam.app.feature.showcase.ShowcaseScreen
 import com.wattagam.app.feature.showcase.ShowcaseSection
+import com.wattagam.app.feature.write.WriteArRoute
 import com.wattagam.app.feature.write.WriteCameraRoute
 import com.wattagam.app.feature.write.WriteEditorRoute
 import com.wattagam.app.feature.write.WriteModeRoute
@@ -78,6 +79,7 @@ private data class BcDetail(val sample: BcSample) : NavKey
 @Serializable private data class Gallery(val placeId: String) : NavKey            // 03-A, 09-A
 @Serializable private data class VisitCheck(val placeId: String) : NavKey         // 04, 04-E
 @Serializable private data class WriteMode(val placeId: String) : NavKey          // 05
+@Serializable private data class WriteAr(val placeId: String) : NavKey            // 05-A
 @Serializable private data class WriteCamera(val placeId: String) : NavKey        // 05-B
 @Serializable private data class WritePreview(val placeId: String) : NavKey       // 06
 @Serializable private data class WriteEditor(val placeId: String) : NavKey        // 06-A
@@ -218,8 +220,23 @@ fun WattagamApp() {
                     stampCount = stampCount,
                     drafts = drafts,
                     onBack = { backStack.removeLastOrNull() },
+                    onAr = { backStack.add(WriteAr(key.placeId)) },
                     onPhoto = { backStack.add(WriteCamera(key.placeId)) },
                     onResumeDraft = { backStack.add(WritePublish(key.placeId)) },
+                )
+            }
+            entry<WriteAr> { key ->
+                val place = SampleData.place(key.placeId) ?: return@entry
+                WriteArRoute(
+                    placeId = place.id,
+                    placeName = place.name,
+                    drafts = drafts,
+                    onBack = { backStack.removeLastOrNull() },
+                    onSwitchToPhoto = {
+                        backStack.removeLastOrNull()
+                        backStack.add(WriteCamera(place.id))
+                    },
+                    onPhotoReady = { backStack.add(WritePreview(place.id)) },
                 )
             }
             entry<WriteCamera> { key ->
@@ -239,7 +256,11 @@ fun WattagamApp() {
                     placeName = place.name,
                     drafts = drafts,
                     onBack = { backStack.removeLastOrNull() },
-                    onRetake = { backStack.backOrAdd(WriteCamera(place.id)) },
+                    // AR 로 찍었으면 AR 촬영으로, 아니면 일반 촬영으로 돌아간다
+                    onRetake = {
+                        if (backStack.getOrNull(backStack.lastIndex - 1) == WriteAr(place.id)) backStack.removeLastOrNull()
+                        else backStack.backOrAdd(WriteCamera(place.id))
+                    },
                     onEdit = { backStack.add(WriteEditor(place.id)) },
                     onNext = { backStack.add(WritePublish(place.id)) },
                 )
