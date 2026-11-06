@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
+import com.google.android.filament.IndirectLight
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Plane
@@ -55,6 +56,8 @@ import com.wattagam.app.R
 import com.wattagam.app.data.draft.DraftStore
 import com.wattagam.app.feature.capture.ArCaptureScreen
 import com.wattagam.app.ui.components.RecordingNavy
+import dev.romainguy.kotlin.math.Float3
+import io.github.sceneview.SceneView
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.ARSceneView
 import io.github.sceneview.ar.arcore.createAnchorOrNull
@@ -63,6 +66,7 @@ import io.github.sceneview.ar.node.AnchorNode
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCollisionSystem
 import io.github.sceneview.rememberEngine
+import io.github.sceneview.rememberEnvironment
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
@@ -71,6 +75,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.hypot
 import kotlin.math.roundToInt
 
 /** 푸앙이 3D 모델 (assets, 앞이 +Z·발이 원점). 모델을 바꿀 때는 같은 이름으로 넣는다 */
@@ -78,6 +83,12 @@ private const val PUANG_MODEL = "models/puang.glb"
 
 /** 바닥에 놓았을 때 푸앙이 키 (m) */
 private const val PUANG_HEIGHT_METERS = 0.7f
+
+/**
+ * 고정 조명. 실제 빛을 따라가면 어두운 곳·역광에서 푸앙이가 새까맣게 나와서, 장소와 상관없이 늘 같은 밝기로 보이게 한다.
+ * 해(기본 주 조명 100,000 lux)를 카메라 뒤 위쪽에 두고, 그림자 쪽이 검게 죽지 않도록 사방에서 고르게 은은한 빛을 더한다.
+ */
+private const val AMBIENT_LIGHT_INTENSITY = 35_000f
 
 /**
  * 이 기기에서 AR 촬영(ARCore)을 쓸 수 있는지. 첫 확인은 잠깐 '확인 중'일 수 있어 몇 번 다시 본다.
@@ -127,6 +138,14 @@ fun WriteArRoute(
     val view = rememberView(engine)
     val collisionSystem = rememberCollisionSystem(view)
     val childNodes = rememberNodes()
+    val environment = rememberEnvironment(engine) {
+        SceneView.createEnvironment(
+            engine = engine,
+            isOpaque = true,
+            indirectLight = IndirectLight.Builder().irradiance(1, floatArrayOf(1f, 1f, 1f)).intensity(AMBIENT_LIGHT_INTENSITY).build(engine),
+            skybox = null,
+        )
+    }
     val puang = remember(modelLoader) {
         ModelNode(modelInstance = modelLoader.createModelInstance(PUANG_MODEL), scaleToUnits = PUANG_HEIGHT_METERS).apply {
             isShadowCaster = true
@@ -174,6 +193,13 @@ fun WriteArRoute(
             current.anchor = anchor
             old.detach()
         }
+        // 주 조명이 카메라 뒤 위쪽에서 푸앙이 앞면을 비추게 (그림자는 푸앙이 뒤 바닥에 진다)
+        val camera = frame.camera.pose
+        val target = anchor.pose
+        val dx = target.tx() - camera.tx()
+        val dz = target.tz() - camera.tz()
+        val length = hypot(dx, dz).coerceAtLeast(0.01f)
+        arView.mainLightNode?.lightDirection = Float3(dx / length * 0.6f, -0.8f, dz / length * 0.6f)
         arView.planeRenderer.isVisible = false
         return true
     }
@@ -239,12 +265,13 @@ fun WriteArRoute(
                     modelLoader = modelLoader,
                     materialLoader = materialLoader,
                     view = view,
+                    environment = environment,
                     collisionSystem = collisionSystem,
                     childNodes = childNodes,
                     planeRenderer = true,
                     sessionConfiguration = { _, config ->
                         config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL
-                        config.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+                        config.lightEstimationMode = Config.LightEstimationMode.DISABLED
                         config.focusMode = Config.FocusMode.AUTO
                     },
                     onSessionFailed = { failed = true },
