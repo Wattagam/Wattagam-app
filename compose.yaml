@@ -2,5 +2,38 @@ services:
   backend:
     build:
       context: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/${MYSQL_DATABASE:-wattagam}?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true"
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-wattagam}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:?Copy .env.example to .env and set MYSQL_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+
+  db:
+    image: mysql:8.4.13
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wattagam}
+      MYSQL_USER: ${MYSQL_USER:-wattagam}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Copy .env.example to .env and set MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Copy .env.example to .env and set MYSQL_ROOT_PASSWORD}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+    ports:
+      - "127.0.0.1:${DB_PORT:-13306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # The initialization server uses only a socket; TCP checks wait for normal startup.
+      test: ["CMD", "mysqladmin", "ping", "--host=127.0.0.1", "--silent"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 20
+
+volumes:
+  mysql-data:
