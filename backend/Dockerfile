@@ -6,11 +6,9 @@ COPY gradle ./gradle
 COPY build.gradle.kts settings.gradle.kts ./
 COPY src ./src
 
+# Testcontainers tests run on the host; the build container has no Docker daemon.
 RUN --mount=type=cache,target=/root/.gradle,sharing=locked \
-    ./gradlew --no-daemon test bootJar
-
-# Tests also produce a plain JAR; copy only the executable JAR to the runtime image.
-RUN rm -f build/libs/*-plain.jar
+    ./gradlew --no-daemon bootJar
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
