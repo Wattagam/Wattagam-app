@@ -10,23 +10,23 @@
 ## Project overview
 
 - Wattagam (왔다감) is an Android campus-tour app for Chung-Ang University students, alumni and visitors. Its course, 푸른캠퍼스 산책, lets users explore campus, publish photo memories and collect place stamps.
-- The four tour places are 정문 느티나무길, 중앙도서관, 호수정원 and 학생회관, displayed in that order. Users may visit them in any order.
+- The initial tour scope is three places: 310관 (75 m visit radius), 도서관 (40 m) and 청룡연못 (30 m). Users may visit them in any order; additional places may be introduced later.
 - The backend uses Kotlin, Java 21, Spring Boot, Spring Data JPA, Flyway and MySQL. OCI Object Storage is the planned image store, with deployment planned on OCI.
 - `backend/` and `Android/` are independent Gradle projects. Android owns screens, permissions, camera/AR capture and photo decoration. The backend owns authentication, location validation, published records, stamps and image storage.
-- The current backend provides the application/database foundation. The flow below describes the intended product, not completed feature implementation.
+- The current backend provides the application/database foundation, Kakao authentication, nickname onboarding, place queries and current-location validation. The flow below describes the intended product, including features still to be implemented.
 
 ## Overall product flow
 
 1. Users sign in with Kakao. The backend verifies the Kakao identity, links or creates the account and issues service authentication. New users set a nickname; returning users retain their records and stamps.
-2. Signed-in users browse the four places, their descriptions and public guestbooks. Browsing does not require location permission.
+2. Signed-in users browse the registered places, their descriptions and public guestbooks. Browsing does not require location permission.
 3. Before writing, the backend checks that the user's current GPS satisfies the selected place's visit conditions. Selecting a place or having visited it before does not grant current writing eligibility.
 4. Android captures an ordinary or Puang (푸앙이) AR photo, or accepts a gallery image. Users may add drawing/text overlays and an optional message. Android combines the photo and overlays into one final image.
 5. On publication, the backend rechecks current location and stores the image and guestbook entry. Publication succeeds only after the required storage work succeeds; failures preserve the draft for a retry with a fresh location check.
-6. A successful publication grants at most one stamp per user/place, four total. Entry creation and the first stamp are committed together. Visits, photos, further entries at the same place and retries do not add stamps or duplicate a completed submission.
+6. A successful publication grants at most one stamp per user/place. The total available stamp count follows the registered places, initially three. Entry creation and the first stamp are committed together. Visits, photos, further entries at the same place and retries do not add stamps or duplicate a completed submission.
 7. Users browse published entries and view their own records and stamps. All published entries are visible to authenticated app users; unpublished drafts remain outside public galleries and do not earn stamps.
 8. Users can manage their own entries and account. Entry edits do not grant stamps; deleting an entry removes its image but preserves its stamp. Account withdrawal removes the account's records, images and stamps according to the agreed deletion policy.
 
-- Draft storage, precise GPS thresholds and other unresolved policies remain subject to agreement. Do not introduce server-side draft synchronization or treat provisional values as final requirements.
+- Draft storage and other unresolved policies remain subject to agreement. Apply the agreed GPS accuracy and freshness limits from the backend configuration; do not introduce server-side draft synchronization or treat provisional values as final requirements.
 - Keep authentication, ownership checks, retry safety and image/DB failure recovery on the server. Do not log credentials or precise location, retain movement tracks or introduce background location monitoring.
 - Other login providers, guest access, private guestbooks, proximity notifications and image-recognition visit checks are outside this product flow.
 
