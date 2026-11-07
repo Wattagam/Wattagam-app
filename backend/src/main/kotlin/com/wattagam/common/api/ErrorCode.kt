@@ -15,5 +15,10 @@ enum class ErrorCode(val status: HttpStatus, val code: String, val message: Stri
     KAKAO_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AUTH_503_1", "카카오 인증을 일시적으로 처리할 수 없습니다."),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER_400_1", "닉네임은 한글, 영문, 숫자로 2자 이상 10자 이하로 입력해 주세요."),
     NICKNAME_REQUIRED(HttpStatus.FORBIDDEN, "USER_403_1", "닉네임 설정이 필요합니다."),
+    WITHDRAWAL_UNAVAILABLE(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "USER_503_1",
+        "계정 삭제를 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    ),
     PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE_404_1", "존재하지 않는 장소입니다."),
 }
