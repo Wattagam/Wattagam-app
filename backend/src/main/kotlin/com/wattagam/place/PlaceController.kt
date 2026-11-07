@@ -1,7 +1,9 @@
 package com.wattagam.place
 
 import com.wattagam.common.api.ApiResponse
+import com.wattagam.common.security.AuthenticatedUser
 import jakarta.validation.Valid
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,8 +18,8 @@ class PlaceController(
 ) {
 
     @GetMapping
-    fun getPlaces(): ApiResponse<PlaceListResponse> =
-        ApiResponse.success("PLACE_200_1", "장소 목록을 조회했습니다.", placeService.getPlaces())
+    fun getPlaces(@AuthenticationPrincipal user: AuthenticatedUser): ApiResponse<PlaceListResponse> =
+        ApiResponse.success("PLACE_200_1", "장소 목록을 조회했습니다.", placeService.getPlaces(user.userId))
 
     @GetMapping("/{id}")
     fun getPlace(@PathVariable id: Long): ApiResponse<PlaceDetailResponse> =

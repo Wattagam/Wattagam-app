@@ -2,6 +2,7 @@ package com.wattagam.place
 
 import com.wattagam.common.api.ApiException
 import com.wattagam.common.api.ErrorCode
+import com.wattagam.stamp.StampService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -10,20 +11,25 @@ import org.springframework.transaction.annotation.Transactional
 class PlaceService(
     private val placeRepository: PlaceRepository,
     private val locationValidationService: LocationValidationService,
+    private val stampService: StampService,
 ) {
 
-    fun getPlaces(): PlaceListResponse = PlaceListResponse(
-        placeRepository.findAllByOrderByCourseOrderAsc().map { place ->
+    fun getPlaces(userId: Long): PlaceListResponse {
+        val earnedPlaceIds = stampService.getEarnedPlaceIds(userId)
+        val places = placeRepository.findAllByOrderByCourseOrderAsc().map { place ->
+            val placeId = requireNotNull(place.id)
             PlaceSummaryResponse(
-                placeId = requireNotNull(place.id),
+                placeId = placeId,
                 courseOrder = place.courseOrder,
                 name = place.name,
                 latitude = place.latitude,
                 longitude = place.longitude,
                 visitRadiusMeters = place.visitRadiusMeters,
+                stampEarned = placeId in earnedPlaceIds,
             )
-        },
-    )
+        }
+        return PlaceListResponse(places)
+    }
 
     fun getPlace(id: Long): PlaceDetailResponse {
         val place = findPlace(id)

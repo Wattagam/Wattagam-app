@@ -13,4 +13,5 @@ data class PlaceSummaryResponse(
     val latitude: BigDecimal,
     val longitude: BigDecimal,
     val visitRadiusMeters: Int,
+    val stampEarned: Boolean,
 )

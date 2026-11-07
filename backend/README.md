@@ -99,7 +99,7 @@ DB 포트·이름을 바꿨다면 JDBC URL도 맞춥니다. Docker 백엔드와 
 
 서비스 Bearer JWT와 닉네임 설정 완료가 필요합니다. 장소 조회에는 위치 정보가 필요하지 않습니다.
 
-장소 목록의 `hasGuestbook`(방명록 존재 여부)과 `stampEarned`(현재 사용자의 도장 획득 여부)는 각 담당 기능의 실제 조회를 연동할 때 추가합니다. 이번 장소 API 응답에는 두 필드를 포함하지 않습니다.
+`GET /api/places`의 `stampEarned`는 로그인한 사용자의 실제 도장 획득 여부입니다. `hasGuestbook`은 방명록 조회를 연동할 때 추가합니다.
 
 초기 대상은 310관(75m), 도서관(40m), 청룡연못(30m)입니다. 서버는 중심점과 현재 위치 사이의 거리가 해당 장소 반경 이하인지 판정합니다. Android 연동 시 기존 30m 고정값 대신 API의 `visitRadiusMeters`를 사용해야 합니다.
 
@@ -116,6 +116,16 @@ GPS 정보는 예상 위치 오차 20m 이하, 측정 후 60초 이내일 때 �
 방문 확인 요청은 JSON 숫자인 `latitude`, `longitude`, `accuracyMeters`와 위치 측정 시각인 `measuredAt`(UTC ISO 8601 문자열)을 전달합니다. 작성 가능 여부는 응답의 `result.canWrite`로 판단합니다. 범위 밖·정확도 부족·오래된 위치도 판정 자체가 성공하면 HTTP 200이며, `reasonCode`가 각각 `OUTSIDE_RADIUS`, `LOW_ACCURACY`, `STALE_LOCATION`입니다. 잘못된 입력이나 허용 오차를 넘는 미래 시각은 HTTP 400입니다.
 
 방문 확인만으로 방문 기록을 저장하거나 도장을 지급하지 않습니다. 방명록 최종 등록에서도 현재 위치를 다시 검증하며, 도장은 해당 장소의 첫 공개 저장 성공 시 지급합니다.
+
+## 스탬프 조회와 방명록 연동
+
+`GET /api/me/stamps`는 닉네임 설정을 마친 사용자의 서비스 Bearer JWT로 본인 스탬프를 조회합니다. `result.stamps`는 미획득 장소를 포함한 전체 장소를 코스 순서로 담습니다. `earnedCount`는 획득 수, `totalCount`는 등록된 전체 장소 수입니다. `earnedAt`은 UTC ISO 8601 시각이고, `firstEntryId`는 첫 발급에 사용한 방명록 ID입니다. 미획득 장소의 두 값은 `null`입니다.
+
+방명록 등록 서비스는 현재 GPS 재검증과 이미지 처리 조건을 충족해 엔트리를 저장한 뒤, 커밋 전에 `com.wattagam.stamp.StampService.grantForPublishedEntry(userId: Long, placeId: Long, entryId: Long): Unit`을 호출합니다. 이 메서드는 `MANDATORY` 전파를 사용하므로 기존 쓰기 트랜잭션이 필요하며, 호출자 롤백 시 발급도 함께 롤백됩니다.
+
+중복 발급 요청은 정상 처리하며 최초 `earnedAt`과 `firstEntryId`를 보존합니다. DB의 `(user_id, place_id)` 고유 제약은 동시 요청에서도 사용자별·장소별 발급을 한 건으로 제한합니다.
+
+사용자 삭제 시 `users` 외래 키의 `ON DELETE CASCADE`로 스탬프를 정리합니다. 방명록 구현 후 별도 마이그레이션에서 `first_entry_id` 외래 키에 `ON DELETE SET NULL`을 적용해, 첫 방명록이 삭제돼도 스탬프를 보존합니다.
 
 ```bash
 cd backend
