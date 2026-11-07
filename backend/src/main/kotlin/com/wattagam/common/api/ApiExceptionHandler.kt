@@ -7,6 +7,7 @@ import org.springframework.web.ErrorResponse
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 @RestControllerAdvice
 class ApiExceptionHandler {
@@ -28,6 +29,9 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleUnreadableBody(): ResponseEntity<ApiResponse<Nothing>> = failure(ErrorCode.INVALID_REQUEST)
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleInvalidParameter(): ResponseEntity<ApiResponse<Nothing>> = failure(ErrorCode.INVALID_REQUEST)
 
     @ExceptionHandler(Exception::class)
     fun handleUnexpectedException(exception: Exception): ResponseEntity<ApiResponse<Nothing>> {

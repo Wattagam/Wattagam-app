@@ -18,5 +18,10 @@ class ApiJsonConfiguration {
             config.setCoercion(CoercionInputShape.Float, CoercionAction.Fail)
             config.setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail)
         }
+        builder.withCoercionConfig(LogicalType.Float) { config ->
+            config.setCoercion(CoercionInputShape.String, CoercionAction.Fail)
+            config.setCoercion(CoercionInputShape.EmptyString, CoercionAction.Fail)
+            config.setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail)
+        }
     }
 }
