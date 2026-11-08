@@ -81,6 +81,7 @@ fun MapScreen(
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
+        contentColor = WattagamColors.Ink,
         topBar = { AppTopBar(uiState.courseName, backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding()) },
         bottomBar = { BottomNavigation(MainTab.Map, onTabSelect) },
     ) { insets ->
@@ -90,7 +91,7 @@ fun MapScreen(
         ) {
             Text(
                 stringResource(R.string.map_summary, uiState.places.size, uiState.stampedCount, uiState.places.size),
-                style = MaterialTheme.typography.labelMedium, color = WattagamColors.Primary,
+                style = MaterialTheme.typography.labelMedium, color = WattagamColors.Muted,
             )
             if (useKakaoMap && !mapFailed) {
                 KakaoCampusMap(
@@ -122,7 +123,7 @@ private val pinPositions = mapOf(1 to Offset(71f, 270f), 2 to Offset(156f, 106f)
 private fun CampusMap(places: List<MapPlaceUiState>, onPlaceClick: (String) -> Unit) {
     Surface(
         color = Color(0xFFF0F4F0),
-        shape = RoundedCornerShape(28.dp),
+        shape = WattagamShapes.Card,
         modifier = Modifier.fillMaxWidth().aspectRatio(MAP_W / MAP_H),
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {

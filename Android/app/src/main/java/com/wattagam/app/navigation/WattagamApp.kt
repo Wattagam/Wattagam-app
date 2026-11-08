@@ -216,6 +216,8 @@ fun WattagamApp() {
                     placeName = place.name,
                     visitorName = nickname,
                     stampCount = stampCount,
+                    placeOrder = place.order,
+                    placeStamped = place.stamped,
                     latitude = place.latitude,
                     longitude = place.longitude,
                     onBack = { backStack.removeLastOrNull() },

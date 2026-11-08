@@ -3,7 +3,6 @@ package com.wattagam.app.feature.guestbook
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,12 +13,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.ui.components.RecordingNavy
 import com.wattagam.app.ui.components.RecordingTopBar
+import com.wattagam.app.ui.theme.WattagamShapes
 
+/** 꾸미기·업로드의 어두운 화면. 촬영 화면과 같은 남색 계열로 맞춰 화면이 바뀔 때 색이 튀지 않게 한다 */
 internal object StudioColors {
-    val Background = Color(0xFF111111)
-    val Surface = Color(0xFF242424)
-    val Muted = Color(0xFFB7B7B7)
+    val Background = RecordingNavy
+    val Surface = Color(0xFF1D2F4B)
+    val Muted = Color(0xFFAFBDD0)
     val Error = Color(0xFFFFB4AB)
 }
 
@@ -52,7 +54,7 @@ internal fun FocusStudioScaffold(
 @Composable
 internal fun StudioPrimaryButton(text: String, onClick: () -> Unit, enabled: Boolean = true, loading: Boolean = false) {
     Button(onClick = onClick, enabled = enabled && !loading,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = WattagamShapes.Button,
         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = StudioColors.Background,
             disabledContainerColor = StudioColors.Surface, disabledContentColor = StudioColors.Muted),
     ) {
@@ -67,7 +69,7 @@ internal fun StudioPrimaryButton(text: String, onClick: () -> Unit, enabled: Boo
 @Composable
 internal fun StudioLocation(place: String, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Icon(painterResource(R.drawable.bc_pin), null, Modifier.size(16.dp), tint = StudioColors.Muted)
         Text(place, color = StudioColors.Muted, style = MaterialTheme.typography.bodySmall)
     }

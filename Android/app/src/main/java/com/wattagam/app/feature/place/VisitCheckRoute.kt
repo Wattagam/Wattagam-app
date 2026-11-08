@@ -29,6 +29,8 @@ fun VisitCheckRoute(
     placeName: String,
     visitorName: String,
     stampCount: Int,
+    placeOrder: Int,
+    placeStamped: Boolean,
     latitude: Double,
     longitude: Double,
     onBack: () -> Unit,
@@ -49,7 +51,10 @@ fun VisitCheckRoute(
     }
 
     VisitCheckScreen(
-        state = VisitCheckUiState(placeName, visitorName, stampCount, if (outside) VisitCheckStatus.Outside else VisitCheckStatus.Available),
+        state = VisitCheckUiState(
+            placeName, visitorName, stampCount, if (outside) VisitCheckStatus.Outside else VisitCheckStatus.Available,
+            placeOrder = placeOrder, placeStamped = placeStamped,
+        ),
         onBack = onBack,
         onRecheck = check.start,
         onContinue = { if (!check.checking) onContinue() },

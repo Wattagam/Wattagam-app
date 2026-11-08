@@ -144,7 +144,7 @@ internal fun DrawingCanvas(
                         )
                     }
                     .background(Color(0xCC161616), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
                 color = Color.White,
                 style = MaterialTheme.typography.labelLarge,
             )

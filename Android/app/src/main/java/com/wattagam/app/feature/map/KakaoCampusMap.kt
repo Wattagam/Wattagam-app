@@ -149,7 +149,8 @@ private fun placePinBitmap(context: Context, order: Int, name: String, stamped: 
     val bold = Typeface.create(base, Typeface.BOLD)
 
     val namePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = bold; textSize = 14 * d; color = ink }
-    val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = bold; textSize = 11 * d; color = primary }
+    // '획득'은 도장 인주색 (장소 목록·도장판의 도장 자국과 같은 색)
+    val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = bold; textSize = 11 * d; color = WattagamColors.StampInk.toArgb() }
     val numberPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = bold; textSize = 13 * d; textAlign = Paint.Align.CENTER; color = if (stamped) android.graphics.Color.WHITE else primary
     }

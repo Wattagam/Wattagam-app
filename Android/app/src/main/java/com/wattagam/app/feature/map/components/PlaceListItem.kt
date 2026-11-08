@@ -2,11 +2,13 @@ package com.wattagam.app.feature.map.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,7 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.ui.components.PlaceStamp
 import com.wattagam.app.ui.theme.WattagamColors
+import com.wattagam.app.ui.theme.WattagamShapes
 import com.wattagam.app.ui.theme.WattagamSizes
 import com.wattagam.app.ui.theme.WattagamSpacing
 import com.wattagam.app.ui.theme.WattagamTheme
@@ -47,23 +51,24 @@ fun PlaceListItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium),
     ) {
-        Surface(color = WattagamColors.PrimarySoft, shape = RoundedCornerShape(8.dp)) {
-            Text(
-                order.toString(),
-                style = MaterialTheme.typography.labelSmall, color = WattagamColors.Primary,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-            )
+        Surface(color = WattagamColors.Soft, shape = WattagamShapes.Small, modifier = Modifier.size(28.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(order.toString(), style = MaterialTheme.typography.labelSmall, color = WattagamColors.Ink)
+            }
         }
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.labelLarge)
             Text(hint, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
         }
-        // 색만으로 구분하지 않도록 글자로 상태 표시
-        Text(
-            stringResource(if (stamped) R.string.earned else R.string.unearned),
-            style = MaterialTheme.typography.bodySmall,
-            color = if (stamped) WattagamColors.Primary else WattagamColors.Muted,
-        )
+        // 받은 도장은 작은 도장 자국으로, 색만으로 구분하지 않도록 글자도 함께
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (stamped) PlaceStamp(name, earned = true, size = 24.dp, showName = false)
+            Text(
+                stringResource(if (stamped) R.string.earned else R.string.unearned),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (stamped) WattagamColors.StampInk else WattagamColors.Muted,
+            )
+        }
     }
 }
 

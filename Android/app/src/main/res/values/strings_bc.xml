@@ -3,7 +3,7 @@
     <string name="bc_ar_support">AR 지원 기기에서는 푸앙이와 촬영할 수 있어요. 미지원 기기에서는 일반 사진으로 이어져요.</string>
     <string name="bc_start">방명록 작성하기</string>
     <string name="bc_recheck_location">현재 위치 다시 확인</string>
-    <string name="bc_return_map">지도로 돌아가기 · 길 안내 보기</string>
+    <string name="bc_return_map">지도로 돌아가기</string>
     <string name="bc_available">작성 가능</string>
     <string name="bc_outside">방문 가능 범위 밖</string>
     <string name="bc_visit_done">방문 확인 완료</string>
@@ -11,7 +11,7 @@
     <string name="bc_visit_welcome">%1$s님, 이곳의 순간을 남겨보세요.</string>
     <string name="bc_visit_outside_body">%1$s에 도착한 뒤\n현재 위치를 다시 확인해 주세요.</string>
     <string name="bc_puang">푸앙이</string>
-    <string name="bc_course">캠퍼스 산책 · 2번째 장소</string>
+    <string name="bc_course">캠퍼스 산책 · %1$d번째 장소</string>
     <string name="bc_stamp_missing">내 도장 %1$d/4 · %2$s 미수집</string>
     <string name="bc_visit_inside">현재 위치 확인 · 방문 가능 범위 안</string>
     <string name="bc_visit_outside">현재 위치는 방문 가능 범위 밖이에요</string>
@@ -33,6 +33,9 @@
     <string name="bc_choose_ar">푸앙이와 함께 찍기(AR)</string>
     <string name="bc_choose_photo">일반 사진으로 찍기</string>
     <string name="bc_ar_placed">푸앙이 배치 완료 · %1$s</string>
+    <string name="bc_ar_not_placed">푸앙이 배치 전 · %1$s</string>
+    <string name="bc_stamp_owned">내 도장 %1$d/4 · %2$s 도장 보유</string>
+    <string name="bc_stamp_owned_body">이 장소의 도장은 이미 받았어요. 새 방명록을 남겨도 도장은 다시 지급되지 않아요.</string>
     <string name="bc_ar_mode">AR 촬영</string>
     <string name="bc_photo_mode">일반 사진</string>
     <string name="bc_take_photo">사진 찍기</string>
@@ -40,7 +43,7 @@
     <string name="bc_photo_title">%1$s · 일반 사진</string>
     <string name="bc_photo_verified">GPS 방문 확인 완료 · 일반 사진으로 남기기</string>
     <string name="bc_gallery_change">갤러리에서 변경</string>
-    <string name="bc_flash">플래시</string>
+    <string name="bc_flash">손전등</string>
     <string name="bc_capture_next">촬영 후 사진 미리보기로 이어져요</string>
     <string name="bc_preview_title">사진 확인</string>
     <string name="bc_preview_next">꾸미거나, 사진 그대로 다음으로 진행하세요</string>
@@ -93,13 +96,13 @@
     <string name="bc_success_title">방명록 공개 업로드</string>
     <string name="bc_open_gallery">장소 갤러리 보기</string>
     <string name="bc_open_mypage">마이페이지로 가기</string>
-    <string name="bc_published">방명록이 공개되었습니다</string>
+    <string name="bc_published">방명록을 공개했어요</string>
     <string name="bc_published_body">현재 위치 확인 후 공개 업로드가 완료됐어요.</string>
     <string name="bc_place_public">이 장소에 공개</string>
     <string name="bc_record_place">캠퍼스 · %1$s</string>
     <string name="bc_stamp_awarded">도장 지급</string>
     <string name="bc_stamp_existing">내 도장</string>
-    <string name="bc_stamp_awarded_title">%1$s 도장 획득!</string>
+    <string name="bc_stamp_awarded_title">%1$s 도장을 받았어요</string>
     <string name="bc_stamp_existing_title">%1$s 도장 보유</string>
     <string name="bc_stamp_count">%1$d/4</string>
     <string name="bc_stamp_awarded_body">첫 공개 업로드로 받은 도장이에요.\n도장은 장소마다 한 번만 지급돼요.</string>

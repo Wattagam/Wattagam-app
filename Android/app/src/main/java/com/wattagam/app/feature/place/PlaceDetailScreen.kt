@@ -2,18 +2,20 @@ package com.wattagam.app.feature.place
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -24,10 +26,11 @@ import com.wattagam.app.ui.components.AppTopBar
 import com.wattagam.app.ui.components.ButtonKind
 import com.wattagam.app.ui.components.LocationStatus
 import com.wattagam.app.ui.components.LocationUiState
-import com.wattagam.app.ui.components.PhotoPlaceholder
+import com.wattagam.app.ui.components.PlaceStamp
 import com.wattagam.app.ui.components.StatusCard
 import com.wattagam.app.ui.components.WattagamButton
 import com.wattagam.app.ui.theme.WattagamColors
+import com.wattagam.app.ui.theme.WattagamShapes
 import com.wattagam.app.ui.theme.WattagamSpacing
 import com.wattagam.app.ui.theme.WattagamTheme
 
@@ -77,33 +80,42 @@ fun PlaceDetailScreen(
         },
     ) { insets ->
         Column(Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState())) {
-            PhotoPlaceholder(Modifier.padding(horizontal = WattagamSpacing.Screen), height = 200.dp)
+            // 장소 사진이 서버에서 오기 전까지는 '사진' 자리 대신 이 장소에서 받을 수 있는 도장을 보여준다
+            Surface(
+                Modifier.padding(horizontal = WattagamSpacing.Screen).fillMaxWidth().height(200.dp),
+                shape = WattagamShapes.Card, color = WattagamColors.Soft,
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    PlaceStamp(uiState.name, uiState.stamped, size = 112.dp)
+                    Text(
+                        stringResource(if (uiState.stamped) R.string.place_stamp_caption_earned else R.string.place_stamp_caption_empty),
+                        style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,
+                    )
+                }
+            }
             Column(
                 Modifier.padding(WattagamSpacing.Screen),
                 verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Content),
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(
-                            stringResource(R.string.place_order, uiState.courseName, uiState.order),
-                            style = MaterialTheme.typography.labelSmall, color = WattagamColors.Primary,
-                        )
-                        Text(
-                            stringResource(if (uiState.stamped) R.string.earned else R.string.unearned),
-                            style = MaterialTheme.typography.labelSmall, color = WattagamColors.Muted,
-                        )
-                    }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        stringResource(R.string.place_order, uiState.courseName, uiState.order),
+                        style = MaterialTheme.typography.labelSmall, color = WattagamColors.Muted,
+                    )
                     Text(uiState.name, style = MaterialTheme.typography.headlineLarge)
                     Text(uiState.description, style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
                 }
                 Text(uiState.highlight, style = MaterialTheme.typography.labelMedium)
-                StatusCard(stringResource(R.string.place_prompt_title), uiState.writingPrompt, Modifier.fillMaxWidth(), highlighted = true)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                StatusCard(stringResource(R.string.place_prompt_title), uiState.writingPrompt, Modifier.fillMaxWidth())
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(R.string.place_directions), style = MaterialTheme.typography.labelLarge)
                     Text(uiState.directions, style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
                     Text(
                         stringResource(R.string.place_checkpoint, uiState.checkpoint),
-                        style = MaterialTheme.typography.labelSmall, color = WattagamColors.Primary,
+                        style = MaterialTheme.typography.labelSmall, color = WattagamColors.Ink,
                     )
                 }
                 WattagamButton(

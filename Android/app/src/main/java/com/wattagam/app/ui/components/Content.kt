@@ -2,10 +2,8 @@ package com.wattagam.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,27 +44,6 @@ fun LocationStatus(state: LocationUiState, modifier: Modifier = Modifier) {
         LocationUiState.Unavailable -> R.string.location_unavailable to R.string.location_unavailable_body
     }
     StatusCard(stringResource(title), stringResource(body), modifier, highlighted = state == LocationUiState.Available)
-}
-
-data class StampUiState(val placeId: String, val name: String, val earned: Boolean)
-
-@Composable
-fun StampBoard(stamps: List<StampUiState>, modifier: Modifier = Modifier) {
-    Surface(modifier, color = WattagamColors.Soft, shape = WattagamShapes.Card) {
-        Column(Modifier.padding(WattagamSpacing.Content), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Content)) {
-            Text(stringResource(R.string.stamp_count, stamps.count { it.earned }, stamps.size), style = MaterialTheme.typography.labelMedium)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(WattagamSpacing.Small), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small)) {
-                stamps.forEach { stamp ->
-                    Surface(color = if (stamp.earned) WattagamColors.PrimarySoft else WattagamColors.Soft, shape = WattagamShapes.Card) {
-                        Column(Modifier.widthIn(min = 68.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text(stringResource(if (stamp.earned) R.string.earned else R.string.unearned), color = if (stamp.earned) WattagamColors.Primary else WattagamColors.Muted, style = MaterialTheme.typography.bodySmall)
-                            Text(stamp.name, style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @Preview(showBackground = true, widthDp = 320, fontScale = 1.5f)

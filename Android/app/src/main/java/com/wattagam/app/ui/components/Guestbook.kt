@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -16,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,9 +44,10 @@ data class GuestbookCardUiState(
  */
 @Composable
 fun PhotoPlaceholder(modifier: Modifier = Modifier, height: Dp = 120.dp) {
-    Surface(modifier.fillMaxWidth().height(height), shape = WattagamShapes.Card, color = WattagamColors.PrimarySoft) {
+    // 흰 화면과 연한 회색 화면 어디에서도 자리가 보이게 테두리 색을 옅게 깐다
+    Surface(modifier.fillMaxWidth().height(height), shape = WattagamShapes.Card, color = WattagamColors.Border.copy(alpha = .5f)) {
         Box(contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.photo_placeholder), style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
+            Icon(painterResource(R.drawable.bc_image), stringResource(R.string.photo_placeholder), Modifier.size(24.dp), tint = WattagamColors.Muted.copy(alpha = .6f))
         }
     }
 }

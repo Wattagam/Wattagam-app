@@ -18,7 +18,15 @@ import com.wattagam.app.ui.theme.*
 
 enum class VisitCheckStatus { Available, Outside }
 
-data class VisitCheckUiState(val placeName: String, val visitorName: String, val stamps: Int, val status: VisitCheckStatus)
+/** [placeOrder] 코스 안 순서, [placeStamped] 이 장소 도장을 이미 받았는지 (안내 문구가 달라진다) */
+data class VisitCheckUiState(
+    val placeName: String,
+    val visitorName: String,
+    val stamps: Int,
+    val status: VisitCheckStatus,
+    val placeOrder: Int = 1,
+    val placeStamped: Boolean = false,
+)
 
 @Composable
 fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: () -> Unit, onContinue: () -> Unit, onMap: () -> Unit, modifier: Modifier = Modifier,
@@ -36,7 +44,7 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
     }) {
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                RecordingBadge(stringResource(if (available) R.string.bc_available else R.string.bc_outside), danger = !available, icon = if (available) R.drawable.bc_check else null)
+                RecordingBadge(stringResource(if (available) R.string.bc_available else R.string.bc_outside), danger = !available, accent = available, icon = if (available) R.drawable.bc_check else null)
                 RecordingHeading(stringResource(if (available) R.string.bc_visit_done else R.string.bc_visit_closer))
                 Text(if (available) stringResource(R.string.bc_visit_welcome, state.visitorName) else stringResource(R.string.bc_visit_outside_body, state.placeName), style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
             }
@@ -44,20 +52,24 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
         }
         Spacer(Modifier.height(2.dp))
         mapContent()
-        Column(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(WattagamColors.Soft).padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                RecordingIcon(R.drawable.bc_pin, size = 22.dp)
-                Column { Text(state.placeName, style = MaterialTheme.typography.titleLarge); RecordingCaption(if (available) stringResource(R.string.bc_course) else stringResource(R.string.bc_stamp_missing, state.stamps, state.placeName)) }
+        val stampLine = stringResource(if (state.placeStamped) R.string.bc_stamp_owned else R.string.bc_stamp_missing, state.stamps, state.placeName)
+        Column(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(WattagamColors.Soft).padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                RecordingIcon(R.drawable.bc_pin, tint = WattagamColors.Ink)
+                Column { Text(state.placeName, style = MaterialTheme.typography.titleLarge); RecordingCaption(if (available) stringResource(R.string.bc_course, state.placeOrder) else stampLine) }
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RecordingIcon(if (available) R.drawable.bc_check_circle else R.drawable.bc_pin_off, size = 16.dp)
                 RecordingCaption(stringResource(if (available) R.string.bc_visit_inside else R.string.bc_visit_outside), Modifier.weight(1f), color = if (available) WattagamColors.Primary else WattagamColors.Danger)
                 if (available) TextButton(onClick = onRecheck, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.bc_recheck), style = MaterialTheme.typography.bodySmall) }
             }
         }
-        RecordingNotice(stringResource(if (available) R.string.bc_stamp_pending else R.string.bc_draft_kept),
-            if (available) stringResource(R.string.bc_stamp_pending_body, state.stamps, state.placeName) else stringResource(R.string.bc_draft_kept_body),
-            if (available) R.drawable.bc_stamp else R.drawable.bc_draft, highlighted = available)
+        when {
+            !available -> RecordingNotice(stringResource(R.string.bc_draft_kept), stringResource(R.string.bc_draft_kept_body), R.drawable.bc_draft)
+            // 이미 받은 장소에 '아직 도장은 찍히지 않았어요'라고 하지 않는다
+            state.placeStamped -> RecordingNotice(stampLine, stringResource(R.string.bc_stamp_owned_body), R.drawable.bc_stamp)
+            else -> RecordingNotice(stringResource(R.string.bc_stamp_pending), stringResource(R.string.bc_stamp_pending_body, state.stamps, state.placeName), R.drawable.bc_stamp, highlighted = true)
+        }
         RecordingCaption(stringResource(if (available) R.string.bc_gps_help else R.string.bc_outside_help))
     }
 }

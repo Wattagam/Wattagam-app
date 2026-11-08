@@ -58,7 +58,7 @@ fun PublishScreen(state: PublishUiState, onBack: () -> Unit, onMessageChange: (S
             BasicTextField(value = state.message, onValueChange = onMessageChange,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(WattagamShapes.Field)
                     .background(WattagamColors.Soft).border(1.dp, if (messageLength > state.messageLimit) WattagamColors.Danger else WattagamColors.Border, WattagamShapes.Field)
-                    .padding(14.dp).semantics { contentDescription = label },
+                    .padding(16.dp).semantics { contentDescription = label },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = WattagamColors.Ink), cursorBrush = SolidColor(WattagamColors.Primary))
         }
         RecordingNotice(stringResource(R.string.bc_stamp_missing, state.stampCount, state.placeName), stringResource(R.string.bc_stamp_on_success), R.drawable.bc_stamp)
@@ -79,18 +79,19 @@ fun PublishSuccessScreen(state: PublishSuccessUiState, onBack: () -> Unit, onGal
         if (state.message.isNotBlank()) Text(state.message, style = MaterialTheme.typography.bodyLarge)
         HorizontalDivider(color = WattagamColors.Border)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            RecordingIcon(R.drawable.bc_pin, size = 18.dp)
+            RecordingIcon(R.drawable.bc_pin, tint = WattagamColors.Muted)
             Text(stringResource(R.string.bc_record_place, state.placeName), style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
         }
-        Column(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(WattagamColors.PrimarySoft).padding(20.dp, 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    RecordingCaption(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded else R.string.bc_stamp_existing), color = WattagamColors.Primary)
-                    Text(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded_title else R.string.bc_stamp_existing_title, state.placeName), style = MaterialTheme.typography.bodyLarge)
-                }
-                RecordingBadge(stringResource(R.string.bc_stamp_count, state.stampCount))
+        // 이 화면의 주인공은 방금 찍힌 장소 도장
+        Row(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(WattagamColors.Soft).padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            PlaceStamp(state.placeName, earned = true, size = 72.dp)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                RecordingCaption(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded else R.string.bc_stamp_existing) + " · " +
+                    stringResource(R.string.bc_stamp_count, state.stampCount))
+                Text(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded_title else R.string.bc_stamp_existing_title, state.placeName), style = MaterialTheme.typography.bodyLarge)
+                RecordingCaption(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded_body else R.string.bc_stamp_existing_body))
             }
-            RecordingCaption(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded_body else R.string.bc_stamp_existing_body))
         }
     }
 }

@@ -1,13 +1,14 @@
 package com.wattagam.app
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.wattagam.app.navigation.WattagamApp
 import com.wattagam.app.ui.components.WattagamButton
 import com.wattagam.app.ui.theme.WattagamTheme
-import com.wattagam.app.navigation.WattagamApp
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +34,7 @@ class ControlsTest {
         compose.setContent { WattagamTheme { WattagamApp() } }
         compose.onNodeWithText("버튼").performClick()
         compose.onNodeWithText("방명록 남기기").assertIsDisplayed()
-        compose.onNodeWithText("뒤로").performClick()
+        compose.onNodeWithContentDescription("뒤로").performClick()
         compose.onNodeWithText("왔다감 공통 디자인").assertIsDisplayed()
     }
 }

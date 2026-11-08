@@ -62,7 +62,7 @@ fun SettingsScreen(
             StatusCard(
                 stringResource(R.string.mypage_settings_privacy_title),
                 stringResource(R.string.mypage_settings_privacy_body),
-                Modifier.fillMaxWidth(), highlighted = true,
+                Modifier.fillMaxWidth(),
             )
             WattagamButton(stringResource(R.string.mypage_settings_logout), onLogout, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
             TextButton(onClick = { confirmWithdraw = true }, modifier = Modifier.fillMaxWidth()) {

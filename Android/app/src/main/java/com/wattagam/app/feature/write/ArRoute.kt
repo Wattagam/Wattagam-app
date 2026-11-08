@@ -288,6 +288,7 @@ fun WriteArRoute(
         onHelp = { showHelp = true },
         onCapture = ::capture,
         onSwitchToPhoto = switchToPhoto,
+        placed = anchorNode != null,
         background = {
             if (granted && !failed && !switchingToPhoto) {
                 ARScene(
@@ -345,7 +346,7 @@ fun WriteArRoute(
                             .align(Alignment.Center)
                             .padding(24.dp)
                             .background(Color(0xCC161616), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
                         color = Color.White, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center,
                     )
                 }

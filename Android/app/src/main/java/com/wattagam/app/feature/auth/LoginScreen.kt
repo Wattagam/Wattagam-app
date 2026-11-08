@@ -1,6 +1,6 @@
 package com.wattagam.app.feature.auth
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,19 +9,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,7 +40,6 @@ import com.wattagam.app.ui.theme.WattagamTheme
 // 카카오 로그인 버튼 색 (카카오 디자인 가이드)
 private val KakaoYellow = Color(0xFFFEE500)
 private val KakaoText = Color(0xFF191919)
-private val HeroGradient = Brush.horizontalGradient(listOf(Color(0xFF1848D5), Color(0xFF3B7CFC)))
 
 /** 로그인 버튼 상태. 진행 중과 실패는 동시에 일어나지 않는다 */
 enum class LoginStatus { Idle, Loading, Failed }
@@ -54,7 +56,7 @@ fun LoginScreen(
     sampleMode: Boolean = true,
 ) {
     val loading = status == LoginStatus.Loading
-    Scaffold(modifier, containerColor = WattagamColors.Soft) { insets ->
+    Scaffold(modifier, containerColor = WattagamColors.Soft, contentColor = WattagamColors.Ink) { insets ->
         Column(Modifier.fillMaxSize().padding(insets)) {
             Column(
                 Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(WattagamSpacing.Screen),
@@ -64,18 +66,23 @@ fun LoginScreen(
                     Text(stringResource(R.string.auth_login_title), style = MaterialTheme.typography.headlineLarge)
                     Text(stringResource(R.string.auth_login_body), style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
                 }
-                Box(
-                    Modifier.fillMaxWidth().height(240.dp).background(HeroGradient, WattagamShapes.Card).padding(20.dp),
-                    contentAlignment = Alignment.BottomStart,
-                ) {
-                    Text(stringResource(R.string.auth_login_hero), style = MaterialTheme.typography.labelMedium, color = WattagamColors.Surface)
+                // 장식 그라데이션 대신 캠퍼스 사진과 푸앙이 (피그마 01 의 구성)
+                Box(Modifier.fillMaxWidth().height(300.dp)) {
+                    Image(
+                        painterResource(R.drawable.bc_photo_sample), stringResource(R.string.auth_login_photo),
+                        Modifier.fillMaxSize().clip(WattagamShapes.Card), contentScale = ContentScale.Crop,
+                    )
+                    Image(
+                        painterResource(R.drawable.bc_puang), stringResource(R.string.bc_puang),
+                        Modifier.align(Alignment.BottomEnd).padding(end = 8.dp).size(112.dp),
+                    )
                 }
             }
             Column(
                 Modifier.padding(start = WattagamSpacing.Screen, end = WattagamSpacing.Screen, bottom = WattagamSpacing.Screen),
                 verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium),
             ) {
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
+                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
                 if (status == LoginStatus.Failed) {
                     StatusCard(stringResource(R.string.auth_login_failed), stringResource(R.string.auth_login_failed_body), Modifier.fillMaxWidth())
                 }
@@ -83,7 +90,7 @@ fun LoginScreen(
                     onClick = onKakaoLogin,
                     modifier = Modifier.fillMaxWidth().heightIn(min = WattagamSizes.Button),
                     enabled = !loading,
-                    shape = WattagamShapes.Field,
+                    shape = WattagamShapes.Button,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = KakaoYellow, contentColor = KakaoText,
                         disabledContainerColor = KakaoYellow, disabledContentColor = KakaoText,

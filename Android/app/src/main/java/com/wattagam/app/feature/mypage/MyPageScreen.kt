@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
 import com.wattagam.app.ui.components.AppTopBar
 import com.wattagam.app.ui.components.BottomNavigation
+import com.wattagam.app.ui.components.ButtonKind
 import com.wattagam.app.ui.components.GuestbookCardUiState
 import com.wattagam.app.ui.components.GuestbookGrid
 import com.wattagam.app.ui.components.MainTab
@@ -37,8 +37,8 @@ import com.wattagam.app.ui.components.StampBoard
 import com.wattagam.app.ui.components.StampUiState
 import com.wattagam.app.ui.components.StatusCard
 import com.wattagam.app.ui.components.WattagamButton
-import com.wattagam.app.ui.components.ButtonKind
 import com.wattagam.app.ui.theme.WattagamColors
+import com.wattagam.app.ui.theme.WattagamShapes
 import com.wattagam.app.ui.theme.WattagamSizes
 import com.wattagam.app.ui.theme.WattagamSpacing
 import com.wattagam.app.ui.theme.WattagamTheme
@@ -67,6 +67,7 @@ fun MyPageScreen(
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
+        contentColor = WattagamColors.Ink,
         topBar = {
             AppTopBar(
                 stringResource(R.string.mypage_title), backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding(),
@@ -85,7 +86,7 @@ fun MyPageScreen(
                 style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted,
             )
             StampBoard(uiState.stamps, Modifier.fillMaxWidth())
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PlaceFilterChip(stringResource(R.string.mypage_filter_all), filter == null) { filter = null }
                 uiState.stamps.forEach { stamp ->
                     PlaceFilterChip(stamp.name, filter == stamp.placeId) { filter = stamp.placeId }
@@ -108,7 +109,7 @@ fun MyPageScreen(
 private fun PlaceFilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
+        shape = WattagamShapes.Pill,
         color = if (selected) WattagamColors.Ink else WattagamColors.Surface,
         modifier = Modifier.heightIn(min = WattagamSizes.TouchTarget).semantics { this.selected = selected },
     ) {
@@ -116,7 +117,7 @@ private fun PlaceFilterChip(label: String, selected: Boolean, onClick: () -> Uni
             label,
             style = MaterialTheme.typography.labelSmall,
             color = if (selected) WattagamColors.Surface else WattagamColors.Muted,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 15.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
         )
     }
 }

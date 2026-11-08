@@ -32,10 +32,10 @@ enum class MainTab { Map, MyPage }
 fun BottomNavigation(selected: MainTab, onSelect: (MainTab) -> Unit, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.navigationBarsPadding().fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(38.dp),
+        // 떠 있는 그림자 없이 얇은 테두리로만 구분한다
+        shape = RoundedCornerShape(20.dp),
         color = WattagamColors.Surface,
         border = BorderStroke(1.dp, WattagamColors.Border),
-        shadowElevation = 6.dp,
     ) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             TabItem(stringResource(R.string.nav_map), selected == MainTab.Map, Modifier.weight(1f)) { onSelect(MainTab.Map) }
@@ -51,7 +51,7 @@ private fun TabItem(label: String, active: Boolean, modifier: Modifier, onClick:
         modifier = modifier
             .heightIn(min = WattagamSizes.TouchTarget + 20.dp)
             .semantics { selected = active; role = Role.Tab },
-        shape = RoundedCornerShape(30.dp),
+        shape = RoundedCornerShape(16.dp),
     ) {
         Text(
             label,
