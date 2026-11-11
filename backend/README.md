@@ -136,6 +136,49 @@ GPS 정보는 예상 위치 오차 20m 이하, 측정 후 60초 이내일 때 �
 
 사용자 삭제 시 `users` 외래 키의 `ON DELETE CASCADE`로 스탬프를 정리합니다. 방명록 구현 후 별도 마이그레이션에서 `first_entry_id` 외래 키에 `ON DELETE SET NULL`을 적용해, 첫 방명록이 삭제돼도 스탬프를 보존합니다.
 
+## 방명록 이미지 저장소
+
+### Android·방명록 연결 규칙
+
+- Android가 사진과 꾸미기를 합성한 **JPEG 한 장**을 보냅니다. 형식은 `image/jpeg`이며 최대 5 MiB(5,242,880바이트), 가로·세로 각각 최대 4,096px입니다. 업로드 API에서 요청 크기를 먼저 제한하고, 저장 모듈에서 JPEG 바이트와 크기를 검증합니다.
+- 백엔드가 `GuestbookImageStorage.createKey()`로 `guestbook/<UUID>.jpg`를 만듭니다. 방명록 DB에는 `image_object_key`를 저장합니다. 원본 파일명, 사용자 입력 키, OCI 주소나 임시 URL을 저장하지 않습니다.
+- 방명록 조회 응답의 이미지 주소는 백엔드의 방명록 ID 기반 이미지 경로로 정합니다. Android는 서비스 JWT로 요청하고, 백엔드는 방명록을 볼 수 있는지 확인한 뒤 `image/jpeg`와 `Cache-Control: private, no-store`로 응답합니다. 키를 인자로 받는 공개 API는 제공하지 않습니다.
+- `put(key, jpeg)`는 기존 객체를 덮어쓰지 않습니다. OCI가 조건 불일치(412)를 반환해 `false`가 되면 기존 객체를 보존하고 새 키를 사용합니다. `read(key)`는 객체가 없을 때 `null`을 반환합니다. `delete(key)`는 객체가 이미 없는 경우에도 완료로 처리합니다. 권한·버킷·통신 오류는 정리 성공으로 처리하지 않습니다.
+- 방명록 등록은 먼저 사용자 잠금·작성 권한·GPS·중복 게시 키를 확인합니다. 업로드 응답을 받지 못해도 객체가 저장됐을 수 있으므로, 시도한 키를 정리 재시도에 사용할 수 있게 보존합니다. 이미지 저장 후 방명록과 도장 저장이 실패하면 이번 요청에서 만든 이미지를 정리합니다. 수정은 새 키로 저장하고 DB 커밋 후 이전 객체를 정리합니다. 탈퇴도 모든 대상 이미지 삭제를 확인할 때까지 DB에 키를 보존합니다.
+
+이 모듈은 서버 내부 저장소만 제공합니다. 방명록 API의 요청·응답, DB 컬럼과 탈퇴 정리 연결은 방명록 구현에서 적용합니다.
+
+### 개발용 OCI 준비와 실제 저장 검증
+
+OCI 콘솔에서 프로젝트 컴파트먼트의 **Object Storage → Buckets**로 이동해 `wattagam-images-dev`를 생성합니다. 저장소 계층은 Standard, 공개 접근은 Private, 버전 관리는 Disabled로 둡니다. 삭제를 막는 보존 규칙은 적용하지 않습니다. 콘솔에서 해당 버킷의 리전과 Object Storage 네임스페이스를 확인합니다. [버킷 생성](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/managingbuckets_topic-To_create_a_bucket.htm) · [버전 관리](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingversioning.htm)
+
+개발용 OCI API 서명 프로필을 로컬 `~/.oci/config`에 설정합니다. 개인키는 저장소 밖에 두고 Git, Docker 이미지와 로그에 남기지 않습니다. 앱 프로필에는 지정 버킷의 `OBJECT_CREATE`, `OBJECT_READ`, `OBJECT_DELETE`만 부여합니다. 버킷을 만드는 권한은 콘솔 운영 계정에 둡니다. [SDK 인증 설정](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm) · [OCI Object Storage 권한](https://docs.oracle.com/en-us/iaas/Content/Identity/policyreference/objectstoragepolicyreference.htm)
+
+`<개발용 그룹>`과 `<컴파트먼트>`를 실제 이름으로 바꿔 프로젝트 컴파트먼트의 IAM 정책에 적용합니다.
+
+```text
+Allow group <개발용 그룹> to manage objects in compartment <컴파트먼트> where all {target.bucket.name = 'wattagam-images-dev', any {request.permission = 'OBJECT_CREATE', request.permission = 'OBJECT_READ', request.permission = 'OBJECT_DELETE'}}
+```
+
+기본 실행과 로컬 테스트에서는 OCI 연결이 꺼져 있습니다. IDE나 호스트에서 백엔드와 연결하려면 `OCI_STORAGE_ENABLED=true`와 아래 환경 변수를 설정합니다. Compose는 기본 로컬 DB 실행에 그대로 사용할 수 있습니다.
+
+| 환경 변수 | 값 |
+|---|---|
+| `OCI_STORAGE_REGION` | 버킷 리전 ID |
+| `OCI_STORAGE_NAMESPACE` | Object Storage 네임스페이스 |
+| `OCI_STORAGE_BUCKET` | 개발 버킷 `wattagam-images-dev` |
+| `OCI_CONFIG_FILE` | 선택 사항. 생략하면 `~/.oci/config` |
+| `OCI_CONFIG_PROFILE` | API 서명 프로필 이름. 기본 `DEFAULT` |
+
+실제 OCI 연동 검증은 위 버킷과 프로필을 설정한 쉘에서 명시적으로 실행합니다. 테스트가 만든 임의 키의 합성 JPEG만 업로드·조회·삭제하고, 삭제 재시도와 최종 객체 부재를 확인합니다.
+
+```bash
+cd backend
+OCI_STORAGE_SMOKE_TEST=true ./gradlew test --tests '*OciImageStorageSmokeTest' --rerun-tasks
+```
+
+## 테스트와 빌드
+
 ```bash
 cd backend
 ./gradlew test

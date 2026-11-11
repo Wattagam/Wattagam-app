@@ -29,6 +29,8 @@ dependencies {
 	implementation("org.flywaydb:flyway-mysql")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("tools.jackson.module:jackson-module-kotlin")
+	implementation("com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.100.0")
+	runtimeOnly("com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey3:3.100.0")
 	runtimeOnly("com.mysql:mysql-connector-j")
 
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
