@@ -94,6 +94,7 @@ data class GuestbookItemDto(
     val imageUrl: String,
     val message: String? = null,
     val createdAt: String,
+    val edited: Boolean = false,
     val mine: Boolean = false,
 )
 
@@ -109,5 +110,10 @@ data class GuestbookDetailDto(
     val imageUrl: String,
     val message: String? = null,
     val createdAt: String,
+    val edited: Boolean = false,
     val mine: Boolean,
 )
+
+/** 메시지 수정. null 이면 메시지를 지운다 (필드 자체는 꼭 보내야 해서 null 도 그대로 보낸다) */
+@Serializable
+internal data class GuestbookMessageBody(val message: String?)

@@ -21,6 +21,8 @@ import com.wattagam.app.data.StampBoardData
 import com.wattagam.app.data.WattagamRepository
 import com.wattagam.app.feature.gallery.GalleryScreen
 import com.wattagam.app.feature.gallery.GalleryUiState
+import com.wattagam.app.feature.gallery.GuestbookDetailScreen
+import com.wattagam.app.feature.gallery.GuestbookDetailUiState
 import com.wattagam.app.feature.place.rememberVisitCheck
 import com.wattagam.app.ui.components.GuestbookCardUiState
 import com.wattagam.app.ui.components.LocalAccountProblemHandler
@@ -126,9 +128,74 @@ internal fun GalleryRoute(
     }
 }
 
+/**
+ * 09-A-1 · 기록 상세. 서버에 연결돼 있고 내 기록이면 메시지 수정·삭제를 할 수 있다.
+ * 삭제에 성공하면 [onDeleted] (보통 뒤로 가기. 갤러리·마이페이지는 돌아갈 때 다시 불러온다).
+ */
+@Composable
+internal fun GuestbookDetailRoute(
+    repository: WattagamRepository,
+    entryId: String,
+    onBack: () -> Unit,
+    onPlaceGalleryClick: (placeId: String) -> Unit,
+    onDeleted: () -> Unit,
+) {
+    val loaded = rememberRemote(entryId) { repository.guestbook(entryId) }
+    RemoteContent(loaded, onBack = onBack) { initial ->
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+        val onAccountProblem = LocalAccountProblemHandler.current
+        var entry by remember(initial) { mutableStateOf(initial) }
+        var working by remember { mutableStateOf(false) }
+        var failure by remember { mutableStateOf<String?>(null) }
+        val canManage = entry.mine && repository.connectedToServer
+
+        fun perform(action: suspend () -> Unit) {
+            if (working) return
+            working = true
+            scope.launch {
+                try {
+                    action()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: AccountProblem) {
+                    onAccountProblem(e)
+                } catch (e: Exception) {
+                    failure = e.userMessage(context)
+                } finally {
+                    working = false
+                }
+            }
+        }
+
+        GuestbookDetailScreen(
+            uiState = GuestbookDetailUiState(
+                entry.author, entry.createdAt, entry.placeName, repository.courseName, entry.message, entry.mine, entry.imageUrl, entry.edited,
+            ),
+            onBack = onBack,
+            onPlaceGalleryClick = { onPlaceGalleryClick(entry.placeId) },
+            // 신고는 서버 명세에서 빠진 기능: 샘플 화면에서만 확인 창을 보여준다
+            onReport = if (repository.connectedToServer) null else { {} },
+            onEditMessage = if (canManage) { message -> perform { entry = repository.updateGuestbook(entry.id, message) } } else null,
+            onDelete = if (canManage) { { perform { repository.deleteGuestbook(entry.id); onDeleted() } } } else null,
+            working = working,
+        )
+        failure?.let { message ->
+            AlertDialog(
+                onDismissRequest = { failure = null },
+                title = { Text(stringResource(R.string.gallery_action_failed)) },
+                text = { Text(message) },
+                confirmButton = { TextButton(onClick = { failure = null }) { Text(stringResource(R.string.write_ok)) } },
+            )
+        }
+    }
+}
+
 /** 방명록 카드. 제목이 없는 서버 기록은 메시지 첫 줄, 메시지도 없으면 '사진만 남긴 기록'. [meta] 뒤에 작성일을 붙인다 */
 @Composable
 internal fun GuestbookEntry.card(meta: String): GuestbookCardUiState {
     val cardTitle = this.title ?: message.lineSequence().firstOrNull { it.isNotBlank() } ?: stringResource(R.string.guestbook_photo_only)
-    return GuestbookCardUiState(id, cardTitle, "$meta · ${createdAt.substringBeforeLast(' ')}", imageUrl)
+    val date = createdAt.substringBeforeLast(' ')
+    val editedMark = if (this.edited) " · ${stringResource(R.string.gallery_edited)}" else ""
+    return GuestbookCardUiState(id, cardTitle, "$meta · $date$editedMark", imageUrl)
 }

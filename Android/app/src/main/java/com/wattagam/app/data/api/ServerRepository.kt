@@ -149,12 +149,16 @@ class ServerRepository(
         )
     }
 
-    override suspend fun guestbook(entryId: String): GuestbookEntry {
-        val dto = authorized { api.guestbook(entryId.toServerId(GUESTBOOK_NOT_FOUND)) }
-        return GuestbookEntry(
-            dto.entryId.toString(), dto.placeId.toString(), dto.placeName, dto.nickname, title = null,
-            dto.message.orEmpty(), dto.imageUrl, displayTime(dto.createdAt), dto.mine,
-        )
+    override suspend fun guestbook(entryId: String): GuestbookEntry =
+        authorized { api.guestbook(entryId.toServerId(GUESTBOOK_NOT_FOUND)) }.toEntry()
+
+    override suspend fun updateGuestbook(entryId: String, message: String): GuestbookEntry {
+        val trimmed = message.trim()
+        return authorized { api.updateGuestbook(entryId.toServerId(GUESTBOOK_NOT_FOUND), trimmed.ifEmpty { null }) }.toEntry()
+    }
+
+    override suspend fun deleteGuestbook(entryId: String) {
+        authorized { api.deleteGuestbook(entryId.toServerId(GUESTBOOK_NOT_FOUND)) }
     }
 
     override suspend fun myGuestbooks(): GuestbookPage {
@@ -231,7 +235,12 @@ class ServerRepository(
     }
 
     private fun GuestbookItemDto.toEntry(placeId: String, placeName: String, author: String, mine: Boolean) = GuestbookEntry(
-        entryId.toString(), placeId, placeName, author, title = null, message.orEmpty(), imageUrl, displayTime(createdAt), mine,
+        entryId.toString(), placeId, placeName, author, title = null, message.orEmpty(), imageUrl, displayTime(createdAt), mine, edited,
+    )
+
+    private fun GuestbookDetailDto.toEntry() = GuestbookEntry(
+        entryId.toString(), placeId.toString(), placeName, nickname, title = null,
+        message.orEmpty(), imageUrl, displayTime(createdAt), mine, edited,
     )
 
     private companion object {

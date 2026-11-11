@@ -46,6 +46,8 @@ data class GuestbookEntry(
     /** 한국 시간으로 바꾼 표시용 작성 시각 (예: 2026. 10. 27. 14:32) */
     val createdAt: String,
     val mine: Boolean,
+    /** 작성 후 메시지를 고친 기록 ('수정됨' 표시) */
+    val edited: Boolean = false,
 )
 
 data class GuestbookPage(val entries: List<GuestbookEntry>, val hasNext: Boolean)
@@ -106,5 +108,11 @@ interface WattagamRepository {
     suspend fun gallery(placeId: String, page: Int): GuestbookPage
     suspend fun guestbook(entryId: String): GuestbookEntry
     suspend fun myGuestbooks(): GuestbookPage
+
+    /** 내 기록의 메시지를 바꾼다. 빈 메시지는 지우기. 수정으로 도장은 바뀌지 않는다 */
+    suspend fun updateGuestbook(entryId: String, message: String): GuestbookEntry
+
+    /** 내 기록을 지운다. 받은 도장은 남는다 */
+    suspend fun deleteGuestbook(entryId: String)
     suspend fun publish(placeId: String, photo: File, message: String, fix: LocationFix.Found, requestId: String): PublishOutcome
 }

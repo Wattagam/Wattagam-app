@@ -34,8 +34,6 @@ import com.wattagam.app.data.sample.SampleData
 import com.wattagam.app.feature.auth.LocationPermissionRoute
 import com.wattagam.app.feature.auth.LoginRoute
 import com.wattagam.app.feature.auth.NicknameScreen
-import com.wattagam.app.feature.gallery.GuestbookDetailScreen
-import com.wattagam.app.feature.gallery.GuestbookDetailUiState
 import com.wattagam.app.feature.guestbook.PublishSuccessScreen
 import com.wattagam.app.feature.guestbook.PublishSuccessUiState
 import com.wattagam.app.feature.map.MapPlaceUiState
@@ -404,18 +402,13 @@ fun WattagamApp() {
                     )
                 }
                 entry<GuestbookDetail> { key ->
-                    val guestbook = rememberRemote(key.guestbookId) { repository.guestbook(key.guestbookId) }
-                    RemoteContent(guestbook, onBack = back) { entry ->
-                        GuestbookDetailScreen(
-                            uiState = GuestbookDetailUiState(
-                                entry.author, entry.createdAt, entry.placeName, repository.courseName, entry.message, entry.mine, entry.imageUrl,
-                            ),
-                            onBack = back,
-                            onPlaceGalleryClick = { backStack.add(Gallery(entry.placeId)) },
-                            // 신고는 서버 명세에서 빠진 기능: 샘플 화면에서만 확인 창을 보여준다
-                            onReport = if (repository.connectedToServer) null else { {} },
-                        )
-                    }
+                    GuestbookDetailRoute(
+                        repository = repository,
+                        entryId = key.guestbookId,
+                        onBack = back,
+                        onPlaceGalleryClick = { backStack.add(Gallery(it)) },
+                        onDeleted = back,
+                    )
                 }
                 entry<MyPage> {
                     val data = rememberRemote(Unit) {

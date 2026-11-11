@@ -14,7 +14,7 @@
 - Kakao-only login. No password or guest-auth implementation. Nickname setup remains a UI proposal until its account contract is confirmed.
 - Valid current GPS is required at writing start and final submission. The provisional visit radius is 30 m; freshness/accuracy thresholds require field validation. A previous visit never grants current write access.
 - A successful server guestbook save grants at most one stamp per account/place, four total. Visiting or taking a photo alone grants none. Server results determine real eligibility and stamp state.
-- All saved guestbooks are visible to signed-in app users. No private visibility selector. Record editing/deletion and notifications are outside the current MVP.
+- All saved guestbooks are visible to signed-in app users. No private visibility selector. Authors can edit their own guestbook message (not its photo or place) and delete their own guestbooks; editing never grants a stamp and deletion keeps earned stamps. Notifications are outside the current MVP.
 - AR is for photos with 푸앙이; unsupported devices can use ordinary capture. A saved AR photo must contain the rendered character. No image-recognition visit verification.
 - Preserve drafts on failed submission, expired authentication or location departure. Recheck position before retry; do not automatically upload later from another location.
 

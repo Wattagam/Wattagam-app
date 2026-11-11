@@ -76,6 +76,15 @@ class SampleRepository(private val profile: LocalProfile) : WattagamRepository {
 
     override suspend fun myGuestbooks(): GuestbookPage = GuestbookPage(SampleData.myGuestbooks().map { it.toEntry() }, hasNext = false)
 
+    /** 샘플 기록은 바꾸지 않는다. 화면은 서버 연결 시에만 수정·삭제 버튼을 보여준다 */
+    override suspend fun updateGuestbook(entryId: String, message: String): GuestbookEntry {
+        throw UnsupportedOperationException("샘플 모드에서는 기록을 수정하지 않습니다")
+    }
+
+    override suspend fun deleteGuestbook(entryId: String) {
+        throw UnsupportedOperationException("샘플 모드에서는 기록을 삭제하지 않습니다")
+    }
+
     override suspend fun publish(placeId: String, photo: File, message: String, fix: LocationFix.Found, requestId: String) =
         PublishOutcome.NotConnected
 

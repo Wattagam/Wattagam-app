@@ -73,6 +73,18 @@ class WattagamApi(baseUrl: String, private val client: OkHttpClient, private val
 
     suspend fun guestbook(entryId: Long): GuestbookDetailDto = call(request("api/guestbook/$entryId").build(), GuestbookDetailDto.serializer())
 
+    /** 내 방명록의 메시지만 바꾼다 (사진·장소는 바꿀 수 없다) */
+    suspend fun updateGuestbook(entryId: Long, message: String?): GuestbookDetailDto =
+        call(
+            request("api/guestbook/$entryId").patch(jsonBody(GuestbookMessageBody(message), GuestbookMessageBody.serializer())).build(),
+            GuestbookDetailDto.serializer(),
+        )
+
+    /** 내 방명록을 지운다. 받은 도장은 남는다 */
+    suspend fun deleteGuestbook(entryId: Long) {
+        call(request("api/guestbook/$entryId").delete().build(), Unit.serializer(), resultRequired = false)
+    }
+
     suspend fun myGuestbooks(page: Int, size: Int): GuestbookPageDto =
         call(request("api/me/guestbook", "page" to page, "size" to size).build(), GuestbookPageDto.serializer())
 
@@ -108,6 +120,7 @@ class WattagamApi(baseUrl: String, private val client: OkHttpClient, private val
     }
 
     private companion object {
+        // explicitNulls 기본값(true): 메시지 지우기처럼 null 을 그대로 보내야 하는 요청이 있다
         val json = Json { ignoreUnknownKeys = true }
         val JSON = "application/json".toMediaType()
         val JPEG = "image/jpeg".toMediaType()

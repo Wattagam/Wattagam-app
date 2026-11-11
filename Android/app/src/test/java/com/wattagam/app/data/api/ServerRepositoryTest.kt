@@ -214,6 +214,44 @@ class ServerRepositoryTest {
         assertEquals("20", galleryRequest.queryParameter("size"))
     }
 
+    @Test fun editSendsTrimmedMessageOrNullToClear() = runBlocking {
+        loggedIn()
+        val detail = { message: String?, edited: Boolean ->
+            ok(
+                """{"entryId":101,"placeId":1,"placeName":"310관","nickname":"하늘","imageUrl":"https://img/101.jpg",""" +
+                    """"message":${message?.let { "\"$it\"" } ?: "null"},"createdAt":"2026-11-06T08:00:00Z","updatedAt":"2026-11-06T08:30:00Z",""" +
+                    """"edited":$edited,"mine":true}""",
+            )
+        }
+        respond = { detail("고쳤어요", true) }
+        val edited = repository.updateGuestbook("101", "  고쳤어요 ")
+        assertEquals("PATCH", requests.last().method)
+        assertEquals("/api/guestbook/101", requests.last().url.encodedPath)
+        assertEquals("""{"message":"고쳤어요"}""", requests.last().bodyText())
+        assertTrue(edited.edited)
+        assertEquals("고쳤어요", edited.message)
+
+        respond = { detail(null, true) }
+        assertEquals("", repository.updateGuestbook("101", "   ").message)
+        assertEquals("""{"message":null}""", requests.last().bodyText())
+    }
+
+    @Test fun deleteOthersGuestbookKeepsServerReason() = runBlocking {
+        loggedIn()
+        respond = { ok("null") }
+        repository.deleteGuestbook("101")
+        assertEquals("DELETE", requests.last().method)
+        assertEquals("/api/guestbook/101", requests.last().url.encodedPath)
+
+        respond = { error(403, "GUESTBOOK_403_4", "본인이 작성한 방명록만 수정하거나 삭제할 수 있습니다.") }
+        try {
+            repository.deleteGuestbook("100")
+            fail()
+        } catch (e: ApiException) {
+            assertEquals("본인이 작성한 방명록만 수정하거나 삭제할 수 있습니다.", e.message)
+        }
+    }
+
     @Test fun badIdIsNotFoundWithoutRequest() = runBlocking {
         loggedIn()
         try {
