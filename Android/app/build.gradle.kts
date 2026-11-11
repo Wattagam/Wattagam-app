@@ -13,6 +13,8 @@ val localProperties = Properties().apply {
     if (file.exists()) file.inputStream().use { load(it) }
 }
 val kakaoNativeAppKey: String = localProperties.getProperty("KAKAO_NATIVE_APP_KEY", "")
+// 왔다감 서버 주소 (예: WATTAGAM_API_URL=https://api.example.com). 비어 있으면 서버 없이 샘플 데이터로 동작한다.
+val wattagamApiUrl: String = localProperties.getProperty("WATTAGAM_API_URL", "").trim().trimEnd('/')
 
 android {
     namespace = "com.wattagam.app"
@@ -25,6 +27,7 @@ android {
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
+        buildConfigField("String", "WATTAGAM_API_URL", "\"$wattagamApiUrl\"")
         manifestPlaceholders["kakaoScheme"] = "kakao$kakaoNativeAppKey"
     }
     buildFeatures {
@@ -49,6 +52,11 @@ dependencies {
     implementation(libs.navigation.runtime)
     implementation(libs.navigation.ui)
     implementation(libs.serialization.core)
+    implementation(libs.serialization.json)
+    implementation(libs.okhttp)
+    // 방명록 사진(서버 이미지 주소) 표시
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.play.services.location)
     implementation(libs.kakao.user)
     implementation(libs.kakao.map)

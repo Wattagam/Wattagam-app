@@ -73,6 +73,7 @@ import kotlinx.coroutines.withContext
 fun WriteModeRoute(
     placeId: String,
     stampCount: Int,
+    stampTotal: Int,
     drafts: DraftStore,
     onBack: () -> Unit,
     onAr: () -> Unit,
@@ -90,6 +91,7 @@ fun WriteModeRoute(
 
     CaptureModeScreen(
         stampCount = stampCount,
+        stampTotal = stampTotal,
         onBack = onBack,
         onHelp = { showHelp = true },
         onSelectMode = { mode ->

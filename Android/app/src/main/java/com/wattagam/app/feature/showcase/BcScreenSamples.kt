@@ -78,7 +78,7 @@ fun BcSampleScreen(sample: BcSample, onBack: () -> Unit, onNavigate: (BcSample) 
                 VisitCheckUiState(place, author, 1, if (sample == BcSample.Visit) VisitCheckStatus.Available else VisitCheckStatus.Outside, placeOrder = 2),
                 onBack, action, { onNavigate(BcSample.Mode) }, action,
                 mapContent = { VisitMapIllustration(place, sample == BcSample.Outside) })
-            BcSample.Mode -> CaptureModeScreen(1, onBack, action, { onNavigate(if (it == CaptureMode.Ar) BcSample.Ar else BcSample.Camera) },
+            BcSample.Mode -> CaptureModeScreen(1, 4, onBack, action, { onNavigate(if (it == CaptureMode.Ar) BcSample.Ar else BcSample.Camera) },
                 background = { CameraSampleBackground() }, character = { PuangSample(false) })
             BcSample.Ar -> ArCaptureScreen(place, onBack, action, action, { onNavigate(BcSample.Camera) },
                 background = { CameraSampleBackground() }, arContent = { PuangSample(true) })

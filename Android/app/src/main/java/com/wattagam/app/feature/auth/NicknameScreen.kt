@@ -53,10 +53,15 @@ fun NicknameScreen(
     onBack: () -> Unit,
     onSubmit: (String) -> Unit,
     modifier: Modifier = Modifier,
+    submitting: Boolean = false,
+    /** 서버가 거절한 이유. 보낸 닉네임을 고치기 전까지만 보여준다 */
+    serverError: String? = null,
 ) {
     var nickname by rememberSaveable { mutableStateOf(initialNickname) }
+    var submitted by rememberSaveable { mutableStateOf<String?>(null) }
     val valid = NicknameRule.isValid(nickname)
-    val showError = nickname.isNotEmpty() && !valid
+    val rejected = serverError != null && submitted == nickname
+    val showError = (nickname.isNotEmpty() && !valid) || rejected
 
     Scaffold(
         modifier,
@@ -77,9 +82,13 @@ fun NicknameScreen(
                 }
                 WattagamButton(
                     stringResource(if (isEdit) R.string.auth_nickname_save else R.string.auth_nickname_next),
-                    onClick = { onSubmit(nickname) },
+                    onClick = {
+                        submitted = nickname
+                        onSubmit(nickname)
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = valid,
+                    enabled = valid && !rejected,
+                    loading = submitting,
                 )
             }
         },
@@ -97,7 +106,9 @@ fun NicknameScreen(
                 onValueChange = { nickname = it.trim().take(NicknameRule.MAX_LENGTH) },
                 label = stringResource(R.string.nickname),
                 modifier = Modifier.fillMaxWidth(),
-                supportingText = if (showError) {
+                supportingText = if (rejected) {
+                    serverError.orEmpty()
+                } else if (showError) {
                     stringResource(R.string.nickname_error)
                 } else {
                     stringResource(R.string.auth_nickname_counter, nickname.length, NicknameRule.MAX_LENGTH)

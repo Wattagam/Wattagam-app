@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
 import com.wattagam.app.ui.components.AppTopBar
 import com.wattagam.app.ui.components.ButtonKind
-import com.wattagam.app.ui.components.PhotoPlaceholder
+import com.wattagam.app.ui.components.GuestbookPhoto
 import com.wattagam.app.ui.components.WattagamButton
 import com.wattagam.app.ui.theme.WattagamColors
 import com.wattagam.app.ui.theme.WattagamSpacing
@@ -40,18 +40,20 @@ data class GuestbookDetailUiState(
     val courseName: String,
     val message: String,
     val mine: Boolean,
+    val imageUrl: String? = null,
 )
 
 /**
  * 09-A-1 · 다른 사람의 공개 기록 / 내 기록 보기.
- * 수정·삭제는 이번 MVP 제외. 다른 사람의 기록에만 '신고'를 보여준다 (신고 API 는 연결 전).
+ * 수정·삭제는 이번 MVP 제외. [onReport] 가 있으면(샘플 화면) 다른 사람의 기록에 '신고'를 보여준다.
+ * 신고는 서버 명세에서 빠진 기능이라 서버 연결 시에는 넘기지 않는다.
  */
 @Composable
 fun GuestbookDetailScreen(
     uiState: GuestbookDetailUiState,
     onBack: () -> Unit,
     onPlaceGalleryClick: () -> Unit,
-    onReport: () -> Unit,
+    onReport: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     var confirmReport by rememberSaveable { mutableStateOf(false) }
@@ -63,7 +65,7 @@ fun GuestbookDetailScreen(
                 stringResource(if (uiState.mine) R.string.gallery_detail_mine_title else R.string.gallery_detail_title),
                 stringResource(R.string.back), onBack,
                 Modifier.statusBarsPadding(),
-                actionLabel = if (uiState.mine) null else stringResource(R.string.gallery_report),
+                actionLabel = if (uiState.mine || onReport == null) null else stringResource(R.string.gallery_report),
                 onAction = { confirmReport = true },
             )
         },
@@ -90,7 +92,7 @@ fun GuestbookDetailScreen(
                 Text(uiState.author, style = MaterialTheme.typography.labelMedium)
                 Text(uiState.createdAt, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
             }
-            PhotoPlaceholder(height = 280.dp)
+            GuestbookPhoto(uiState.imageUrl, stringResource(R.string.photo_placeholder), height = 280.dp)
             if (uiState.message.isNotBlank()) {
                 Text(uiState.message, style = MaterialTheme.typography.bodyLarge)
             }
@@ -108,7 +110,7 @@ fun GuestbookDetailScreen(
             title = { Text(stringResource(R.string.gallery_report_title)) },
             text = { Text(stringResource(R.string.gallery_report_body)) },
             confirmButton = {
-                TextButton(onClick = { confirmReport = false; onReport() }) {
+                TextButton(onClick = { confirmReport = false; onReport?.invoke() }) {
                     Text(stringResource(R.string.gallery_report), color = WattagamColors.Danger)
                 }
             },

@@ -5,6 +5,7 @@ import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.UUID
 
 /**
  * 장소별 작성 초안 (사진 원본·꾸민 사진·메시지).
@@ -27,6 +28,12 @@ class DraftStore(context: Context) {
 
     private fun messageFile(placeId: String) = File(dir(placeId), "message.txt")
 
+    /** 서버에 올릴 사진 (등록할 때마다 [publishPhoto] 를 다시 압축해 만든다) */
+    fun uploadFile(placeId: String) = File(dir(placeId), "upload.jpg")
+
+    /** 등록 재시도 때 같은 값을 보내 중복 등록을 막는 키. 새 사진을 찍으면 새로 만든다 */
+    private fun requestIdFile(placeId: String) = File(dir(placeId), "request_id.txt")
+
     /** 파일 존재 확인이라 백그라운드에서 부른다 */
     fun hasPhoto(placeId: String) = photoFile(placeId).exists()
 
@@ -45,6 +52,7 @@ class DraftStore(context: Context) {
         val temp = captureTempFile(placeId)
         if (temp.exists()) {
             decoratedFile(placeId).delete()
+            requestIdFile(placeId).delete()
             temp.copyTo(photoFile(placeId), overwrite = true)
             temp.delete()
         }
@@ -67,6 +75,12 @@ class DraftStore(context: Context) {
     suspend fun writeMessage(placeId: String, message: String) = withContext(Dispatchers.IO) {
         ensureDir(placeId)
         messageFile(placeId).writeText(message)
+    }
+
+    suspend fun requestId(placeId: String): String = withContext(Dispatchers.IO) {
+        val file = requestIdFile(placeId)
+        file.takeIf { it.exists() }?.readText()?.takeIf { it.isNotBlank() }
+            ?: UUID.randomUUID().toString().also { ensureDir(placeId); file.writeText(it) }
     }
 
     suspend fun clear(placeId: String) = withContext(Dispatchers.IO) {

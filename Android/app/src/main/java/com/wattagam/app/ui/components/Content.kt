@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
 import com.wattagam.app.ui.theme.*
 
-enum class LocationUiState { Available, Outside, Checking, Denied, Unavailable }
+/** [Failed] 는 위치는 쟀지만 서버 확인 결과를 받지 못한 경우 */
+enum class LocationUiState { Available, Outside, Checking, Denied, Unavailable, Failed }
 
 @Composable
 fun StatusCard(
@@ -42,6 +43,7 @@ fun LocationStatus(state: LocationUiState, modifier: Modifier = Modifier) {
         LocationUiState.Checking -> R.string.location_checking to R.string.location_checking_body
         LocationUiState.Denied -> R.string.location_denied to R.string.location_denied_body
         LocationUiState.Unavailable -> R.string.location_unavailable to R.string.location_unavailable_body
+        LocationUiState.Failed -> R.string.location_failed to R.string.location_failed_body
     }
     StatusCard(stringResource(title), stringResource(body), modifier, highlighted = state == LocationUiState.Available)
 }

@@ -54,6 +54,8 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     status: LoginStatus = LoginStatus.Idle,
     sampleMode: Boolean = true,
+    /** 서버까지 연결된 실제 로그인. 이때는 연결 상태 안내를 숨긴다 */
+    serverConnected: Boolean = false,
 ) {
     val loading = status == LoginStatus.Loading
     Scaffold(modifier, containerColor = WattagamColors.Soft, contentColor = WattagamColors.Ink) { insets ->
@@ -103,11 +105,13 @@ fun LoginScreen(
                         Text(stringResource(R.string.auth_login_kakao), style = MaterialTheme.typography.labelLarge)
                     }
                 }
-                Text(
-                    stringResource(if (sampleMode) R.string.sample_notice else R.string.auth_login_server_pending),
-                    style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,
-                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
-                )
+                if (!serverConnected) {
+                    Text(
+                        stringResource(if (sampleMode) R.string.sample_notice else R.string.auth_login_server_pending),
+                        style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,
+                        textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 Text(
                     stringResource(R.string.auth_login_terms),
                     style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,

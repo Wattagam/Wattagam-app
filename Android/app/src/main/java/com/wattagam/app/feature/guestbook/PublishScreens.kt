@@ -27,6 +27,7 @@ data class PublishUiState(
     val message: String,
     val stampCount: Int,
     val status: PublishStatus = PublishStatus.Ready,
+    val stampTotal: Int = 4,
     val location: PublishLocation = PublishLocation.Verified,
     val messageLimit: Int = 80,
 )
@@ -61,11 +62,19 @@ fun PublishScreen(state: PublishUiState, onBack: () -> Unit, onMessageChange: (S
                     .padding(16.dp).semantics { contentDescription = label },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = WattagamColors.Ink), cursorBrush = SolidColor(WattagamColors.Primary))
         }
-        RecordingNotice(stringResource(R.string.bc_stamp_missing, state.stampCount, state.placeName), stringResource(R.string.bc_stamp_on_success), R.drawable.bc_stamp)
+        RecordingNotice(stringResource(R.string.bc_stamp_missing, state.stampCount, state.placeName, state.stampTotal), stringResource(R.string.bc_stamp_on_success), R.drawable.bc_stamp)
     }
 }
 
-data class PublishSuccessUiState(val placeName: String, val authorName: String, val createdAt: String, val message: String, val stampCount: Int, val newlyEarnedStamp: Boolean)
+data class PublishSuccessUiState(
+    val placeName: String,
+    val authorName: String,
+    val createdAt: String,
+    val message: String,
+    val stampCount: Int,
+    val newlyEarnedStamp: Boolean,
+    val stampTotal: Int = 4,
+)
 
 @Composable
 fun PublishSuccessScreen(state: PublishSuccessUiState, onBack: () -> Unit, onGallery: () -> Unit, onMyPage: () -> Unit, modifier: Modifier = Modifier, photo: @Composable (Modifier) -> Unit) {
@@ -88,7 +97,7 @@ fun PublishSuccessScreen(state: PublishSuccessUiState, onBack: () -> Unit, onGal
             PlaceStamp(state.placeName, earned = true, size = 72.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 RecordingCaption(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded else R.string.bc_stamp_existing) + " · " +
-                    stringResource(R.string.bc_stamp_count, state.stampCount))
+                    stringResource(R.string.bc_stamp_count, state.stampCount, state.stampTotal))
                 Text(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded_title else R.string.bc_stamp_existing_title, state.placeName), style = MaterialTheme.typography.bodyLarge)
                 RecordingCaption(stringResource(if (state.newlyEarnedStamp) R.string.bc_stamp_awarded_body else R.string.bc_stamp_existing_body))
             }

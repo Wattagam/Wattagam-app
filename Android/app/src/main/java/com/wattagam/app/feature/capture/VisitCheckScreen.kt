@@ -26,6 +26,8 @@ data class VisitCheckUiState(
     val status: VisitCheckStatus,
     val placeOrder: Int = 1,
     val placeStamped: Boolean = false,
+    /** 등록된 장소 수 (서버 기준) */
+    val stampTotal: Int = 4,
 )
 
 @Composable
@@ -52,7 +54,7 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
         }
         Spacer(Modifier.height(2.dp))
         mapContent()
-        val stampLine = stringResource(if (state.placeStamped) R.string.bc_stamp_owned else R.string.bc_stamp_missing, state.stamps, state.placeName)
+        val stampLine = stringResource(if (state.placeStamped) R.string.bc_stamp_owned else R.string.bc_stamp_missing, state.stamps, state.placeName, state.stampTotal)
         Column(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(WattagamColors.Soft).padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 RecordingIcon(R.drawable.bc_pin, tint = WattagamColors.Ink)
@@ -68,7 +70,7 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
             !available -> RecordingNotice(stringResource(R.string.bc_draft_kept), stringResource(R.string.bc_draft_kept_body), R.drawable.bc_draft)
             // 이미 받은 장소에 '아직 도장은 찍히지 않았어요'라고 하지 않는다
             state.placeStamped -> RecordingNotice(stampLine, stringResource(R.string.bc_stamp_owned_body), R.drawable.bc_stamp)
-            else -> RecordingNotice(stringResource(R.string.bc_stamp_pending), stringResource(R.string.bc_stamp_pending_body, state.stamps, state.placeName), R.drawable.bc_stamp, highlighted = true)
+            else -> RecordingNotice(stringResource(R.string.bc_stamp_pending), stringResource(R.string.bc_stamp_pending_body, state.stamps, state.placeName, state.stampTotal), R.drawable.bc_stamp, highlighted = true)
         }
         RecordingCaption(stringResource(if (available) R.string.bc_gps_help else R.string.bc_outside_help))
     }

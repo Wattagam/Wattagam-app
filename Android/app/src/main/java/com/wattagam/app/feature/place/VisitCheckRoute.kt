@@ -13,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.wattagam.app.R
+import com.wattagam.app.data.location.LocationFix
+import com.wattagam.app.data.location.VisitEligibility
 import com.wattagam.app.feature.capture.VisitCheckScreen
 import com.wattagam.app.feature.capture.VisitCheckStatus
 import com.wattagam.app.feature.capture.VisitCheckUiState
@@ -31,21 +33,21 @@ fun VisitCheckRoute(
     stampCount: Int,
     placeOrder: Int,
     placeStamped: Boolean,
-    latitude: Double,
-    longitude: Double,
+    stampTotal: Int,
+    judge: suspend (LocationFix.Found) -> VisitEligibility,
     onBack: () -> Unit,
     onContinue: () -> Unit,
     onMap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val check = rememberVisitCheck(latitude, longitude, onAllowed = {})
+    val check = rememberVisitCheck(judge, onAllowed = {})
     val result = check.status
     // 들어온 직후는 범위 안. 다시 확인하는 동안에는 직전 판정을 그대로 보여준다 (04-E 에서 잠깐 04 로 바뀌지 않게)
     var outside by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(result) {
         when (result) {
             LocationUiState.Available -> outside = false
-            LocationUiState.Outside, LocationUiState.Denied, LocationUiState.Unavailable -> outside = true
+            LocationUiState.Outside, LocationUiState.Denied, LocationUiState.Unavailable, LocationUiState.Failed -> outside = true
             LocationUiState.Checking, null -> Unit
         }
     }
@@ -53,7 +55,7 @@ fun VisitCheckRoute(
     VisitCheckScreen(
         state = VisitCheckUiState(
             placeName, visitorName, stampCount, if (outside) VisitCheckStatus.Outside else VisitCheckStatus.Available,
-            placeOrder = placeOrder, placeStamped = placeStamped,
+            placeOrder = placeOrder, placeStamped = placeStamped, stampTotal = stampTotal,
         ),
         onBack = onBack,
         onRecheck = check.start,
@@ -65,10 +67,11 @@ fun VisitCheckRoute(
 
     // 범위 밖은 04-E 화면 자체가 안내한다. 권한·측정 실패는 이유가 달라 따로 알린다.
     var showProblem by remember { mutableStateOf(false) }
-    LaunchedEffect(result) { showProblem = result == LocationUiState.Denied || result == LocationUiState.Unavailable }
+    LaunchedEffect(result) { showProblem = result == LocationUiState.Denied || result == LocationUiState.Unavailable || result == LocationUiState.Failed }
     val problem = when (result) {
         LocationUiState.Denied -> R.string.location_denied to R.string.location_denied_body
         LocationUiState.Unavailable -> R.string.location_unavailable to R.string.location_unavailable_body
+        LocationUiState.Failed -> R.string.location_failed to R.string.location_failed_body
         else -> null
     }
     if (problem != null && showProblem) {

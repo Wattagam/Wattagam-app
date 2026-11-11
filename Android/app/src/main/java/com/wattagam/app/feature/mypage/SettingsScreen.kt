@@ -43,6 +43,9 @@ fun SettingsScreen(
     onLogout: () -> Unit,
     onWithdraw: () -> Unit,
     modifier: Modifier = Modifier,
+    /** 서버 탈퇴가 연결된 상태 (샘플 안내 문구를 빼고, 기록 수는 서버가 주지 않아 쓰지 않는다) */
+    serverConnected: Boolean = false,
+    withdrawing: Boolean = false,
 ) {
     var confirmWithdraw by rememberSaveable { mutableStateOf(false) }
 
@@ -65,7 +68,7 @@ fun SettingsScreen(
                 Modifier.fillMaxWidth(),
             )
             WattagamButton(stringResource(R.string.mypage_settings_logout), onLogout, Modifier.fillMaxWidth(), kind = ButtonKind.Text)
-            TextButton(onClick = { confirmWithdraw = true }, modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { confirmWithdraw = true }, modifier = Modifier.fillMaxWidth(), enabled = !withdrawing) {
                 Text(stringResource(R.string.mypage_settings_withdraw), color = WattagamColors.Danger)
             }
         }
@@ -75,7 +78,12 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { confirmWithdraw = false },
             title = { Text(stringResource(R.string.mypage_withdraw_title)) },
-            text = { Text(stringResource(R.string.mypage_withdraw_body, nickname, guestbookCount)) },
+            text = {
+                Text(
+                    if (serverConnected) stringResource(R.string.mypage_withdraw_body_server, nickname)
+                    else stringResource(R.string.mypage_withdraw_body, nickname, guestbookCount),
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { confirmWithdraw = false; onWithdraw() }) {
                     Text(stringResource(R.string.mypage_withdraw_confirm), color = WattagamColors.Danger)

@@ -38,14 +38,14 @@ private fun CameraLayout(title: String, onBack: () -> Unit, modifier: Modifier, 
 }
 
 @Composable
-fun CaptureModeScreen(stampCount: Int, onBack: () -> Unit, onHelp: () -> Unit, onSelectMode: (CaptureMode) -> Unit, modifier: Modifier = Modifier,
+fun CaptureModeScreen(stampCount: Int, stampTotal: Int, onBack: () -> Unit, onHelp: () -> Unit, onSelectMode: (CaptureMode) -> Unit, modifier: Modifier = Modifier,
     background: @Composable BoxScope.() -> Unit, character: @Composable () -> Unit,
 ) {
     CameraLayout(stringResource(R.string.bc_create_title), onBack, modifier, background, onHelp) {
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             val contentHeight = maxHeight
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = contentHeight).padding(24.dp), verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
-                RecordingBadge(stringResource(R.string.bc_capture_verified, stampCount), dark = true, solidDark = true, icon = R.drawable.bc_check_light)
+                RecordingBadge(stringResource(R.string.bc_capture_verified, stampCount, stampTotal), dark = true, solidDark = true, icon = R.drawable.bc_check_light)
                 Box(Modifier.padding(vertical = 24.dp)) { character() }
                 Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(stringResource(R.string.bc_choose_mode), color = WattagamColors.Ink, style = MaterialTheme.typography.titleLarge)

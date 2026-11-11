@@ -44,7 +44,8 @@ data class PlaceDetailUiState(
     val directions: String,
     val checkpoint: String,
     val stamped: Boolean,
-    val publicCount: Int,
+    /** 공개 기록 수. 서버는 전체 수를 주지 않아 null 이면 수 없이 보여준다 */
+    val publicCount: Int?,
 )
 
 /**
@@ -109,7 +110,10 @@ fun PlaceDetailScreen(
                     Text(uiState.description, style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
                 }
                 Text(uiState.highlight, style = MaterialTheme.typography.labelMedium)
-                StatusCard(stringResource(R.string.place_prompt_title), uiState.writingPrompt, Modifier.fillMaxWidth())
+                // 작성 도움말은 아직 서버에 없는 항목이라 비어 있으면 숨긴다
+                if (uiState.writingPrompt.isNotBlank()) {
+                    StatusCard(stringResource(R.string.place_prompt_title), uiState.writingPrompt, Modifier.fillMaxWidth())
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(R.string.place_directions), style = MaterialTheme.typography.labelLarge)
                     Text(uiState.directions, style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
@@ -119,7 +123,7 @@ fun PlaceDetailScreen(
                     )
                 }
                 WattagamButton(
-                    stringResource(R.string.place_open_gallery, uiState.publicCount),
+                    uiState.publicCount?.let { stringResource(R.string.place_open_gallery, it) } ?: stringResource(R.string.place_open_gallery_plain),
                     onGalleryClick, Modifier.fillMaxWidth(), kind = ButtonKind.Secondary,
                 )
             }

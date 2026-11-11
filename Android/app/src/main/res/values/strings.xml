@@ -29,6 +29,8 @@
     <string name="location_denied">위치 권한이 필요해요</string>
     <string name="location_denied_body">설정에서 위치 권한을 허용해주세요.</string>
     <string name="location_unavailable">위치를 확인하지 못했어요</string>
+    <string name="location_failed">결과를 받지 못했어요</string>
+    <string name="location_failed_body">서버에 연결하지 못해 방문 확인을 못 했어요. 인터넷 연결을 확인하고 다시 시도해주세요.</string>
     <string name="location_unavailable_body">위치 서비스가 켜져 있는지 확인하고, 하늘이 보이는 곳에서 다시 시도해주세요.</string>
     <string name="empty_title">아직 남겨진 기록이 없어요</string>
     <string name="empty_body">이 장소의 첫 추억을 남겨보세요.</string>
@@ -168,6 +170,21 @@
     <string name="write_save_failed">꾸민 사진을 저장하지 못했어요. 다시 시도해주세요.</string>
     <string name="write_text_title">사진에 글자 넣기</string>
     <string name="write_text_label">글자 (최대 %1$d자, 비우면 지워져요)</string>
+    <string name="write_publish_failed_title">등록하지 못했어요</string>
     <string name="write_upload_pending_title">위치 확인 완료 · 업로드는 연결 전이에요</string>
     <string name="write_upload_pending_body">현재 위치가 범위 안인 것을 확인했어요. 공개 업로드는 서버 연결 전이라 아직 등록되지 않았고, 사진과 메시지는 이 기기에 초안으로 남아 있어요.</string>
+
+    <!-- 서버 연결 -->
+    <string name="campus_course">캠퍼스 산책</string>
+    <string name="loading">불러오는 중</string>
+    <string name="error_load_title">불러오지 못했어요</string>
+    <string name="error_network">서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해주세요.</string>
+    <string name="error_server">잠시 후 다시 시도해주세요.</string>
+    <string name="error_session_expired">로그인이 끝났어요. 다시 로그인해주세요.</string>
+    <string name="error_nickname_required">닉네임을 먼저 정해주세요.</string>
+    <string name="gallery_more_remote">기록 더 보기</string>
+    <string name="place_open_gallery_plain">장소 갤러리 열기</string>
+    <string name="guestbook_photo_only">사진만 남긴 기록</string>
+    <string name="mypage_withdraw_body_server">%1$s님의 모든 기록과 사진·그림이 함께 삭제돼요. 장소 갤러리에서도 사라지며 복구할 수 없어요.</string>
+    <string name="mypage_withdraw_failed">탈퇴하지 못했어요</string>
 </resources>

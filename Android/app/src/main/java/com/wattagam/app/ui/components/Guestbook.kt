@@ -18,12 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.wattagam.app.R
 import com.wattagam.app.ui.theme.WattagamColors
 import com.wattagam.app.ui.theme.WattagamShapes
@@ -36,12 +38,11 @@ data class GuestbookCardUiState(
     val title: String,
     /** '하늘 · 2026. 10. 27.' 처럼 작성자·작성일 */
     val meta: String,
+    /** 서버에 올라간 사진 주소. 샘플 기록은 null 이라 사진 자리만 보인다 */
+    val imageUrl: String? = null,
 )
 
-/**
- * 사진 자리. 이미지 로딩 라이브러리는 이미지 연결 단계에서 추가한다.
- * 그 전까지는 사진 영역만 표시한다.
- */
+/** 사진 자리 (사진이 없거나 불러오는 중일 때) */
 @Composable
 fun PhotoPlaceholder(modifier: Modifier = Modifier, height: Dp = 120.dp) {
     // 흰 화면과 연한 회색 화면 어디에서도 자리가 보이게 테두리 색을 옅게 깐다
@@ -49,6 +50,19 @@ fun PhotoPlaceholder(modifier: Modifier = Modifier, height: Dp = 120.dp) {
         Box(contentAlignment = Alignment.Center) {
             Icon(painterResource(R.drawable.bc_image), stringResource(R.string.photo_placeholder), Modifier.size(24.dp), tint = WattagamColors.Muted.copy(alpha = .6f))
         }
+    }
+}
+
+/** 방명록 사진. [url] 이 없거나 불러오지 못하면 사진 자리를 보여준다 */
+@Composable
+fun GuestbookPhoto(url: String?, contentDescription: String, modifier: Modifier = Modifier, height: Dp = 120.dp) {
+    if (url == null) {
+        PhotoPlaceholder(modifier, height)
+        return
+    }
+    Box(modifier.fillMaxWidth().height(height).clip(WattagamShapes.Card)) {
+        PhotoPlaceholder(height = height)
+        AsyncImage(url, contentDescription, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
     }
 }
 
@@ -71,7 +85,7 @@ fun GuestbookCard(item: GuestbookCardUiState, modifier: Modifier = Modifier, onC
         modifier.clip(WattagamShapes.Card).clickable(onClick = onClick).padding(bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small),
     ) {
-        PhotoPlaceholder()
+        GuestbookPhoto(item.imageUrl, item.title)
         Text(item.title, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(item.meta, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted, maxLines = 1)
     }

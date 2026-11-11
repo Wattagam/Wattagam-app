@@ -58,7 +58,8 @@ fun PlaceListItem(
         }
         Column(Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.labelLarge)
-            Text(hint, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
+            // 서버 장소 목록에는 확인 지점 이름이 없어 비어 있을 수 있다
+            if (hint.isNotBlank()) Text(hint, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
         }
         // 받은 도장은 작은 도장 자국으로, 색만으로 구분하지 않도록 글자도 함께
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
