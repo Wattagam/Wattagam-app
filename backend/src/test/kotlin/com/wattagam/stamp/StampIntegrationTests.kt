@@ -1,9 +1,12 @@
 package com.wattagam.stamp
 
 import com.wattagam.auth.JwtService
+import com.wattagam.guestbook.GuestbookEntry
+import com.wattagam.guestbook.GuestbookEntryRepository
 import com.wattagam.user.User
 import com.wattagam.user.UserRepository
 import java.time.Instant
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -53,6 +56,9 @@ class StampIntegrationTests {
     private lateinit var userRepository: UserRepository
 
     @Autowired
+    private lateinit var guestbookEntryRepository: GuestbookEntryRepository
+
+    @Autowired
     private lateinit var jwtService: JwtService
 
     @Autowired
@@ -89,8 +95,9 @@ class StampIntegrationTests {
     fun returnsOnlyTheCurrentUsersStampsOnBothViews() {
         val userId = createUser(101L)
         val otherUserId = createUser(102L)
-        grantStamp(userId, 2L, 201L)
-        grantStamp(otherUserId, 3L, 202L)
+        val entryId = createEntry(userId, 2L)
+        grantStamp(userId, 2L, entryId)
+        grantStamp(otherUserId, 3L, createEntry(otherUserId, 3L))
         val earnedStamp = stampRepository.findAllByUserId(userId).single()
 
         requestForUser("/api/me/stamps", userId)
@@ -100,7 +107,7 @@ class StampIntegrationTests {
             .andExpect(jsonPath("$.result.stamps[0].earned").value(false))
             .andExpect(jsonPath("$.result.stamps[1].earned").value(true))
             .andExpect(jsonPath("$.result.stamps[1].earnedAt").value(earnedStamp.earnedAt.toString()))
-            .andExpect(jsonPath("$.result.stamps[1].firstEntryId").value(201))
+            .andExpect(jsonPath("$.result.stamps[1].firstEntryId").value(entryId.toInt()))
             .andExpect(jsonPath("$.result.stamps[2].earned").value(false))
             .andExpect(jsonPath("$.result.stamps[2].firstEntryId").value(nullValue()))
 
@@ -125,27 +132,30 @@ class StampIntegrationTests {
     @Test
     fun keepsTheFirstStampAndCommitsLaterWorkAfterADuplicateGrant() {
         val userId = createUser(101L)
-        grantStamp(userId, 1L, 201L)
+        val firstEntryId = createEntry(userId, 1L)
+        grantStamp(userId, 1L, firstEntryId)
         val firstStamp = stampRepository.findAllByUserId(userId).single()
 
+        val duplicateEntryId = createEntry(userId, 1L)
+        val secondPlaceEntryId = createEntry(userId, 2L)
         TransactionTemplate(transactionManager).executeWithoutResult {
-            stampService.grantForPublishedEntry(userId, 1L, 202L)
-            stampService.grantForPublishedEntry(userId, 2L, 203L)
+            stampService.grantForPublishedEntry(userId, 1L, duplicateEntryId)
+            stampService.grantForPublishedEntry(userId, 2L, secondPlaceEntryId)
         }
 
         val stamps = stampRepository.findAllByUserId(userId).associateBy { it.placeId }
         val original = stamps.getValue(1L)
         assertEquals(setOf(1L, 2L), stamps.keys)
         assertEquals(firstStamp.id, original.id)
-        assertEquals(201L, original.firstEntryId)
+        assertEquals(firstEntryId, original.firstEntryId)
         assertEquals(firstStamp.earnedAt, original.earnedAt)
-        assertEquals(203L, stamps.getValue(2L).firstEntryId)
+        assertEquals(secondPlaceEntryId, stamps.getValue(2L).firstEntryId)
     }
 
     @Test
     fun commitsExactlyOneStampWhenPublicationsRaceForTheSamePlace() {
         val userId = createUser(101L)
-        val entryIds = listOf(201L, 202L)
+        val entryIds = listOf(createEntry(userId, 1L), createEntry(userId, 1L))
         val ready = CountDownLatch(entryIds.size)
         val start = CountDownLatch(1)
         val executor = Executors.newFixedThreadPool(entryIds.size)
@@ -173,9 +183,10 @@ class StampIntegrationTests {
     @Test
     fun rollsBackTheStampWhenPublicationRollsBack() {
         val userId = createUser(101L)
+        val entryId = createEntry(userId, 1L)
         TransactionTemplate(transactionManager).executeWithoutResult { transaction ->
-            stampService.grantForPublishedEntry(userId, 1L, 201L)
-            assertEquals(201L, stampRepository.findAllByUserId(userId).single().firstEntryId)
+            stampService.grantForPublishedEntry(userId, 1L, entryId)
+            assertEquals(entryId, stampRepository.findAllByUserId(userId).single().firstEntryId)
             transaction.setRollbackOnly()
         }
 
@@ -185,8 +196,9 @@ class StampIntegrationTests {
     @Test
     fun rejectsGrantsOutsideAPublicationTransaction() {
         val userId = createUser(101L)
+        val entryId = createEntry(userId, 1L)
         assertFailsWith<IllegalTransactionStateException> {
-            stampService.grantForPublishedEntry(userId, 1L, 201L)
+            stampService.grantForPublishedEntry(userId, 1L, entryId)
         }
         assertTrue(stampRepository.findAllByUserId(userId).isEmpty())
     }
@@ -195,18 +207,33 @@ class StampIntegrationTests {
     fun deletesOnlyTheRemovedUsersStamps() {
         val userId = createUser(101L)
         val otherUserId = createUser(102L)
-        grantStamp(userId, 1L, 201L)
-        grantStamp(otherUserId, 1L, 202L)
+        grantStamp(userId, 1L, createEntry(userId, 1L))
+        val otherEntryId = createEntry(otherUserId, 1L)
+        grantStamp(otherUserId, 1L, otherEntryId)
 
         userRepository.deleteById(userId)
 
         assertTrue(stampRepository.findAllByUserId(userId).isEmpty())
-        assertEquals(202L, stampRepository.findAllByUserId(otherUserId).single().firstEntryId)
+        assertEquals(otherEntryId, stampRepository.findAllByUserId(otherUserId).single().firstEntryId)
     }
 
     private fun createUser(kakaoUserId: Long, nickname: String? = "푸앙이"): Long {
         val user = userRepository.save(User(kakaoUserId = kakaoUserId, nickname = nickname, createdAt = Instant.now()))
         return requireNotNull(user.id)
+    }
+
+    private fun createEntry(userId: Long, placeId: Long): Long {
+        val now = Instant.now()
+        val entry = GuestbookEntry(
+            placeId = placeId,
+            userId = userId,
+            imageObjectKey = "guestbook/${UUID.randomUUID()}.jpg",
+            message = null,
+            clientRequestId = UUID.randomUUID().toString(),
+            createdAt = now,
+            updatedAt = now,
+        )
+        return requireNotNull(guestbookEntryRepository.save(entry).id)
     }
 
     private fun requestForUser(path: String, userId: Long): ResultActions = mockMvc.perform(
