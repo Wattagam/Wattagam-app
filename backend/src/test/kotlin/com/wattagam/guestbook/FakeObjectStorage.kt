@@ -18,7 +18,7 @@ import org.mockito.Mockito
  * 실제 [GuestbookImageStorage] 검증 로직을 그대로 쓰고 OCI 클라이언트만 대체한다.
  */
 class FakeObjectStorage {
-    val objects = ConcurrentHashMap<String, ByteArray>()
+    val objects: MutableMap<String, ByteArray> = ConcurrentHashMap()
     val deletedKeys = java.util.concurrent.CopyOnWriteArrayList<String>()
 
     @Volatile
