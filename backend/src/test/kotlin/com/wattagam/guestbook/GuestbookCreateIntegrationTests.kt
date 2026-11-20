@@ -207,6 +207,21 @@ class GuestbookCreateIntegrationTests : GuestbookIntegrationTestSupport() {
     }
 
     @Test
+    fun keepsTheKeyForALaterRetryWhenCleaningUpAfterAFailureAlsoFails() {
+        val userId = createUser(101L)
+        val stampTarget = AopTestUtils.getUltimateTargetObject<StampService>(spiedStampService)
+        Mockito.doThrow(IllegalStateException("도장 지급 실패")).`when`(stampTarget)
+            .grantForPublishedEntry(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong())
+        fakeStorage.failAllDeletes = true
+
+        postGuestbook(userId).andExpect(status().isInternalServerError)
+
+        val storedKey = fakeStorage.objects.keys.single()
+        assertEquals(listOf(storedKey), cleanupRepository.findAll().map { it.imageObjectKey })
+        assertTrue(guestbookEntryRepository.findAllByUserId(userId).isEmpty())
+    }
+
+    @Test
     fun savesOneEntryAndOneStampWhenTheSameRequestRacesItself() {
         val userId = createUser(101L)
         val requestId = UUID.randomUUID().toString()

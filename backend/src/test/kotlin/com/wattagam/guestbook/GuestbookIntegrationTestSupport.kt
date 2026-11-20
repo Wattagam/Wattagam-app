@@ -45,6 +45,9 @@ abstract class GuestbookIntegrationTestSupport {
     protected lateinit var guestbookEntryRepository: GuestbookEntryRepository
 
     @Autowired
+    protected lateinit var cleanupRepository: GuestbookImageCleanupRepository
+
+    @Autowired
     protected lateinit var stampRepository: StampRepository
 
     @Autowired
@@ -62,6 +65,7 @@ abstract class GuestbookIntegrationTestSupport {
     @BeforeEach
     fun clearTestData() {
         userRepository.deleteAll()
+        cleanupRepository.deleteAll()
         fakeStorage.reset()
     }
 
