@@ -3,9 +3,12 @@ package com.wattagam.user
 import com.wattagam.auth.JwtService
 import com.wattagam.auth.kakao.KakaoClient
 import com.wattagam.common.api.ApiException
+import com.wattagam.guestbook.GuestbookEntry
+import com.wattagam.guestbook.GuestbookEntryRepository
 import com.wattagam.stamp.StampRepository
 import com.wattagam.stamp.StampService
 import java.time.Instant
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -61,6 +64,9 @@ class UserWithdrawalIntegrationTests {
     private lateinit var stampRepository: StampRepository
 
     @Autowired
+    private lateinit var guestbookEntryRepository: GuestbookEntryRepository
+
+    @Autowired
     private lateinit var stampService: StampService
 
     @Autowired
@@ -87,8 +93,8 @@ class UserWithdrawalIntegrationTests {
     fun deletesTheAuthenticatedUserAndTheirStampsAndRejectsTheirOldToken() {
         val userId = createUser(101L)
         val otherUserId = createUser(102L)
-        grantStamp(userId, 201L)
-        grantStamp(otherUserId, 202L)
+        grantStamp(userId)
+        val otherEntryId = grantStamp(otherUserId)
         val token = jwtService.issueAccessToken(userId)
         Mockito.`when`(contentCleanup.deleteForUser(userId)).thenReturn(true)
 
@@ -97,7 +103,7 @@ class UserWithdrawalIntegrationTests {
         assertFalse(userRepository.existsById(userId))
         assertTrue(stampRepository.findAllByUserId(userId).isEmpty())
         assertTrue(userRepository.existsById(otherUserId))
-        assertEquals(202L, stampRepository.findAllByUserId(otherUserId).single().firstEntryId)
+        assertEquals(otherEntryId, stampRepository.findAllByUserId(otherUserId).single().firstEntryId)
         requestStampBoard(token)
             .andExpect(status().isUnauthorized)
             .andExpect(jsonPath("$.code").value("COMMON_401_1"))
@@ -132,7 +138,7 @@ class UserWithdrawalIntegrationTests {
     @Test
     fun preservesTheAccountAndStampsWhenContentCleanupNeedsARetry() {
         val userId = createUser(101L)
-        grantStamp(userId, 201L)
+        grantStamp(userId)
         val token = jwtService.issueAccessToken(userId)
         Mockito.doAnswer {
             // 정리 단계의 DB 삭제도 실패 응답과 함께 롤백되는지 확인한다.
@@ -206,10 +212,22 @@ class UserWithdrawalIntegrationTests {
         return requireNotNull(user.id)
     }
 
-    private fun grantStamp(userId: Long, entryId: Long) {
+    private fun grantStamp(userId: Long): Long {
+        val now = Instant.now()
+        val entry = GuestbookEntry(
+            placeId = 1L,
+            userId = userId,
+            imageObjectKey = "guestbook/${UUID.randomUUID()}.jpg",
+            message = null,
+            clientRequestId = UUID.randomUUID().toString(),
+            createdAt = now,
+            updatedAt = now,
+        )
+        val entryId = requireNotNull(guestbookEntryRepository.save(entry).id)
         TransactionTemplate(transactionManager).executeWithoutResult {
             stampService.grantForPublishedEntry(userId, 1L, entryId)
         }
+        return entryId
     }
 
     private fun requestWithdrawal(token: String): ResultActions =
