@@ -26,6 +26,7 @@ class GuestbookService(
     private val locationValidationService: LocationValidationService,
     private val stampService: StampService,
     private val imageStorage: ObjectProvider<GuestbookImageStorage>,
+    private val cleanupService: GuestbookImageCleanupService,
     private val clock: Clock,
     transactionManager: PlatformTransactionManager,
 ) {
@@ -155,11 +156,21 @@ class GuestbookService(
         keys.forEach { key ->
             try {
                 if (!guestbookEntryRepository.existsByImageObjectKey(key)) {
-                    storage.delete(key)
+                    deleteOrReserve(storage, key)
                 }
             } catch (exception: RuntimeException) {
                 logger.warn("저장한 방명록 이미지를 정리하지 못했습니다. 오류 유형: {}", exception.javaClass.simpleName)
             }
+        }
+    }
+
+    // 삭제에 실패한 객체는 키를 DB에 보존해 주기 작업이 다시 정리하게 한다.
+    private fun deleteOrReserve(storage: GuestbookImageStorage, key: String) {
+        try {
+            storage.delete(key)
+        } catch (exception: ImageStorageException) {
+            logger.warn("저장한 방명록 이미지를 바로 정리하지 못했습니다. 오류 유형: {}", exception.javaClass.simpleName)
+            cleanupService.record(key)
         }
     }
 
