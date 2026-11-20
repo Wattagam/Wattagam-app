@@ -5,13 +5,17 @@ import com.wattagam.stamp.StampRepository
 import com.wattagam.stamp.StampService
 import com.wattagam.user.User
 import com.wattagam.user.UserRepository
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
+import javax.imageio.ImageIO
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.transaction.PlatformTransactionManager
@@ -27,6 +31,7 @@ import org.testcontainers.mysql.MySQLContainer
     ],
 )
 @AutoConfigureMockMvc
+@Import(FakeImageStorageConfiguration::class)
 @Testcontainers
 abstract class GuestbookIntegrationTestSupport {
 
@@ -51,9 +56,13 @@ abstract class GuestbookIntegrationTestSupport {
     @Autowired
     protected lateinit var transactionManager: PlatformTransactionManager
 
+    @Autowired
+    protected lateinit var fakeStorage: FakeObjectStorage
+
     @BeforeEach
-    fun clearTestUsers() {
+    fun clearTestData() {
         userRepository.deleteAll()
+        fakeStorage.reset()
     }
 
     protected fun createUser(kakaoUserId: Long, nickname: String? = "푸앙이"): Long {
@@ -78,6 +87,12 @@ abstract class GuestbookIntegrationTestSupport {
             updatedAt = createdAt,
         ),
     )
+
+    protected fun jpegBytes(width: Int = 64, height: Int = 64): ByteArray {
+        val output = ByteArrayOutputStream()
+        ImageIO.write(BufferedImage(width, height, BufferedImage.TYPE_INT_RGB), "jpg", output)
+        return output.toByteArray()
+    }
 
     protected fun bearer(userId: Long): String = "Bearer ${jwtService.issueAccessToken(userId)}"
 
