@@ -92,9 +92,9 @@ DB 포트·이름을 바꿨다면 JDBC URL도 맞춥니다. Docker 백엔드와 
 
 ## 회원 탈퇴
 
-`DELETE /api/me`는 JWT로 확인한 본인만 요청할 수 있으며 닉네임 설정 전에도 허용합니다. 탈퇴 정책은 계정·방명록·OCI 이미지·도장의 즉시 영구 삭제입니다. 현재 브랜치는 실제 방명록·OCI 정리 기능이 연결되기 전까지 `503 USER_503_1`을 반환합니다. 연결 후에는 필수 정리와 DB 커밋이 끝나야 `200 USER_200_2`를 반환합니다. 탈퇴 완료 후 기존 JWT는 보호 API에서 `401`로 거절되며, 같은 카카오 계정으로 다시 가입하면 새 계정을 만듭니다.
+`DELETE /api/me`는 JWT로 확인한 본인만 요청할 수 있으며 닉네임 설정 전에도 허용합니다. 탈퇴 정책은 계정·방명록·OCI 이미지·도장의 즉시 영구 삭제입니다. 방명록·OCI 이미지 정리(`GuestbookWithdrawalContentCleanup`)가 연결돼 있어, 필수 정리와 DB 커밋이 끝나야 `200 USER_200_2`를 반환하고 정리에 실패하면 `503 USER_503_1`입니다. OCI 저장소가 꺼진 환경에서는 방명록이 있는 사용자의 탈퇴가 `503`입니다(방명록이 없으면 탈퇴 가능). 탈퇴 완료 후 기존 JWT는 보호 API에서 `401`로 거절되며, 같은 카카오 계정으로 다시 가입하면 새 계정을 만듭니다.
 
-방명록·OCI 구현은 `com.wattagam.user.WithdrawalContentCleanup.deleteForUser(userId: Long): Boolean`을 제공해야 합니다. 탈퇴와 같은 DB 트랜잭션에서 호출하며, `true`는 방명록·이미지 정리 완료이고 `false`는 재시도 가능한 실패입니다. 모든 OCI 삭제가 성공할 때까지 키 조회에 필요한 DB 레코드를 유지합니다. 일부 이미지가 먼저 삭제되면 재시도에서 이미 없는 키를 정리 완료로 처리합니다. 도장은 사용자 외래 키의 `ON DELETE CASCADE`로 정리합니다.
+방명록·OCI 구현(`com.wattagam.guestbook.GuestbookWithdrawalContentCleanup`)은 `com.wattagam.user.WithdrawalContentCleanup.deleteForUser(userId: Long): Boolean`을 제공합니다. 탈퇴와 같은 DB 트랜잭션에서 호출하며, `true`는 방명록·이미지 정리 완료이고 `false`는 재시도 가능한 실패입니다. 모든 OCI 삭제가 성공할 때까지 키 조회에 필요한 DB 레코드를 유지합니다. 일부 이미지가 먼저 삭제되면 재시도에서 이미 없는 키를 정리 완료로 처리합니다. 도장은 사용자 외래 키의 `ON DELETE CASCADE`로 정리합니다.
 
 방명록 등록·이미지 쓰기는 첫 OCI 또는 방명록 쓰기 전에 `UserRepository.findByIdForUpdate(userId)`로 회원 탈퇴와 같은 사용자 행 락을 얻어 DB 트랜잭션이 종료될 때까지 유지합니다. 사용자 조회 결과가 없으면 작업을 중단합니다. OCI 통신에는 연결·응답 시간 제한을 설정합니다.
 
@@ -134,7 +134,7 @@ GPS 정보는 예상 위치 오차 20m 이하, 측정 후 60초 이내일 때 �
 
 중복 발급 요청은 정상 처리하며 최초 `earnedAt`과 `firstEntryId`를 보존합니다. DB의 `(user_id, place_id)` 고유 제약은 동시 요청에서도 사용자별·장소별 발급을 한 건으로 제한합니다.
 
-사용자 삭제 시 `users` 외래 키의 `ON DELETE CASCADE`로 스탬프를 정리합니다. 방명록 구현 후 별도 마이그레이션에서 `first_entry_id` 외래 키에 `ON DELETE SET NULL`을 적용해, 첫 방명록이 삭제돼도 스탬프를 보존합니다.
+사용자 삭제 시 `users` 외래 키의 `ON DELETE CASCADE`로 스탬프를 정리합니다. `V5` 마이그레이션이 `first_entry_id` 외래 키에 `ON DELETE SET NULL`을 적용하므로, 첫 방명록이 삭제돼도 스탬프는 유지되고 `firstEntryId`만 `null`이 됩니다.
 
 ## 방명록 이미지 저장소
 
@@ -146,7 +146,25 @@ GPS 정보는 예상 위치 오차 20m 이하, 측정 후 60초 이내일 때 �
 - `put(key, jpeg)`는 기존 객체를 덮어쓰지 않습니다. OCI가 조건 불일치(412)를 반환해 `false`가 되면 기존 객체를 보존하고 새 키를 사용합니다. `read(key)`는 객체가 없을 때 `null`을 반환합니다. `delete(key)`는 객체가 이미 없는 경우에도 완료로 처리합니다. 권한·버킷·통신 오류는 정리 성공으로 처리하지 않습니다.
 - 방명록 등록은 먼저 사용자 잠금·작성 권한·GPS·중복 게시 키를 확인합니다. 업로드 응답을 받지 못해도 객체가 저장됐을 수 있으므로, 시도한 키를 정리 재시도에 사용할 수 있게 보존합니다. 이미지 저장 후 방명록과 도장 저장이 실패하면 이번 요청에서 만든 이미지를 정리합니다. 수정은 새 키로 저장하고 DB 커밋 후 이전 객체를 정리합니다. 탈퇴도 모든 대상 이미지 삭제를 확인할 때까지 DB에 키를 보존합니다.
 
-이 모듈은 서버 내부 저장소만 제공합니다. 방명록 API의 요청·응답, DB 컬럼과 탈퇴 정리 연결은 방명록 구현에서 적용합니다.
+이 모듈은 서버 내부 저장소만 제공하며, 방명록 API가 이를 사용합니다.
+
+### 방명록 API
+
+명세는 [`docs/api/guestbook/`](../docs/api/guestbook)이 기준입니다. 모든 API는 서비스 Bearer JWT와 닉네임 설정 완료가 필요합니다.
+
+| 메서드 | 경로 | 동작 |
+|---|---|---|
+| POST | `/api/places/{id}/guestbook` | 사진·메시지·현재 GPS로 방명록 작성(multipart). 최초 장소는 도장 지급 |
+| GET | `/api/places/{id}/guestbook` | 장소별 갤러리(`page`, `size`) |
+| GET | `/api/guestbook/{id}` | 방명록 상세 |
+| PATCH | `/api/guestbook/{id}` | 본인 방명록의 메시지 수정(이미지 교체 제외) |
+| DELETE | `/api/guestbook/{id}` | 본인 방명록 삭제(도장 유지) |
+| GET | `/api/me/guestbook` | 내 방명록 목록 |
+| GET | `/api/guestbook/{id}/image` | 이미지 JPEG 바이트 |
+
+- 작성 요청은 사용자 행 락 → `clientRequestId` 중복 확인 → GPS 재검증 → 이미지 저장 → 방명록·도장 저장 순으로 한 DB 트랜잭션에서 처리합니다. 같은 `clientRequestId` 재요청은 200으로 기존 결과를 반환합니다. 업로드 한도는 `spring.servlet.multipart.*`(이미지 5MB, 요청 6MB)입니다.
+- 삭제는 방명록 행과 정리 대상 이미지 키(`guestbook_image_cleanups`)를 한 트랜잭션에서 처리한 뒤 OCI 이미지를 지웁니다. 삭제가 실패해도 응답은 200이며, `app.guestbook.cleanup.retry-interval`(기본 `PT5M`)마다 성공할 때까지 재시도합니다.
+- OCI 저장소가 꺼진 환경(로컬 기본값)에서는 작성·이미지 조회가 `503 GUESTBOOK_503_1`입니다. 통합 테스트는 메모리 대체 저장소를 사용하므로 실제 OCI 검증은 위 스모크 테스트로 따로 확인합니다.
 
 ### 개발용 OCI 준비와 실제 저장 검증
 

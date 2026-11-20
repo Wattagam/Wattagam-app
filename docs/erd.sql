@@ -53,3 +53,11 @@ CREATE TABLE stamps (
   CONSTRAINT fk_stamp_place FOREIGN KEY (place_id) REFERENCES places (id),
   CONSTRAINT fk_stamp_entry FOREIGN KEY (first_entry_id) REFERENCES guestbook_entries (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='장소별 도장(장소당 1개)';
+
+CREATE TABLE guestbook_image_cleanups (
+  id               BIGINT       NOT NULL AUTO_INCREMENT COMMENT '정리 대상 ID',
+  image_object_key VARCHAR(255) NOT NULL COMMENT '삭제를 재시도할 OCI 객체 키',
+  created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '보존 일시(UTC)',
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_cleanup_key (image_object_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='방명록 삭제 후 이미지 정리 대기';
