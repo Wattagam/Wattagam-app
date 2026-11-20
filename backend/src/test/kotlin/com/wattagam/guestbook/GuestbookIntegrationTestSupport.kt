@@ -19,11 +19,12 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.transaction.PlatformTransactionManager
-import org.testcontainers.junit.jupiter.Container
-import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.mysql.MySQLContainer
 
-/** 방명록 통합 테스트가 공유하는 MySQL 컨테이너와 데이터 준비 도구. */
+/**
+ * 방명록 통합 테스트가 공유하는 MySQL 컨테이너와 데이터 준비 도구.
+ * 스프링 컨텍스트가 클래스 사이에 재사용되므로 컨테이너도 JVM 전체에서 하나만 띄운다.
+ */
 @SpringBootTest(
     properties = [
         "app.auth.jwt.secret=MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=",
@@ -32,7 +33,6 @@ import org.testcontainers.mysql.MySQLContainer
 )
 @AutoConfigureMockMvc
 @Import(FakeImageStorageConfiguration::class)
-@Testcontainers
 abstract class GuestbookIntegrationTestSupport {
 
     @Autowired
@@ -99,14 +99,14 @@ abstract class GuestbookIntegrationTestSupport {
     protected fun authorization(userId: Long): Pair<String, String> = HttpHeaders.AUTHORIZATION to bearer(userId)
 
     companion object {
-        @Container
         @ServiceConnection
         @JvmStatic
-        val mysql = MySQLContainer("mysql:8.4.13")
+        val mysql: MySQLContainer = MySQLContainer("mysql:8.4.13")
             .withCommand(
                 "--character-set-server=utf8mb4",
                 "--collation-server=utf8mb4_0900_ai_ci",
                 "--default-time-zone=+00:00",
             )
+            .also { it.start() }
     }
 }
