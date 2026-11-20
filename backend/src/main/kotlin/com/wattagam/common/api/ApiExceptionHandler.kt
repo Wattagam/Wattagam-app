@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.multipart.MaxUploadSizeExceededException
 
 @RestControllerAdvice
 class ApiExceptionHandler {
@@ -32,6 +33,10 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleInvalidParameter(): ResponseEntity<ApiResponse<Nothing>> = failure(ErrorCode.INVALID_REQUEST)
+
+    // 업로드 크기 제한 초과도 이미지 용량 오류와 같은 400으로 응답한다.
+    @ExceptionHandler(MaxUploadSizeExceededException::class)
+    fun handleUploadTooLarge(): ResponseEntity<ApiResponse<Nothing>> = failure(ErrorCode.INVALID_REQUEST)
 
     @ExceptionHandler(Exception::class)
     fun handleUnexpectedException(exception: Exception): ResponseEntity<ApiResponse<Nothing>> {

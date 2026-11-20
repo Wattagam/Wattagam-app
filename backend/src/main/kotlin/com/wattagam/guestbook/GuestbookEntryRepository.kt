@@ -7,4 +7,6 @@ interface GuestbookEntryRepository : JpaRepository<GuestbookEntry, Long> {
     fun findByUserIdAndClientRequestId(userId: Long, clientRequestId: String): GuestbookEntry?
 
     fun findAllByUserId(userId: Long): List<GuestbookEntry>
+
+    fun existsByImageObjectKey(imageObjectKey: String): Boolean
 }
