@@ -27,7 +27,7 @@ data class VisitCheckUiState(
     val placeOrder: Int = 1,
     val placeStamped: Boolean = false,
     /** 등록된 장소 수 (서버 기준) */
-    val stampTotal: Int = 4,
+    val stampTotal: Int = 3,
 )
 
 @Composable

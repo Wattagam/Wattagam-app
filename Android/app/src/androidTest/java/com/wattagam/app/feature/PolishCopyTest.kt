@@ -20,23 +20,23 @@ class PolishCopyTest {
         compose.setContent {
             WattagamTheme {
                 VisitCheckScreen(
-                    VisitCheckUiState("정문", "하늘", 2, VisitCheckStatus.Available, placeOrder = 1, placeStamped = true),
+                    VisitCheckUiState("310관", "하늘", 2, VisitCheckStatus.Available, placeOrder = 1, placeStamped = true),
                     {}, {}, {}, {}, mapContent = {},
                 )
             }
         }
         compose.onNodeWithText("캠퍼스 산책 · 1번째 장소").assertIsDisplayed()
-        compose.onNodeWithText("내 도장 2/4 · 정문 도장 보유").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("내 도장 2/3 · 310관 도장 보유").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("아직 도장은 찍히지 않았어요").assertDoesNotExist()
     }
 
     @Test fun arBadgeSaysPlacedOnlyAfterPlacing() {
         compose.setContent {
             WattagamTheme {
-                ArCaptureScreen("정문", {}, {}, {}, {}, placed = false, background = {}, arContent = {})
+                ArCaptureScreen("310관", {}, {}, {}, {}, placed = false, background = {}, arContent = {})
             }
         }
-        compose.onNodeWithText("푸앙이 배치 전 · 정문").assertIsDisplayed()
-        compose.onNodeWithText("푸앙이 배치 완료 · 정문").assertDoesNotExist()
+        compose.onNodeWithText("푸앙이 배치 전 · 310관").assertIsDisplayed()
+        compose.onNodeWithText("푸앙이 배치 완료 · 310관").assertDoesNotExist()
     }
 }

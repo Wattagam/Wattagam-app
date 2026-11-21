@@ -65,7 +65,7 @@ class SampleRepository(private val profile: LocalProfile) : WattagamRepository {
 
     override suspend fun checkVisit(placeId: String, fix: LocationFix.Found): VisitEligibility {
         val place = SampleData.place(placeId) ?: throw ApiException(404, "PLACE_404_1", null)
-        return VisitRule.evaluate(fix, place.latitude, place.longitude)
+        return VisitRule.evaluate(fix, place.latitude, place.longitude, place.radiusMeters.toDouble())
     }
 
     override suspend fun gallery(placeId: String, page: Int): GuestbookPage =

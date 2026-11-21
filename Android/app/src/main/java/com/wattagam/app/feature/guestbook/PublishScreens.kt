@@ -27,7 +27,7 @@ data class PublishUiState(
     val message: String,
     val stampCount: Int,
     val status: PublishStatus = PublishStatus.Ready,
-    val stampTotal: Int = 4,
+    val stampTotal: Int = 3,
     val location: PublishLocation = PublishLocation.Verified,
     val messageLimit: Int = 80,
 )
@@ -73,7 +73,7 @@ data class PublishSuccessUiState(
     val message: String,
     val stampCount: Int,
     val newlyEarnedStamp: Boolean,
-    val stampTotal: Int = 4,
+    val stampTotal: Int = 3,
 )
 
 @Composable

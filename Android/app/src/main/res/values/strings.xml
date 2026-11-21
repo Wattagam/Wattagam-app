@@ -40,11 +40,10 @@
     <string name="stamp_count">내 도장 %1$d / %2$d</string>
     <string name="earned">획득</string>
     <string name="unearned">미수집</string>
-    <string name="gate">정문</string>
     <string name="library">도서관</string>
     <string name="pond">청룡탕</string>
     <string name="building">310관</string>
-    <string name="stamp_sample">샘플: 정문·도서관 도장을 획득한 상태입니다.</string>
+    <string name="stamp_sample">샘플: 310관·도서관 도장을 획득한 상태입니다.</string>
     <string name="stamp_earned_description">%1$s 도장 받음</string>
     <string name="stamp_empty_description">%1$s 도장 아직 없음</string>
     <string name="place_stamp_caption_earned">이 장소의 도장을 받았어요</string>
@@ -58,7 +57,7 @@
     <string name="photo_placeholder">사진</string>
     <string name="showcase_start_flow">앱 화면 흐름 보기 (샘플 데이터)</string>
     <string name="showcase_capture_test_title">촬영 테스트 (개발용)</string>
-    <string name="showcase_capture_test_body">위치 확인 없이 정문 촬영 화면으로 바로 들어가요. 테스트 빌드에만 보이고, 등록 단계에서는 위치를 다시 확인해요.</string>
+    <string name="showcase_capture_test_body">위치 확인 없이 첫 장소(310관) 촬영 화면으로 바로 들어가요. 테스트 빌드에만 보이고, 등록 단계에서는 위치를 다시 확인해요.</string>
     <string name="showcase_capture_test_ar">AR 촬영 테스트</string>
     <string name="showcase_capture_test_photo">일반 촬영 테스트</string>
     <string name="debug_crash_title">직전 앱 종료 기록 (개발용)</string>
@@ -66,8 +65,8 @@
     <string name="debug_crash_close">닫기</string>
 
     <!-- auth: 01 로그인 · 01-A 닉네임 · 01-B 위치 허용 -->
-    <string name="auth_login_title">캠퍼스 네 곳을 걷고\n도장을 모아요</string>
-    <string name="auth_login_body">정문, 도서관, 청룡탕, 310관에서 사진과 글을 남기면 장소마다 도장을 하나씩 받아요.</string>
+    <string name="auth_login_title">캠퍼스 세 곳을 걷고\n도장을 모아요</string>
+    <string name="auth_login_body">310관, 도서관, 청룡탕에서 사진과 글을 남기면 장소마다 도장을 하나씩 받아요.</string>
     <string name="auth_login_photo">중앙도서관 앞 풍경</string>
     <string name="auth_login_kakao">카카오로 시작하기</string>
     <string name="auth_login_failed">카카오 로그인에 실패했어요</string>

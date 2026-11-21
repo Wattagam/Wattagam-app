@@ -243,13 +243,24 @@ class ServerRepositoryTest {
         assertEquals("DELETE", requests.last().method)
         assertEquals("/api/guestbook/101", requests.last().url.encodedPath)
 
-        respond = { error(403, "GUESTBOOK_403_4", "본인이 작성한 방명록만 수정하거나 삭제할 수 있습니다.") }
+        respond = { error(403, "COMMON_403_1", "해당 요청을 처리할 권한이 없습니다.") }
         try {
             repository.deleteGuestbook("100")
             fail()
         } catch (e: ApiException) {
-            assertEquals("본인이 작성한 방명록만 수정하거나 삭제할 수 있습니다.", e.message)
+            assertEquals("해당 요청을 처리할 권한이 없습니다.", e.message)
         }
+    }
+
+    @Test fun serverImagePathBecomesFullAddress() = runBlocking {
+        loggedIn()
+        respond = {
+            ok(
+                """{"entryId":101,"placeId":1,"placeName":"310관","nickname":"하늘","imageUrl":"/api/guestbook/101/image",""" +
+                    """"message":null,"createdAt":"2026-11-06T08:00:00Z","updatedAt":"2026-11-06T08:00:00Z","edited":false,"mine":true}""",
+            )
+        }
+        assertEquals("http://test.local/api/guestbook/101/image", repository.guestbook("101").imageUrl)
     }
 
     @Test fun badIdIsNotFoundWithoutRequest() = runBlocking {

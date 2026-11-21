@@ -75,14 +75,14 @@ fun PlaceStamp(name: String, earned: Boolean, modifier: Modifier = Modifier, siz
 
 data class StampUiState(val placeId: String, val name: String, val earned: Boolean)
 
-/** 도장판 · StampBoard — 네 장소의 도장을 한 줄로 */
+/** 도장판 · StampBoard — 모든 장소의 도장을 한 줄로 */
 @Composable
 fun StampBoard(stamps: List<StampUiState>, modifier: Modifier = Modifier) {
     Surface(modifier, color = WattagamColors.Surface, shape = WattagamShapes.Card) {
         Column(Modifier.padding(WattagamSpacing.Content), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium)) {
             Text(stringResource(R.string.stamp_count, stamps.count { it.earned }, stamps.size), style = MaterialTheme.typography.labelMedium)
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                // 좁은 화면에서도 네 개가 한 줄에 들어가게
+                // 좁은 화면에서도 모든 도장이 한 줄에 들어가게
                 val stampSize = (maxWidth / stamps.size.coerceAtLeast(1) - 8.dp).coerceIn(40.dp, 64.dp)
                 Row(Modifier.fillMaxWidth()) {
                     stamps.forEach {
@@ -101,8 +101,8 @@ private fun StampBoardPreview() {
     WattagamTheme {
         StampBoard(
             listOf(
-                StampUiState("gate", "정문", true), StampUiState("library", "도서관", true),
-                StampUiState("pond", "청룡탕", false), StampUiState("310", "310관", false),
+                StampUiState("310", "310관", true), StampUiState("library", "도서관", true),
+                StampUiState("pond", "청룡탕", false),
             ),
             Modifier.padding(16.dp),
         )

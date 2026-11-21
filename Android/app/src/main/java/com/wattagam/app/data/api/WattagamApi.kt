@@ -31,6 +31,9 @@ class ApiException(val status: Int, val code: String?, override val message: Str
 class WattagamApi(baseUrl: String, private val client: OkHttpClient, private val accessToken: () -> String?) {
     private val base: HttpUrl = baseUrl.toHttpUrl()
 
+    /** 서버가 준 사진 경로(예: /api/guestbook/1/image)를 서버 주소가 붙은 전체 주소로. 이미 전체 주소면 그대로 */
+    fun absoluteUrl(url: String): String = base.resolve(url)?.toString() ?: url
+
     suspend fun loginWithKakao(kakaoAccessToken: String): LoginDto =
         call(post("api/auth/kakao", KakaoLoginBody(kakaoAccessToken), KakaoLoginBody.serializer(), authorized = false), LoginDto.serializer())
 

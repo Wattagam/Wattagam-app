@@ -109,10 +109,9 @@ private fun StateSamples() {
 @Composable
 private fun StampSamples() {
     val stamps = listOf(
-        StampUiState("gate", stringResource(R.string.gate), true),
+        StampUiState("310", stringResource(R.string.building), true),
         StampUiState("library", stringResource(R.string.library), true),
         StampUiState("pond", stringResource(R.string.pond), false),
-        StampUiState("310", stringResource(R.string.building), false),
     )
     StampBoard(stamps, Modifier.fillMaxWidth())
     Text(stringResource(R.string.stamp_sample), style = MaterialTheme.typography.bodyMedium)

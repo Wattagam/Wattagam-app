@@ -37,14 +37,14 @@ import com.kakao.vectormap.label.LabelStyles
 import com.wattagam.app.R
 import com.wattagam.app.ui.theme.WattagamColors
 
-/** 서울캠퍼스 네 장소가 한 화면에 들어오는 중심과 확대 수준 */
-private val CampusCenter = LatLng.from(37.50540, 126.95730)
+/** 서울캠퍼스 세 장소(310관·도서관·청룡탕)가 한 화면에 들어오는 중심과 확대 수준 */
+private val CampusCenter = LatLng.from(37.50463, 126.95700)
 private const val CAMPUS_ZOOM = 16
 private const val MY_LOCATION_LAYER = "my_location"
 private const val MY_LOCATION_LABEL = "me"
 
 /**
- * 02 · 카카오맵으로 그리는 캠퍼스 지도. 네 장소에 번호·이름 라벨을 달고, 라벨을 누르면 장소 설명을 연다.
+ * 02 · 카카오맵으로 그리는 캠퍼스 지도. 장소마다 번호·이름 라벨을 달고, 라벨을 누르면 장소 설명을 연다.
  * 지도 오류(인증 실패 등)가 나면 [onError] 로 알려 안내 지도 그림으로 바꾸게 한다.
  */
 @Composable

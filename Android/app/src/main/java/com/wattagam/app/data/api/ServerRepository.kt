@@ -177,7 +177,7 @@ class ServerRepository(
             StampBoardData(dto.earnedCount, dto.totalCount, board.slots.map { if (it.placeId == placeId) it.copy(earned = true) else it })
         }
         return PublishOutcome.Published(
-            dto.entryId.toString(), dto.imageUrl, dto.message.orEmpty(), displayTime(dto.createdAt),
+            dto.entryId.toString(), api.absoluteUrl(dto.imageUrl), dto.message.orEmpty(), displayTime(dto.createdAt),
             dto.stampAwarded, dto.earnedCount, dto.totalCount,
         )
     }
@@ -235,12 +235,12 @@ class ServerRepository(
     }
 
     private fun GuestbookItemDto.toEntry(placeId: String, placeName: String, author: String, mine: Boolean) = GuestbookEntry(
-        entryId.toString(), placeId, placeName, author, title = null, message.orEmpty(), imageUrl, displayTime(createdAt), mine, edited,
+        entryId.toString(), placeId, placeName, author, title = null, message.orEmpty(), api.absoluteUrl(imageUrl), displayTime(createdAt), mine, edited,
     )
 
     private fun GuestbookDetailDto.toEntry() = GuestbookEntry(
         entryId.toString(), placeId.toString(), placeName, nickname, title = null,
-        message.orEmpty(), imageUrl, displayTime(createdAt), mine, edited,
+        message.orEmpty(), api.absoluteUrl(imageUrl), displayTime(createdAt), mine, edited,
     )
 
     private companion object {

@@ -4,6 +4,7 @@ import android.content.Context
 import com.wattagam.app.BuildConfig
 import com.wattagam.app.R
 import com.wattagam.app.data.api.ServerRepository
+import com.wattagam.app.data.api.authorizedImageClient
 import com.wattagam.app.data.auth.KakaoLogin
 import com.wattagam.app.data.auth.LocalProfile
 import com.wattagam.app.data.auth.PrefsSessionStorage
@@ -17,11 +18,17 @@ import java.util.concurrent.TimeUnit
  */
 object AppRepository {
     @Volatile private var instance: WattagamRepository? = null
+    @Volatile private var images: OkHttpClient? = null
 
     val serverConfigured: Boolean get() = BuildConfig.WATTAGAM_API_URL.isNotBlank() && KakaoLogin.isConfigured
 
     fun get(context: Context): WattagamRepository = instance ?: synchronized(this) {
         instance ?: create(context.applicationContext).also { instance = it }
+    }
+
+    /** 사진 로더(Coil)가 쓰는 연결. 서버 사진 요청에 저장된 로그인 토큰을 붙인다 */
+    fun imageClient(context: Context): OkHttpClient = images ?: synchronized(this) {
+        images ?: authorizedImageClient(BuildConfig.WATTAGAM_API_URL, PrefsSessionStorage(context.applicationContext)).also { images = it }
     }
 
     private fun create(context: Context): WattagamRepository =

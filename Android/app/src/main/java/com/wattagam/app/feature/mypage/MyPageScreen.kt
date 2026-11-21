@@ -131,12 +131,12 @@ private fun MyPagePreview() {
             MyPageUiState(
                 "하늘",
                 listOf(
-                    StampUiState("gate", "정문", true), StampUiState("library", "도서관", true),
-                    StampUiState("pond", "청룡탕", false), StampUiState("310", "310관", false),
+                    StampUiState("310", "310관", true), StampUiState("library", "도서관", true),
+                    StampUiState("pond", "청룡탕", false),
                 ),
                 listOf(
                     MyGuestbookUiState("library", GuestbookCardUiState("g1", "햇살까지 기억할 오후", "도서관 · 2026. 10. 27.")),
-                    MyGuestbookUiState("gate", GuestbookCardUiState("g7", "산책의 시작은 가볍게", "정문 · 2026. 10. 27.")),
+                    MyGuestbookUiState("310", GuestbookCardUiState("g7", "산책의 시작은 가볍게", "310관 · 2026. 10. 27.")),
                 ),
             ),
             onSettingsClick = {}, onGuestbookClick = {}, onTabSelect = {},
