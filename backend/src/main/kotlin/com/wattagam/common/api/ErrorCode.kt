@@ -1,0 +1,38 @@
+package com.wattagam.common.api
+
+import org.springframework.http.HttpStatus
+
+enum class ErrorCode(val status: HttpStatus, val code: String, val message: String) {
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "COMMON_400_2", "요청 형식 또는 필드 값이 올바르지 않습니다."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON_401_1", "인증 정보가 없거나 유효하지 않습니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON_403_1", "해당 요청을 처리할 권한이 없습니다."),
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_500_1", "서버 오류가 발생했습니다."),
+    KAKAO_UNAUTHORIZED(
+        HttpStatus.UNAUTHORIZED,
+        "AUTH_401_1",
+        "카카오 인증 정보가 유효하지 않거나 해당 앱에서 발급된 토큰이 아닙니다.",
+    ),
+    KAKAO_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AUTH_503_1", "카카오 인증을 일시적으로 처리할 수 없습니다."),
+    INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "USER_400_1", "닉네임은 한글, 영문, 숫자로 2자 이상 10자 이하로 입력해 주세요."),
+    NICKNAME_REQUIRED(HttpStatus.FORBIDDEN, "USER_403_1", "닉네임 설정이 필요합니다."),
+    WITHDRAWAL_UNAVAILABLE(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "USER_503_1",
+        "계정 삭제를 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    ),
+    PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, "PLACE_404_1", "존재하지 않는 장소입니다."),
+    GUESTBOOK_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "GUESTBOOK_400_1", "메시지는 80자 이하로 입력해 주세요."),
+    GUESTBOOK_OUTSIDE_RADIUS(HttpStatus.FORBIDDEN, "GUESTBOOK_403_1", "방문 반경 밖에서는 방명록을 작성할 수 없습니다."),
+    GUESTBOOK_LOW_ACCURACY(HttpStatus.FORBIDDEN, "GUESTBOOK_403_2", "위치 정확도가 낮아 방명록을 작성할 수 없습니다."),
+    GUESTBOOK_STALE_LOCATION(
+        HttpStatus.FORBIDDEN,
+        "GUESTBOOK_403_3",
+        "위치 측정 후 시간이 지나 방명록을 작성할 수 없습니다.",
+    ),
+    GUESTBOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "GUESTBOOK_404_1", "존재하지 않는 방명록입니다."),
+    GUESTBOOK_IMAGE_UNAVAILABLE(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "GUESTBOOK_503_1",
+        "이미지를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    ),
+}

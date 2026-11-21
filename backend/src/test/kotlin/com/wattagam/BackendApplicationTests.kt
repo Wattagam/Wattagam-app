@@ -2,6 +2,7 @@ package com.wattagam
 
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import java.math.BigDecimal
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +17,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @SpringBootTest(
-	properties = ["spring.flyway.locations=classpath:db/migration,classpath:db/test-migration"],
+	properties = [
+		"spring.flyway.locations=classpath:db/migration,classpath:db/test-migration",
+		"app.auth.jwt.secret=d2F0dGFnYW0tdGVzdC1vbmx5LXNpZ25pbmcta2V5LTAx",
+		"app.auth.kakao.app-id=12345",
+	],
 )
 @Testcontainers
 class BackendApplicationTests {
@@ -53,6 +58,40 @@ class BackendApplicationTests {
 
 		assertEquals(content, stored)
 	}
+
+    @Test
+    fun flywaySeedsTheThreePlacesWithTheirConfirmedCentersAndRadii() {
+        assertTrue(flyway.info().applied().any { it.script == "V3__seed_initial_places.sql" })
+        assertTrue(flyway.info().applied().any { it.script == "V7__rename_pond_to_cheongryongtang.sql" })
+        val expected = listOf(
+            listOf(1L, 1, "310관", BigDecimal("37.503645"), BigDecimal("126.956032"), 75),
+            listOf(2L, 2, "도서관", BigDecimal("37.504779"), BigDecimal("126.957959"), 40),
+            listOf(3L, 3, "청룡탕", BigDecimal("37.505625"), BigDecimal("126.957321"), 30),
+        )
+        dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery(
+                    "SELECT id, course_order, name, latitude, longitude, visit_radius_m FROM places ORDER BY course_order",
+                ).use { rows ->
+                    val actual = buildList {
+                        while (rows.next()) {
+                            add(
+                                listOf(
+                                    rows.getLong("id"),
+                                    rows.getInt("course_order"),
+                                    rows.getString("name"),
+                                    rows.getBigDecimal("latitude").stripTrailingZeros(),
+                                    rows.getBigDecimal("longitude").stripTrailingZeros(),
+                                    rows.getInt("visit_radius_m"),
+                                ),
+                            )
+                        }
+                    }
+                    assertEquals(expected, actual)
+                }
+            }
+        }
+    }
 
 	companion object {
 		@Container
