@@ -60,7 +60,7 @@ class PlaceIntegrationTests {
     fun preparePlacesAndAnOnboardedUser() {
         placeRepository.deleteAll()
         userRepository.deleteAll()
-        placeRepository.save(createPlace(3, "청룡연못", 30))
+        placeRepository.save(createPlace(3, "청룡탕", 30))
         placeRepository.save(createPlace(1, "310관", 75))
         library = placeRepository.save(createPlace(2, "도서관", 40))
         val user = userRepository.save(User(kakaoUserId = 123456789L, nickname = "푸앙이", createdAt = Instant.now()))
@@ -81,7 +81,7 @@ class PlaceIntegrationTests {
             .andExpect(jsonPath("$.result.places[1].name").value("도서관"))
             .andExpect(jsonPath("$.result.places[1].visitRadiusMeters").value(40))
             .andExpect(jsonPath("$.result.places[2].courseOrder").value(3))
-            .andExpect(jsonPath("$.result.places[2].name").value("청룡연못"))
+            .andExpect(jsonPath("$.result.places[2].name").value("청룡탕"))
             .andExpect(jsonPath("$.result.places[2].visitRadiusMeters").value(30))
             .andExpect(jsonPath("$.result.places[1].placeId").value(library.id))
             .andExpect(jsonPath("$.result.places[1].latitude").value(37.5))

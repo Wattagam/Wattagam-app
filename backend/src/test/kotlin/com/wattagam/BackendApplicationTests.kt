@@ -62,10 +62,11 @@ class BackendApplicationTests {
     @Test
     fun flywaySeedsTheThreePlacesWithTheirConfirmedCentersAndRadii() {
         assertTrue(flyway.info().applied().any { it.script == "V3__seed_initial_places.sql" })
+        assertTrue(flyway.info().applied().any { it.script == "V7__rename_pond_to_cheongryongtang.sql" })
         val expected = listOf(
             listOf(1L, 1, "310관", BigDecimal("37.503645"), BigDecimal("126.956032"), 75),
             listOf(2L, 2, "도서관", BigDecimal("37.504779"), BigDecimal("126.957959"), 40),
-            listOf(3L, 3, "청룡연못", BigDecimal("37.505625"), BigDecimal("126.957321"), 30),
+            listOf(3L, 3, "청룡탕", BigDecimal("37.505625"), BigDecimal("126.957321"), 30),
         )
         dataSource.connection.use { connection ->
             connection.createStatement().use { statement ->

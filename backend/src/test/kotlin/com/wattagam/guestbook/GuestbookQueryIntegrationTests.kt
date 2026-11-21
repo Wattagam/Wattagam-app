@@ -131,7 +131,7 @@ class GuestbookQueryIntegrationTests : GuestbookIntegrationTestSupport() {
             .andExpect(jsonPath("$.code").value("GUESTBOOK_200_6"))
             .andExpect(jsonPath("$.result.entries.length()").value(2))
             .andExpect(jsonPath("$.result.entries[0].entryId").value(second.id!!.toInt()))
-            .andExpect(jsonPath("$.result.entries[0].placeName").value("청룡연못"))
+            .andExpect(jsonPath("$.result.entries[0].placeName").value("청룡탕"))
             .andExpect(jsonPath("$.result.entries[0].message").value("연못"))
             .andExpect(jsonPath("$.result.entries[1].entryId").value(first.id!!.toInt()))
             .andExpect(jsonPath("$.result.entries[1].placeId").value(1))

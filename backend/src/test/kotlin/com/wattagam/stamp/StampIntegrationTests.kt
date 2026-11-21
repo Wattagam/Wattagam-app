@@ -80,7 +80,7 @@ class StampIntegrationTests {
             .andExpect(jsonPath("$.result.totalCount").value(3))
             .andExpect(jsonPath("$.result.stamps.length()").value(3))
 
-        listOf("310관", "도서관", "청룡연못").forEachIndexed { index, placeName ->
+        listOf("310관", "도서관", "청룡탕").forEachIndexed { index, placeName ->
             val slot = "$.result.stamps[$index]"
             result.andExpect(jsonPath("$slot.placeId").value(index + 1))
                 .andExpect(jsonPath("$slot.courseOrder").value(index + 1))
