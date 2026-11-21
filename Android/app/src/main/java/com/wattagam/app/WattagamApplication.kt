@@ -20,6 +20,6 @@ class WattagamApplication : Application(), SingletonImageLoader.Factory {
     /** 앱 전체 사진 로더. 방명록 사진 요청에 로그인 토큰을 붙인다 */
     override fun newImageLoader(context: PlatformContext): ImageLoader =
         ImageLoader.Builder(context)
-            .components { add(OkHttpNetworkFetcherFactory(callFactory = { AppRepository.imageClient(this) })) }
+            .components { add(OkHttpNetworkFetcherFactory(callFactory = { AppRepository.imageClient(context) })) }
             .build()
 }
