@@ -48,15 +48,15 @@ internal fun FocusPublishScreen(
                 modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp).clip(RoundedCornerShape(12.dp))
                     .background(StudioColors.Surface)
                     .then(if (overLimit) Modifier.border(1.dp, StudioColors.Error, RoundedCornerShape(12.dp)) else Modifier)
-                    .padding(14.dp).semantics { contentDescription = label },
+                    .padding(16.dp).semantics { contentDescription = label },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White), cursorBrush = SolidColor(Color.White))
             Text(stringResource(R.string.bc_message_count, count, state.messageLimit), Modifier.align(Alignment.End),
                 color = if (overLimit) StudioColors.Error else StudioColors.Muted, style = MaterialTheme.typography.bodySmall)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(painterResource(R.drawable.bc_globe), null, Modifier.size(18.dp), tint = StudioColors.Muted)
                 Text(stringResource(R.string.bc_studio_public, state.authorName), style = MaterialTheme.typography.bodySmall, color = StudioColors.Muted)
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(painterResource(if (state.location == PublishLocation.Verified) R.drawable.bc_check else R.drawable.bc_pin_off), null,
                     Modifier.size(18.dp), tint = if (state.location == PublishLocation.Outside) StudioColors.Error else StudioColors.Muted)
                 Text(stringResource(when (state.location) {

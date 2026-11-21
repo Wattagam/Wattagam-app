@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -32,8 +33,9 @@ import com.wattagam.app.ui.theme.*
 val RecordingNavy = Color(0xFF102139)
 
 @Composable
-fun RecordingIcon(@DrawableRes asset: Int, modifier: Modifier = Modifier, size: Dp = 20.dp) {
-    Image(painterResource(asset), contentDescription = null, modifier = modifier.size(size))
+fun RecordingIcon(@DrawableRes asset: Int, modifier: Modifier = Modifier, size: Dp = 20.dp, tint: Color? = null) {
+    // 아이콘은 옆 글자 역할의 색을 따른다 (null 이면 그림 원래 색)
+    Image(painterResource(asset), contentDescription = null, modifier = modifier.size(size), colorFilter = tint?.let { ColorFilter.tint(it) })
 }
 
 @Composable
@@ -50,7 +52,7 @@ fun RecordingTopBar(
             Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-                    Image(painterResource(if (dark) R.drawable.bc_arrow_light else R.drawable.bc_arrow), stringResource(R.string.back), Modifier.size(22.dp))
+                    Image(painterResource(if (dark) R.drawable.bc_arrow_light else R.drawable.bc_arrow), stringResource(R.string.back), Modifier.size(24.dp))
                 }
                 Text(title, Modifier.weight(1f), color = if (dark) Color.White else WattagamColors.Ink, style = MaterialTheme.typography.titleLarge)
                 if (!separateAction) action()
@@ -77,7 +79,7 @@ fun RecordingScaffold(
         RecordingTopBar(title, onBack, dark = dark, action = topAction)
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(top = 8.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(contentSpacing), content = content)
-        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp), content = bottom)
+        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = bottom)
     }
     }
 }
@@ -87,20 +89,36 @@ fun RecordingCaption(text: String, modifier: Modifier = Modifier, color: Color =
     Text(text, modifier, color = color, style = MaterialTheme.typography.bodySmall)
 }
 
+/**
+ * 짧은 상태·정보 표시. 기본은 중립 색이고, 확인된 상태처럼 의미가 있을 때만 [accent](강조색)를 쓴다.
+ */
 @Composable
-fun RecordingBadge(text: String, modifier: Modifier = Modifier, danger: Boolean = false, dark: Boolean = false, solidDark: Boolean = false, @DrawableRes icon: Int? = null) {
-    Row(modifier.clip(RoundedCornerShape(if (solidDark) 22.dp else 8.dp)).background(if (solidDark) RecordingNavy else if (danger) WattagamColors.DangerSoft else if (dark) Color.White.copy(alpha = .1f) else WattagamColors.PrimarySoft).padding(horizontal = 10.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        icon?.let { RecordingIcon(it, size = 13.dp) }
-        Text(text, style = MaterialTheme.typography.labelSmall, color = if (danger) WattagamColors.Danger else if (dark) Color.White else WattagamColors.Primary)
+fun RecordingBadge(text: String, modifier: Modifier = Modifier, danger: Boolean = false, dark: Boolean = false, solidDark: Boolean = false, @DrawableRes icon: Int? = null, accent: Boolean = false) {
+    val background = when {
+        solidDark -> RecordingNavy
+        danger -> WattagamColors.DangerSoft
+        dark -> Color.White.copy(alpha = .1f)
+        accent -> WattagamColors.PrimarySoft
+        else -> WattagamColors.Soft
+    }
+    val ink = when {
+        danger -> WattagamColors.Danger
+        dark -> Color.White
+        accent -> WattagamColors.Primary
+        else -> WattagamColors.Muted
+    }
+    Row(modifier.clip(if (solidDark) WattagamShapes.Pill else WattagamShapes.Small).background(background).padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        icon?.let { RecordingIcon(it, size = 16.dp, tint = ink) }
+        Text(text, style = MaterialTheme.typography.labelSmall, color = ink)
     }
 }
 
 @Composable
 fun RecordingNotice(title: String, body: String, @DrawableRes icon: Int, modifier: Modifier = Modifier, highlighted: Boolean = false, danger: Boolean = false) {
-    Row(modifier.fillMaxWidth().clip(WattagamShapes.Field).background(if (danger) WattagamColors.DangerSoft else if (highlighted) WattagamColors.PrimarySoft else WattagamColors.Soft).padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        RecordingIcon(icon)
+    Row(modifier.fillMaxWidth().clip(WattagamShapes.Card).background(if (danger) WattagamColors.DangerSoft else if (highlighted) WattagamColors.PrimarySoft else WattagamColors.Soft).padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        RecordingIcon(icon, tint = if (danger) WattagamColors.Danger else if (highlighted) WattagamColors.Primary else WattagamColors.Muted)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, style = MaterialTheme.typography.labelMedium)
             RecordingCaption(body)
@@ -124,14 +142,14 @@ fun CreationSteps(active: Int, modifier: Modifier = Modifier, dark: Boolean = fa
                 else -> R.string.bc_step_upcoming
             })
             Column(Modifier.weight(1f).semantics(mergeDescendants = true) { stateDescription = status },
-                verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (completed) Icon(painterResource(R.drawable.bc_check), null, Modifier.size(14.dp), tint = muted)
                     Text(stringResource(label), color = if (current) ink else muted,
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = if (current) FontWeight.Bold else FontWeight.Normal)
+                        fontWeight = if (current) FontWeight.Medium else FontWeight.Normal)
                 }
-                Box(Modifier.fillMaxWidth().height(3.dp).clip(CircleShape)
+                Box(Modifier.fillMaxWidth().height(4.dp).clip(CircleShape)
                     .background(if (current) (if (dark) Color.White else WattagamColors.Primary) else if (completed) muted else track))
             }
         }
@@ -158,9 +176,9 @@ fun RecordingHeading(text: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun RecordingAuthor(name: String, subtitle: String, badge: String, modifier: Modifier = Modifier) {
-    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.size(38.dp).background(WattagamColors.PrimarySoft, CircleShape), contentAlignment = Alignment.Center) {
-            Text(name.take(1), color = WattagamColors.Primary, style = MaterialTheme.typography.labelMedium)
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.size(40.dp).background(WattagamColors.Soft, CircleShape), contentAlignment = Alignment.Center) {
+            Text(name.take(1), color = WattagamColors.Ink, style = MaterialTheme.typography.labelMedium)
         }
         Column(Modifier.weight(1f)) { Text(name, style = MaterialTheme.typography.labelMedium); RecordingCaption(subtitle) }
         RecordingBadge(badge)

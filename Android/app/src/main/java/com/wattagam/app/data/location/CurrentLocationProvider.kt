@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import android.os.SystemClock
 import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -15,7 +16,13 @@ import kotlin.coroutines.resume
 
 /** 한 번 측정한 현재 위치 결과 */
 sealed interface LocationFix {
-    data class Found(val latitude: Double, val longitude: Double, val accuracyMeters: Float) : LocationFix
+    /** [measuredAtMillis] 는 위치를 잰 시각 (기기 시계 기준). 서버는 60초 지난 위치를 받지 않는다 */
+    data class Found(
+        val latitude: Double,
+        val longitude: Double,
+        val accuracyMeters: Float,
+        val measuredAtMillis: Long = System.currentTimeMillis(),
+    ) : LocationFix
     /** 정확한 위치 권한이 없음 (대략적인 위치만 허용한 경우 포함) */
     data object PermissionMissing : LocationFix
     /** 위치 서비스가 꺼져 있거나 측정에 실패함 */
@@ -52,7 +59,9 @@ class CurrentLocationProvider(context: Context) {
                     val fix = if (location == null) {
                         LocationFix.Unavailable
                     } else {
-                        LocationFix.Found(location.latitude, location.longitude, location.accuracy)
+                        // 위치를 잰 지 얼마나 지났는지(부팅 후 경과 시간 기준)로 측정 시각을 구한다
+                        val ageMillis = (SystemClock.elapsedRealtimeNanos() - location.elapsedRealtimeNanos) / 1_000_000
+                        LocationFix.Found(location.latitude, location.longitude, location.accuracy, System.currentTimeMillis() - ageMillis.coerceAtLeast(0))
                     }
                     if (continuation.isActive) continuation.resume(fix)
                 }

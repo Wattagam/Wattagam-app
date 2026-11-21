@@ -2,14 +2,15 @@ package com.wattagam.app.navigation
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import com.wattagam.app.ui.theme.WattagamTheme
 import androidx.test.platform.app.InstrumentationRegistry
 import com.wattagam.app.data.auth.KakaoLogin
 import com.wattagam.app.data.auth.LocalProfile
+import com.wattagam.app.ui.theme.WattagamTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Assume.assumeFalse
 import org.junit.Before
@@ -33,7 +34,7 @@ class AppFlowTest {
         compose.onNodeWithText("앱 화면 흐름 보기 (샘플 데이터)").performScrollTo().performClick()
         compose.onNodeWithText("카카오로 시작하기").assertIsDisplayed().performClick()
         compose.onNodeWithText("닉네임 정하기").assertIsDisplayed()
-        compose.onNodeWithText("뒤로").performClick()
+        compose.onNodeWithContentDescription("뒤로").performClick()
         compose.onNodeWithText("카카오로 시작하기").assertIsDisplayed()
     }
 

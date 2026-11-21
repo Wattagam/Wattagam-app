@@ -29,6 +29,8 @@
     <string name="location_denied">위치 권한이 필요해요</string>
     <string name="location_denied_body">설정에서 위치 권한을 허용해주세요.</string>
     <string name="location_unavailable">위치를 확인하지 못했어요</string>
+    <string name="location_failed">결과를 받지 못했어요</string>
+    <string name="location_failed_body">서버에 연결하지 못해 방문 확인을 못 했어요. 인터넷 연결을 확인하고 다시 시도해주세요.</string>
     <string name="location_unavailable_body">위치 서비스가 켜져 있는지 확인하고, 하늘이 보이는 곳에서 다시 시도해주세요.</string>
     <string name="empty_title">아직 남겨진 기록이 없어요</string>
     <string name="empty_body">이 장소의 첫 추억을 남겨보세요.</string>
@@ -38,11 +40,14 @@
     <string name="stamp_count">내 도장 %1$d / %2$d</string>
     <string name="earned">획득</string>
     <string name="unearned">미수집</string>
-    <string name="gate">정문</string>
     <string name="library">도서관</string>
     <string name="pond">청룡탕</string>
     <string name="building">310관</string>
-    <string name="stamp_sample">샘플: 정문·도서관 도장을 획득한 상태입니다.</string>
+    <string name="stamp_sample">샘플: 310관·도서관 도장을 획득한 상태입니다.</string>
+    <string name="stamp_earned_description">%1$s 도장 받음</string>
+    <string name="stamp_empty_description">%1$s 도장 아직 없음</string>
+    <string name="place_stamp_caption_earned">이 장소의 도장을 받았어요</string>
+    <string name="place_stamp_caption_empty">아직 받지 않은 도장이에요</string>
     <string name="stamp_rule">공개 방명록 저장 성공 시에만 장소별 도장을 받아요.</string>
     <string name="public_title">앱 사용자에게 공개</string>
     <string name="public_body">사진·손그림·글·표시명·작성 시각이 로그인한 앱 사용자에게 공개돼요.</string>
@@ -51,11 +56,18 @@
     <string name="nav_mypage">마이페이지</string>
     <string name="photo_placeholder">사진</string>
     <string name="showcase_start_flow">앱 화면 흐름 보기 (샘플 데이터)</string>
+    <string name="showcase_capture_test_title">촬영 테스트 (개발용)</string>
+    <string name="showcase_capture_test_body">위치 확인 없이 첫 장소(310관) 촬영 화면으로 바로 들어가요. 테스트 빌드에만 보이고, 등록 단계에서는 위치를 다시 확인해요.</string>
+    <string name="showcase_capture_test_ar">AR 촬영 테스트</string>
+    <string name="showcase_capture_test_photo">일반 촬영 테스트</string>
+    <string name="debug_crash_title">직전 앱 종료 기록 (개발용)</string>
+    <string name="debug_crash_clear">확인했어요 (지우기)</string>
+    <string name="debug_crash_close">닫기</string>
 
     <!-- auth: 01 로그인 · 01-A 닉네임 · 01-B 위치 허용 -->
-    <string name="auth_login_title">카카오로 시작하고,\n4곳의 장소를 확인해봐요.</string>
-    <string name="auth_login_body">로그인 후 지도에서 정문, 도서관, 청룡탕, 310관을 확인하고, 도장 수집 상태를 한 번에 볼 수 있어요.</string>
-    <string name="auth_login_hero">네 곳의 장소를 확인하고, 도장을 모아봐요.</string>
+    <string name="auth_login_title">캠퍼스 세 곳을 걷고\n도장을 모아요</string>
+    <string name="auth_login_body">310관, 도서관, 청룡탕에서 사진과 글을 남기면 장소마다 도장을 하나씩 받아요.</string>
+    <string name="auth_login_photo">중앙도서관 앞 풍경</string>
     <string name="auth_login_kakao">카카오로 시작하기</string>
     <string name="auth_login_failed">카카오 로그인에 실패했어요</string>
     <string name="auth_login_failed_body">네트워크를 확인하고 다시 시도해주세요.</string>
@@ -70,7 +82,7 @@
     <string name="auth_nickname_next">다음 · 위치 권한 설정</string>
     <string name="auth_nickname_save">저장</string>
     <string name="auth_permission_title">산책을 시작하기 전에</string>
-    <string name="auth_permission_heading">가까운 장소에서,\n추억을 남겨요.</string>
+    <string name="auth_permission_heading">가까운 장소에서\n추억을 남겨요</string>
     <string name="auth_permission_body">시작 전에 위치 권한을 확인해요.</string>
     <string name="auth_permission_card_title">정확한 위치 · 작성 시 필요</string>
     <string name="auth_permission_card_body">작성을 시작할 때와 등록할 때 현장에 있는지 GPS로 확인해요. 앱을 사용하는 동안에만 위치를 이용해요.</string>
@@ -109,6 +121,18 @@
     <string name="gallery_report_title">이 기록을 신고할까요?</string>
     <string name="gallery_report_body">신고 기능은 아직 연결되지 않았어요. 샘플 화면에서는 접수되지 않아요.</string>
     <string name="gallery_report_cancel">취소</string>
+    <string name="gallery_edited">수정됨</string>
+    <string name="gallery_edit">수정</string>
+    <string name="gallery_edit_title">메시지 수정</string>
+    <string name="gallery_edit_note">사진과 장소는 바꿀 수 없어요. 수정해도 도장은 새로 받지 않아요.</string>
+    <string name="gallery_edit_label">메시지</string>
+    <string name="gallery_edit_counter">%1$d/%2$d자 · 비우면 메시지를 지워요</string>
+    <string name="gallery_edit_save">저장</string>
+    <string name="gallery_delete">기록 삭제</string>
+    <string name="gallery_delete_title">이 기록을 삭제할까요?</string>
+    <string name="gallery_delete_body">사진과 메시지가 지워지고 장소 갤러리에서도 사라져요. 되돌릴 수 없어요. 이 장소에서 받은 도장은 그대로 남아요.</string>
+    <string name="gallery_delete_confirm">삭제</string>
+    <string name="gallery_action_failed">처리하지 못했어요</string>
 
     <!-- mypage: 09-B 마이페이지 · 09-B-3 설정 -->
     <string name="mypage_title">마이페이지</string>
@@ -133,9 +157,18 @@
     <!-- write: 05~07 촬영·꾸미기·공개 업로드 연동 -->
     <string name="write_ok">확인</string>
     <string name="write_cancel">취소</string>
-    <string name="write_ar_title">AR 촬영은 준비 중이에요</string>
-    <string name="write_ar_body">푸앙이 3D 모델과 AR 연결 전이라 지금은 일반 사진으로 찍을 수 있어요.</string>
+    <string name="write_ar_title">이 기기는 AR 촬영을 지원하지 않아요</string>
+    <string name="write_ar_body">푸앙이 AR 대신 일반 사진으로 찍을 수 있어요.</string>
     <string name="write_ar_photo">일반 사진으로 찍기</string>
+    <string name="write_ar_frame">AR 촬영 칸. 눌러서 푸앙이를 놓고, 길게 눌러 다시 놓아요</string>
+    <string name="write_ar_hint_place">바닥을 비춘 뒤 칸 안을 눌러 푸앙이를 놓아주세요</string>
+    <string name="write_ar_hint_scan">아직 바닥을 찾는 중이에요. 휴대폰을 천천히 움직여 바닥을 비춰주세요</string>
+    <string name="write_ar_place_first">먼저 칸 안을 눌러 푸앙이를 놓아주세요. AR 사진에는 푸앙이가 꼭 들어가야 해요.</string>
+    <string name="write_ar_camera_permission">AR로 찍으려면 카메라 권한이 필요해요. \'사진 찍기\'를 누르면 다시 요청해요.</string>
+    <string name="write_ar_failed_title">AR을 시작하지 못했어요</string>
+    <string name="write_ar_failed_body">일반 사진으로 찍을 수 있어요.</string>
+    <string name="write_ar_help_title">AR 촬영 방법</string>
+    <string name="write_ar_help_body">휴대폰을 천천히 움직여 바닥을 비추면 인식한 바닥에 무늬가 보여요. 칸 안을 눌러 푸앙이를 놓고, 다른 곳에 놓으려면 길게 누르세요. 칸 안에 보이는 모습 그대로 사진에 담겨요.</string>
     <string name="write_help_title">기록 남기는 방법</string>
     <string name="write_help_body">사진 한 장을 찍거나 갤러리에서 고른 뒤, 손그림과 글자로 꾸며 공개 방명록으로 남겨요. 등록할 때 현재 위치를 한 번 더 확인해요.</string>
     <string name="write_draft_title">남겨둔 초안이 있어요</string>
@@ -148,6 +181,21 @@
     <string name="write_save_failed">꾸민 사진을 저장하지 못했어요. 다시 시도해주세요.</string>
     <string name="write_text_title">사진에 글자 넣기</string>
     <string name="write_text_label">글자 (최대 %1$d자, 비우면 지워져요)</string>
+    <string name="write_publish_failed_title">등록하지 못했어요</string>
     <string name="write_upload_pending_title">위치 확인 완료 · 업로드는 연결 전이에요</string>
     <string name="write_upload_pending_body">현재 위치가 범위 안인 것을 확인했어요. 공개 업로드는 서버 연결 전이라 아직 등록되지 않았고, 사진과 메시지는 이 기기에 초안으로 남아 있어요.</string>
+
+    <!-- 서버 연결 -->
+    <string name="campus_course">캠퍼스 산책</string>
+    <string name="loading">불러오는 중</string>
+    <string name="error_load_title">불러오지 못했어요</string>
+    <string name="error_network">서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해주세요.</string>
+    <string name="error_server">잠시 후 다시 시도해주세요.</string>
+    <string name="error_session_expired">로그인이 끝났어요. 다시 로그인해주세요.</string>
+    <string name="error_nickname_required">닉네임을 먼저 정해주세요.</string>
+    <string name="gallery_more_remote">기록 더 보기</string>
+    <string name="place_open_gallery_plain">장소 갤러리 열기</string>
+    <string name="guestbook_photo_only">사진만 남긴 기록</string>
+    <string name="mypage_withdraw_body_server">%1$s님의 모든 기록과 사진·그림이 함께 삭제돼요. 장소 갤러리에서도 사라지며 복구할 수 없어요.</string>
+    <string name="mypage_withdraw_failed">탈퇴하지 못했어요</string>
 </resources>

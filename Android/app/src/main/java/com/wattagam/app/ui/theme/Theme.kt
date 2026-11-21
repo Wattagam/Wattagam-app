@@ -27,6 +27,9 @@ object WattagamColors {
     val Border = Color(0xFFDCE4F1)
     val Danger = Color(0xFFB93838)
     val DangerSoft = Color(0xFFFFF0ED)
+
+    /** 장소 도장 인주색. 도장 자국에만 쓰고 오류(Danger)와 섞어 쓰지 않는다 */
+    val StampInk = Color(0xFFB8472F)
 }
 
 object WattagamSpacing {
@@ -36,10 +39,16 @@ object WattagamSpacing {
     val Screen = 24.dp
 }
 
+/**
+ * 모서리는 크기에 따라: 작은 표시 8, 버튼·입력 12~14, 카드 16. 칩·토글처럼 정말 알약 모양인 것만 [Pill].
+ * 안쪽 모서리는 바깥 모서리에서 사이 여백을 뺀 값으로 맞춘다.
+ */
 object WattagamShapes {
-    val Field = RoundedCornerShape(20.dp)
-    val Card = RoundedCornerShape(24.dp)
-    val Pill = RoundedCornerShape(28.dp)
+    val Small = RoundedCornerShape(8.dp)
+    val Field = RoundedCornerShape(12.dp)
+    val Button = RoundedCornerShape(14.dp)
+    val Card = RoundedCornerShape(16.dp)
+    val Pill = RoundedCornerShape(percent = 50)
 }
 
 object WattagamSizes {
@@ -52,7 +61,7 @@ object WattagamSizes {
 private val NotoSansKr = FontFamily(
     Font(R.font.noto_sans_kr, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
     Font(R.font.noto_sans_kr, FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
-    Font(R.font.noto_sans_kr, FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
+    Font(R.font.noto_sans_kr, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
 )
 
 private fun textStyle(size: Int, height: Int, weight: FontWeight = FontWeight.Normal) = TextStyle(
@@ -63,7 +72,8 @@ private fun textStyle(size: Int, height: Int, weight: FontWeight = FontWeight.No
 )
 
 private val WattagamTypography = Typography(
-    headlineLarge = textStyle(30, 42, FontWeight.Bold),
+    // 위계는 크기와 색으로. 가장 큰 제목도 600 까지만
+    headlineLarge = textStyle(30, 42, FontWeight.SemiBold),
     titleLarge = textStyle(18, 27, FontWeight.Medium),
     titleMedium = textStyle(16, 24, FontWeight.Medium),
     bodyLarge = textStyle(16, 24),

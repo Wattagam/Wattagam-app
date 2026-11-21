@@ -81,6 +81,7 @@ fun MapScreen(
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
+        contentColor = WattagamColors.Ink,
         topBar = { AppTopBar(uiState.courseName, backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding()) },
         bottomBar = { BottomNavigation(MainTab.Map, onTabSelect) },
     ) { insets ->
@@ -90,7 +91,7 @@ fun MapScreen(
         ) {
             Text(
                 stringResource(R.string.map_summary, uiState.places.size, uiState.stampedCount, uiState.places.size),
-                style = MaterialTheme.typography.labelMedium, color = WattagamColors.Primary,
+                style = MaterialTheme.typography.labelMedium, color = WattagamColors.Muted,
             )
             if (useKakaoMap && !mapFailed) {
                 KakaoCampusMap(
@@ -113,16 +114,16 @@ fun MapScreen(
     }
 }
 
-// 피그마 '캠퍼스 안내 지도' 기준 좌표 (364 × 370). 핀 크기 48 = 최소 터치 영역
+// 피그마 '캠퍼스 안내 지도' 기준 좌표 (364 × 370). 핀 크기 48 = 최소 터치 영역. 코스 순서: 1 310관, 2 도서관, 3 청룡탕
 private const val MAP_W = 364f
 private const val MAP_H = 370f
-private val pinPositions = mapOf(1 to Offset(71f, 270f), 2 to Offset(156f, 106f), 3 to Offset(267f, 70f), 4 to Offset(36f, 174f))
+private val pinPositions = mapOf(1 to Offset(36f, 174f), 2 to Offset(156f, 106f), 3 to Offset(267f, 70f))
 
 @Composable
 private fun CampusMap(places: List<MapPlaceUiState>, onPlaceClick: (String) -> Unit) {
     Surface(
         color = Color(0xFFF0F4F0),
-        shape = RoundedCornerShape(28.dp),
+        shape = WattagamShapes.Card,
         modifier = Modifier.fillMaxWidth().aspectRatio(MAP_W / MAP_H),
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -174,7 +175,7 @@ private fun MapPreview() {
         MapScreen(
             MapUiState(
                 "푸른캠퍼스 산책",
-                listOf("정문", "도서관", "청룡탕", "310관").mapIndexed { i, name ->
+                listOf("310관", "도서관", "청룡탕").mapIndexed { i, name ->
                     MapPlaceUiState("p$i", i + 1, name, "장소 설명과 공개 기록 보기", stamped = i < 2, latitude = 0.0, longitude = 0.0)
                 },
             ),
