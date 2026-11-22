@@ -10,7 +10,7 @@
 ## Project overview
 
 - Wattagam (왔다감) is an Android campus-tour app for Chung-Ang University students, alumni and visitors. Its course, 푸른캠퍼스 산책, lets users explore campus, publish photo memories and collect place stamps.
-- The initial tour scope is three places: 310관 (75 m visit radius), 도서관 (40 m) and 청룡연못 (30 m). Users may visit them in any order; additional places may be introduced later.
+- The initial tour scope is three places: 310관 (75 m visit radius), 도서관 (40 m) and 청룡탕 (30 m). Users may visit them in any order; additional places may be introduced later.
 - The backend uses Kotlin, Java 21, Spring Boot, Spring Data JPA, Flyway and MySQL. OCI Object Storage is the planned image store, with deployment planned on OCI.
 - `backend/` and `Android/` are independent Gradle projects. Android owns screens, permissions, camera/AR capture and photo decoration. The backend owns authentication, location validation, published records, stamps and image storage.
 - The current backend provides the application/database foundation, Kakao authentication, nickname onboarding, place queries, current-location validation, stamp queries and a stamp-granting method for guestbook publication. The flow below describes the intended product, including features still to be implemented.
