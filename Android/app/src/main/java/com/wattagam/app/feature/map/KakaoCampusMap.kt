@@ -37,14 +37,14 @@ import com.kakao.vectormap.label.LabelStyles
 import com.wattagam.app.R
 import com.wattagam.app.ui.theme.WattagamColors
 
-/** 서울캠퍼스 네 장소가 한 화면에 들어오는 중심과 확대 수준 */
-private val CampusCenter = LatLng.from(37.50540, 126.95730)
+/** 서울캠퍼스 세 장소(310관·도서관·청룡탕)가 한 화면에 들어오는 중심과 확대 수준 */
+private val CampusCenter = LatLng.from(37.50463, 126.95700)
 private const val CAMPUS_ZOOM = 16
 private const val MY_LOCATION_LAYER = "my_location"
 private const val MY_LOCATION_LABEL = "me"
 
 /**
- * 02 · 카카오맵으로 그리는 캠퍼스 지도. 네 장소에 번호·이름 라벨을 달고, 라벨을 누르면 장소 설명을 연다.
+ * 02 · 카카오맵으로 그리는 캠퍼스 지도. 장소마다 번호·이름 라벨을 달고, 라벨을 누르면 장소 설명을 연다.
  * 지도 오류(인증 실패 등)가 나면 [onError] 로 알려 안내 지도 그림으로 바꾸게 한다.
  */
 @Composable
@@ -149,7 +149,8 @@ private fun placePinBitmap(context: Context, order: Int, name: String, stamped: 
     val bold = Typeface.create(base, Typeface.BOLD)
 
     val namePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = bold; textSize = 14 * d; color = ink }
-    val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = bold; textSize = 11 * d; color = primary }
+    // '획득'은 도장 인주색 (장소 목록·도장판의 도장 자국과 같은 색)
+    val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = bold; textSize = 11 * d; color = WattagamColors.StampInk.toArgb() }
     val numberPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         typeface = bold; textSize = 13 * d; textAlign = Paint.Align.CENTER; color = if (stamped) android.graphics.Color.WHITE else primary
     }

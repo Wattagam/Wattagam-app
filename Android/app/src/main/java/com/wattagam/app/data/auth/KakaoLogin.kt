@@ -2,6 +2,7 @@ package com.wattagam.app.data.auth
 
 import android.content.Context
 import com.kakao.sdk.auth.AuthApiClient
+import com.kakao.sdk.auth.TokenManagerProvider
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.KakaoSdk
 import com.kakao.sdk.common.model.ClientError
@@ -13,7 +14,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 sealed interface KakaoLoginResult {
-    /** 카카오 access token. 서버 로그인 API 가 나오면 이 토큰을 서버에 보내 우리 서비스 토큰으로 교환한다 */
+    /** 카카오 access token. 서버에 보내 왔다감 서비스 토큰으로 교환한다 */
     data class Success(val kakaoAccessToken: String) : KakaoLoginResult
     data object Cancelled : KakaoLoginResult
     data object Failed : KakaoLoginResult
@@ -74,9 +75,20 @@ object KakaoLogin {
         }
     }
 
-    /** 로그아웃·탈퇴 시 카카오 SDK 의 토큰도 지운다 */
-    fun logout() {
-        if (isConfigured) UserApiClient.instance.logout { }
+    /**
+     * 서버 토큰이 만료됐을 때 다시 교환할 카카오 access token. 카카오 로그인이 살아 있지 않으면 null.
+     * [hasSession] 의 토큰 확인 요청 중에 만료된 카카오 토큰은 SDK 가 갱신한다.
+     */
+    suspend fun currentAccessToken(): String? =
+        if (hasSession()) TokenManagerProvider.instance.manager.getToken()?.accessToken else null
+
+    /** 로그아웃·탈퇴 시 카카오 SDK 의 토큰도 지운다. 지운 뒤에 돌아와서 로그인 화면이 예전 로그인으로 자동 로그인하지 않는다 */
+    suspend fun logout() {
+        if (!isConfigured) return
+        suspendCancellableCoroutine { continuation ->
+            // 요청이 실패해도 SDK 는 이 기기의 토큰을 지운다
+            UserApiClient.instance.logout { if (continuation.isActive) continuation.resume(Unit) }
+        }
     }
 
     private fun Throwable?.isCancel() = this is ClientError && reason == ClientErrorCause.Cancelled

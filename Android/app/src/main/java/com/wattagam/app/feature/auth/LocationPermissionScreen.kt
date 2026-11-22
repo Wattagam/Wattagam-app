@@ -47,6 +47,7 @@ fun LocationPermissionScreen(onBack: () -> Unit, onAllow: () -> Unit, onLater: (
     Scaffold(
         modifier,
         containerColor = WattagamColors.Soft,
+        contentColor = WattagamColors.Ink,
         topBar = { AppTopBar(stringResource(R.string.auth_permission_title), stringResource(R.string.back), onBack, Modifier.statusBarsPadding()) },
         bottomBar = {
             Column(Modifier.navigationBarsPadding().padding(WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small)) {
@@ -65,7 +66,6 @@ fun LocationPermissionScreen(onBack: () -> Unit, onAllow: () -> Unit, onLater: (
                 stringResource(R.string.auth_permission_card_title),
                 stringResource(R.string.auth_permission_card_body),
                 Modifier.fillMaxWidth(),
-                highlighted = true,
             )
             Text(stringResource(R.string.auth_permission_privacy), style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
             Text(stringResource(R.string.auth_permission_denied_note), style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)

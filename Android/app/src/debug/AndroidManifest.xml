@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  디버그 빌드에서만: 같은 와이파이의 노트북에서 띄운 로컬 서버(http://192.168.x.x:8080, 에뮬레이터는 http://10.0.2.2:8080)에
+  연결할 수 있게 암호화하지 않은 http 를 허용한다. 출시 빌드는 https 만 쓴다.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="true" />
+</manifest>

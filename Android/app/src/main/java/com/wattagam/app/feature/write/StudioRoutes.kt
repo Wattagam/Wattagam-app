@@ -38,6 +38,17 @@ import com.wattagam.app.ui.components.WattagamTextField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.platform.LocalContext
+import com.wattagam.app.data.AccountProblem
+import com.wattagam.app.data.PublishOutcome
+import com.wattagam.app.data.api.ApiException
+import com.wattagam.app.data.api.locationRejection
+import com.wattagam.app.data.location.LocationFix
+import com.wattagam.app.data.location.VisitEligibility
+import com.wattagam.app.ui.components.LocalAccountProblemHandler
+import com.wattagam.app.ui.components.userMessage
+import kotlinx.coroutines.CancellationException
+import java.io.File
 
 private const val TEXT_MAX_LENGTH = 30
 
@@ -118,8 +129,9 @@ fun WriteEditorRoute(
 
 /**
  * 07 · 공개 업로드. 메시지는 초안 파일에 계속 저장한다.
- * '등록'을 누르면 현재 위치를 다시 재서 범위 안일 때만 업로드로 넘어간다 (작성 시작 때 확인했어도 다시 확인).
- * 업로드 API 연결 전이라 범위 안이면 '아직 등록되지 않음'을 알리고 초안을 그대로 둔다.
+ * '등록'을 누르면 현재 위치를 다시 재서 범위 안일 때만 [publish] 로 올린다 (작성 시작 때 확인했어도 다시 확인).
+ * 실패하면 초안을 그대로 두고, 같은 요청 키로 다시 보내 중복 등록을 막는다. 성공하면 초안을 지우고 [onPublished].
+ * 샘플 모드([PublishOutcome.NotConnected])에서는 '아직 등록되지 않음'을 알리고 초안을 그대로 둔다.
  */
 @Composable
 fun WritePublishRoute(
@@ -127,13 +139,18 @@ fun WritePublishRoute(
     placeName: String,
     authorName: String,
     stampCount: Int,
-    latitude: Double,
-    longitude: Double,
+    stampTotal: Int,
+    judge: suspend (LocationFix.Found) -> VisitEligibility,
+    publish: suspend (photo: File, message: String, fix: LocationFix.Found, requestId: String) -> PublishOutcome,
     drafts: DraftStore,
     onBack: () -> Unit,
     onEditPhoto: () -> Unit,
+    onPublished: (PublishOutcome.Published) -> Unit,
 ) {
-    val photoFile by produceState<java.io.File?>(null, placeId) { value = withContext(Dispatchers.IO) { drafts.publishPhoto(placeId) } }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val onAccountProblem = LocalAccountProblemHandler.current
+    val photoFile by produceState<File?>(null, placeId) { value = withContext(Dispatchers.IO) { drafts.publishPhoto(placeId) } }
     val photo by rememberPhoto(photoFile)
     var message by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(placeId) { if (message == null) message = drafts.readMessage(placeId) }
@@ -145,21 +162,69 @@ fun WritePublishRoute(
 
     LightSystemBarIcons()
     var publishRequested by remember { mutableStateOf(false) }
+    var uploading by remember { mutableStateOf(false) }
+    var failed by rememberSaveable { mutableStateOf(false) }
+    var failure by remember { mutableStateOf<String?>(null) }
     var showUploadPending by remember { mutableStateOf(false) }
-    val check = rememberVisitCheck(latitude, longitude, onAllowed = {
-        if (publishRequested) {
-            publishRequested = false
-            showUploadPending = true
-        }
-    })
     // 다시 확인하는 동안에는 직전 판정을 보여준다
     var location by rememberSaveable { mutableStateOf(PublishLocation.Unverified) }
-    var showProblem by remember { mutableStateOf(false) }
+    var showProblem by remember { mutableStateOf<Int?>(null) }
+
+    fun upload(fix: LocationFix.Found) {
+        uploading = true
+        scope.launch {
+            try {
+                val file = withContext(Dispatchers.IO) { prepareUpload(drafts, placeId) }
+                if (file == null) {
+                    showProblem = R.string.write_photo_failed
+                    return@launch
+                }
+                when (val outcome = publish(file, message.orEmpty().trim(), fix, drafts.requestId(placeId))) {
+                    is PublishOutcome.Published -> {
+                        drafts.clear(placeId)
+                        onPublished(outcome)
+                    }
+                    PublishOutcome.NotConnected -> showUploadPending = true
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: AccountProblem) {
+                // 다시 로그인한 뒤 이어서 쓸 수 있게 초안은 둔다
+                onAccountProblem(e)
+            } catch (e: ApiException) {
+                when (e.locationRejection()) {
+                    VisitEligibility.Outside -> location = PublishLocation.Outside
+                    VisitEligibility.Unavailable -> {
+                        location = PublishLocation.Unverified
+                        showProblem = R.string.location_unavailable_body
+                    }
+                    else -> {
+                        failed = true
+                        failure = e.userMessage(context)
+                    }
+                }
+            } catch (e: Exception) {
+                failed = true
+                failure = e.userMessage(context)
+            } finally {
+                uploading = false
+            }
+        }
+    }
+
+    val check = rememberVisitCheck(judge, onAllowed = { fix ->
+        if (publishRequested) {
+            publishRequested = false
+            upload(fix)
+        }
+    })
     LaunchedEffect(check.status) {
         when (check.status) {
             LocationUiState.Available -> location = PublishLocation.Verified
             LocationUiState.Outside -> { location = PublishLocation.Outside; publishRequested = false }
-            LocationUiState.Denied, LocationUiState.Unavailable -> { location = PublishLocation.Unverified; publishRequested = false; showProblem = true }
+            LocationUiState.Denied -> { location = PublishLocation.Unverified; publishRequested = false; showProblem = R.string.location_denied_body }
+            LocationUiState.Unavailable -> { location = PublishLocation.Unverified; publishRequested = false; showProblem = R.string.location_unavailable_body }
+            LocationUiState.Failed -> { publishRequested = false; showProblem = R.string.location_failed_body }
             LocationUiState.Checking, null -> Unit
         }
     }
@@ -170,15 +235,21 @@ fun WritePublishRoute(
             authorName = authorName,
             message = message.orEmpty(),
             stampCount = stampCount,
-            status = if (check.checking) PublishStatus.CheckingLocation else PublishStatus.Ready,
+            status = when {
+                uploading -> PublishStatus.Uploading
+                check.checking -> PublishStatus.CheckingLocation
+                failed -> PublishStatus.Failed
+                else -> PublishStatus.Ready
+            },
             location = location,
+            stampTotal = stampTotal,
         ),
         onBack = onBack,
         onMessageChange = { message = it },
         onEditPhoto = onEditPhoto,
         onRecheck = check.start,
         onPublish = {
-            if (!check.checking) {
+            if (!check.checking && !uploading) {
                 publishRequested = true
                 check.start()
             }
@@ -191,8 +262,20 @@ fun WritePublishRoute(
     )
 
     if (showUploadPending) MessageDialog(R.string.write_upload_pending_title, R.string.write_upload_pending_body) { showUploadPending = false }
-    if (showProblem) {
-        val body = if (check.status == LocationUiState.Denied) R.string.location_denied_body else R.string.location_unavailable_body
-        MessageDialog(null, body) { showProblem = false }
+    showProblem?.let { MessageDialog(null, it) { showProblem = null } }
+    failure?.let {
+        AlertDialog(
+            onDismissRequest = { failure = null },
+            title = { Text(stringResource(R.string.write_publish_failed_title)) },
+            text = { Text(it) },
+            confirmButton = { TextButton(onClick = { failure = null }) { Text(stringResource(R.string.write_ok)) } },
+        )
     }
 }
+
+/** 올릴 사진을 서버 제한(5MB) 안으로 다시 압축한다. 사진이 없거나 읽지 못하면 null */
+private fun prepareUpload(drafts: DraftStore, placeId: String): File? = runCatching {
+    val source = drafts.publishPhoto(placeId) ?: return null
+    val bitmap = decodePhoto(source, OUTPUT_MAX_SIDE) ?: return null
+    drafts.uploadFile(placeId).also { file -> file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) } }
+}.getOrNull()

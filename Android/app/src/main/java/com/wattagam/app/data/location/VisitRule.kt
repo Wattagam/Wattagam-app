@@ -9,21 +9,21 @@ import kotlin.math.sqrt
 enum class VisitEligibility { Allowed, Outside, PermissionMissing, Unavailable }
 
 /**
- * 작성 시작 위치 판정.
- * - 반경 30 m 는 임시 기준, 정확도 기준은 현장 검증 후 조정
+ * 작성 시작 위치 판정 (서버 없이 쓰는 샘플 모드용. 서버 연결 시에는 서버가 판정한다).
+ * - 반경은 장소마다 다르다 (서버의 visitRadiusMeters 와 같은 값)
+ * - 정확도 기준은 현장 검증 후 조정
  * - 이전 방문 기록은 쓰지 않고 매번 현재 위치로만 판정한다
  */
 object VisitRule {
-    const val RADIUS_METERS = 30.0
     const val MAX_ACCURACY_METERS = 50f
 
-    fun evaluate(fix: LocationFix, placeLatitude: Double, placeLongitude: Double): VisitEligibility = when (fix) {
+    fun evaluate(fix: LocationFix, placeLatitude: Double, placeLongitude: Double, radiusMeters: Double): VisitEligibility = when (fix) {
         LocationFix.PermissionMissing -> VisitEligibility.PermissionMissing
         LocationFix.Unavailable -> VisitEligibility.Unavailable
         is LocationFix.Found -> when {
             // 정확도가 낮으면 거리를 믿을 수 없어서 범위 밖으로 단정하지 않고 재시도를 안내
             fix.accuracyMeters > MAX_ACCURACY_METERS -> VisitEligibility.Unavailable
-            distanceMeters(fix.latitude, fix.longitude, placeLatitude, placeLongitude) <= RADIUS_METERS -> VisitEligibility.Allowed
+            distanceMeters(fix.latitude, fix.longitude, placeLatitude, placeLongitude) <= radiusMeters -> VisitEligibility.Allowed
             else -> VisitEligibility.Outside
         }
     }

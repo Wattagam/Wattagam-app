@@ -32,13 +32,19 @@ import com.wattagam.app.ui.theme.WattagamColors
 import com.wattagam.app.ui.theme.WattagamSpacing
 import com.wattagam.app.ui.theme.WattagamTheme
 
-data class GalleryUiState(val placeName: String, val items: List<GuestbookCardUiState>)
+/** [hasMore] 는 서버에 다음 페이지가 더 있는지 ([items] 는 지금까지 받은 기록) */
+data class GalleryUiState(
+    val placeName: String,
+    val items: List<GuestbookCardUiState>,
+    val hasMore: Boolean = false,
+    val loadingMore: Boolean = false,
+)
 
 private const val PAGE_SIZE = 4 // 피그마: "기록 더 보기 · 4 / 23"
 
 /**
  * 03-A · 공개 갤러리 열람 / 09-A · 업로드 후 장소 갤러리 (같은 화면).
- * 샘플 단계라 전체 목록을 받아 4개씩 더 보여준다. API 단계에서 페이지 요청으로 바꾼다.
+ * 받은 기록을 4개씩 더 보여주고, 다 보여줬는데 서버에 더 있으면 [onLoadMore] 로 다음 페이지를 받는다.
  */
 @Composable
 fun GalleryScreen(
@@ -49,6 +55,7 @@ fun GalleryScreen(
     onGuestbookClick: (guestbookId: String) -> Unit,
     modifier: Modifier = Modifier,
     locationStatus: LocationUiState? = null,
+    onLoadMore: () -> Unit = {},
 ) {
     var shown by rememberSaveable { mutableIntStateOf(PAGE_SIZE) }
     val visible = uiState.items.take(shown)
@@ -75,12 +82,18 @@ fun GalleryScreen(
             } else {
                 GuestbookGrid(visible, onGuestbookClick)
             }
-            if (shown < uiState.items.size) {
+            if (shown < uiState.items.size || uiState.hasMore) {
                 WattagamButton(
-                    stringResource(R.string.gallery_more, visible.size, uiState.items.size),
-                    onClick = { shown += PAGE_SIZE },
+                    // 서버에 더 있으면 전체 수를 모르므로 수 없이 보여준다
+                    if (uiState.hasMore) stringResource(R.string.gallery_more_remote)
+                    else stringResource(R.string.gallery_more, visible.size, uiState.items.size),
+                    onClick = {
+                        if (shown >= uiState.items.size) onLoadMore()
+                        shown += PAGE_SIZE
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     kind = ButtonKind.Text,
+                    loading = uiState.loadingMore,
                 )
             }
         }
