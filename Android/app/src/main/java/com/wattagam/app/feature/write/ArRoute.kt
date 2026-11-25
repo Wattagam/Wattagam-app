@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.view.PixelCopy
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -189,7 +190,25 @@ fun WriteArRoute(
             onSwitchToPhoto()
         }
     }
-    val switchToPhoto = { switchingToPhoto = true }
+    // 화면을 떠날 때는 ARCore 세션이 살아 있는 동안 푸앙이 앵커를 먼저 뗀다.
+    // 그냥 떠나면 SceneView 가 세션을 닫은 뒤에 앵커를 떼려다 네이티브 오류(ArAnchor_detach)로 앱이 꺼진다.
+    var exitAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    LaunchedEffect(exitAction) {
+        val action = exitAction ?: return@LaunchedEffect
+        anchorNode?.let { node ->
+            childNodes -= node
+            withFrameNanos {}
+            node.destroy()
+            anchorNode = null
+        }
+        withFrameNanos {}
+        action()
+    }
+    fun leave(action: () -> Unit) {
+        if (exitAction == null) exitAction = action
+    }
+    BackHandler(enabled = exitAction == null) { leave(onBack) }
+    val switchToPhoto = { leave { switchingToPhoto = true } }
     var showHelp by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
 
@@ -271,7 +290,7 @@ fun WriteArRoute(
                         if (saved) {
                             drafts.commitCapture(placeId)
                             capturing = false
-                            onPhotoReady()
+                            leave(onPhotoReady)
                         } else {
                             capturing = false
                             error = R.string.write_capture_failed
@@ -284,7 +303,7 @@ fun WriteArRoute(
 
     ArCaptureScreen(
         placeName = placeName,
-        onBack = onBack,
+        onBack = { leave(onBack) },
         onHelp = { showHelp = true },
         onCapture = ::capture,
         onSwitchToPhoto = switchToPhoto,
@@ -360,7 +379,7 @@ fun WriteArRoute(
             title = { Text(stringResource(R.string.write_ar_failed_title)) },
             text = { Text(stringResource(R.string.write_ar_failed_body)) },
             confirmButton = { TextButton(onClick = switchToPhoto) { Text(stringResource(R.string.write_ar_photo)) } },
-            dismissButton = { TextButton(onClick = onBack) { Text(stringResource(R.string.write_cancel)) } },
+            dismissButton = { TextButton(onClick = { leave(onBack) }) { Text(stringResource(R.string.write_cancel)) } },
         )
     }
     if (showHelp) MessageDialog(R.string.write_ar_help_title, R.string.write_ar_help_body) { showHelp = false }
