@@ -34,6 +34,9 @@
     <string name="bc_choose_photo">일반 사진으로 찍기</string>
     <string name="bc_ar_placed">푸앙이 배치 완료 · %1$s</string>
     <string name="bc_ar_not_placed">푸앙이 배치 전 · %1$s</string>
+    <string name="bc_stamp_short_pending">올리면 도장을 받아요 · 내 도장 %1$d/%2$d</string>
+    <string name="bc_stamp_short_owned">도장을 받은 장소예요 · 내 도장 %1$d/%2$d</string>
+    <string name="bc_outside_short">작성 중인 초안은 그대로 남아 있어요. 건물 밖에서 다시 확인해 보세요.</string>
     <string name="bc_stamp_owned">내 도장 %1$d/%3$d · %2$s 도장 보유</string>
     <string name="bc_stamp_owned_body">이 장소의 도장은 이미 받았어요. 새 방명록을 남겨도 도장은 다시 지급되지 않아요.</string>
     <string name="bc_ar_mode">AR 촬영</string>

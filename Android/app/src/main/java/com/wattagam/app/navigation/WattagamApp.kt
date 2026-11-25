@@ -281,7 +281,10 @@ fun WattagamApp() {
                 entry<VisitCheck> { key ->
                     WithPlaceAndStamps(repository, key.placeId, back) { place, stamps ->
                         VisitCheckRoute(
+                            placeId = place.id,
                             placeName = place.name,
+                            latitude = place.latitude,
+                            longitude = place.longitude,
                             visitorName = nickname,
                             stampCount = stamps.earned,
                             placeOrder = place.order,
@@ -298,6 +301,7 @@ fun WattagamApp() {
                     WithPlaceAndStamps(repository, key.placeId, back) { place, stamps ->
                         WriteModeRoute(
                             placeId = place.id,
+                            placeOrder = place.order,
                             stampCount = stamps.earned,
                             stampTotal = stamps.total,
                             drafts = drafts,

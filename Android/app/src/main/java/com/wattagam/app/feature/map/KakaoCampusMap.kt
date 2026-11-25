@@ -43,9 +43,13 @@ private const val CAMPUS_ZOOM = 16
 private const val MY_LOCATION_LAYER = "my_location"
 private const val MY_LOCATION_LABEL = "me"
 
+/** 한 장소 주변을 보여줄 때의 확대 수준 (방문 확인 화면) */
+const val PLACE_ZOOM = 18
+
 /**
  * 02 · 카카오맵으로 그리는 캠퍼스 지도. 장소마다 번호·이름 라벨을 달고, 라벨을 누르면 장소 설명을 연다.
  * 지도 오류(인증 실패 등)가 나면 [onError] 로 알려 안내 지도 그림으로 바꾸게 한다.
+ * [center]·[zoom] 을 주면 그 지점을 가운데 두고 확대해서 시작한다 (기본은 세 장소가 한 화면에 들어오는 캠퍼스 전체).
  */
 @Composable
 fun KakaoCampusMap(
@@ -54,6 +58,8 @@ fun KakaoCampusMap(
     onError: () -> Unit,
     modifier: Modifier = Modifier,
     myLocation: MapPoint? = null,
+    center: MapPoint? = null,
+    zoom: Int = CAMPUS_ZOOM,
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -128,8 +134,8 @@ fun KakaoCampusMap(
                             }
                         }
 
-                        override fun getPosition(): LatLng = CampusCenter
-                        override fun getZoomLevel(): Int = CAMPUS_ZOOM
+                        override fun getPosition(): LatLng = center?.let { LatLng.from(it.latitude, it.longitude) } ?: CampusCenter
+                        override fun getZoomLevel(): Int = zoom
                     },
                 )
             }

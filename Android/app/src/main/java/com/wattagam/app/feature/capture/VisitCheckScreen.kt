@@ -35,9 +35,9 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
     mapContent: @Composable () -> Unit,
 ) {
     val available = state.status == VisitCheckStatus.Available
+    // 글은 꼭 필요한 것만: 판정, 지도, 장소·도장 한 줄, 범위 상태
     RecordingScaffold(stringResource(R.string.bc_visit_title), onBack, modifier, bottom = {
         if (available) {
-            RecordingCaption(stringResource(R.string.bc_ar_support))
             WattagamButton(stringResource(R.string.bc_start), onContinue, Modifier.fillMaxWidth())
         } else {
             WattagamButton(stringResource(R.string.bc_recheck_location), onRecheck, Modifier.fillMaxWidth())
@@ -54,11 +54,13 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
         }
         Spacer(Modifier.height(2.dp))
         mapContent()
-        val stampLine = stringResource(if (state.placeStamped) R.string.bc_stamp_owned else R.string.bc_stamp_missing, state.stamps, state.placeName, state.stampTotal)
         Column(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(WattagamColors.Soft).padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 RecordingIcon(R.drawable.bc_pin, tint = WattagamColors.Ink)
-                Column { Text(state.placeName, style = MaterialTheme.typography.titleLarge); RecordingCaption(if (available) stringResource(R.string.bc_course, state.placeOrder) else stampLine) }
+                Column {
+                    Text(state.placeName, style = MaterialTheme.typography.titleLarge)
+                    RecordingCaption(stringResource(if (state.placeStamped) R.string.bc_stamp_short_owned else R.string.bc_stamp_short_pending, state.stamps, state.stampTotal))
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RecordingIcon(if (available) R.drawable.bc_check_circle else R.drawable.bc_pin_off, size = 16.dp)
@@ -66,13 +68,7 @@ fun VisitCheckScreen(state: VisitCheckUiState, onBack: () -> Unit, onRecheck: ()
                 if (available) TextButton(onClick = onRecheck, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.bc_recheck), style = MaterialTheme.typography.bodySmall) }
             }
         }
-        when {
-            !available -> RecordingNotice(stringResource(R.string.bc_draft_kept), stringResource(R.string.bc_draft_kept_body), R.drawable.bc_draft)
-            // 이미 받은 장소에 '아직 도장은 찍히지 않았어요'라고 하지 않는다
-            state.placeStamped -> RecordingNotice(stampLine, stringResource(R.string.bc_stamp_owned_body), R.drawable.bc_stamp)
-            else -> RecordingNotice(stringResource(R.string.bc_stamp_pending), stringResource(R.string.bc_stamp_pending_body, state.stamps, state.placeName, state.stampTotal), R.drawable.bc_stamp, highlighted = true)
-        }
-        RecordingCaption(stringResource(if (available) R.string.bc_gps_help else R.string.bc_outside_help))
+        if (!available) RecordingCaption(stringResource(R.string.bc_outside_short))
     }
 }
 

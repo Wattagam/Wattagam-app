@@ -1,20 +1,28 @@
 package com.wattagam.app.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +71,31 @@ fun GuestbookPhoto(url: String?, contentDescription: String, modifier: Modifier 
     Box(modifier.fillMaxWidth().height(height).clip(WattagamShapes.Card)) {
         PhotoPlaceholder(height = height)
         AsyncImage(url, contentDescription, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+    }
+}
+
+/**
+ * 방명록 사진 크게 보기 · 잘리지 않게 사진의 원래 비율 그대로 보여준다.
+ * 불러오기 전에는 촬영 기본 비율(9:16)로 자리를 잡고, 세로로 너무 길면 [maxHeight] 에 맞춰 폭을 줄인다.
+ */
+@Composable
+fun GuestbookFullPhoto(url: String?, contentDescription: String, modifier: Modifier = Modifier, maxHeight: Dp = 560.dp) {
+    if (url == null) {
+        PhotoPlaceholder(modifier, 280.dp)
+        return
+    }
+    var ratio by remember(url) { mutableFloatStateOf(9f / 16f) }
+    Box(
+        modifier.fillMaxWidth().wrapContentWidth().heightIn(max = maxHeight).aspectRatio(ratio)
+            .clip(WattagamShapes.Card).background(WattagamColors.Border.copy(alpha = .5f)),
+    ) {
+        AsyncImage(
+            url, contentDescription, Modifier.matchParentSize(), contentScale = ContentScale.Fit,
+            onSuccess = { state ->
+                val image = state.result.image
+                if (image.width > 0 && image.height > 0) ratio = image.width.toFloat() / image.height
+            },
+        )
     }
 }
 

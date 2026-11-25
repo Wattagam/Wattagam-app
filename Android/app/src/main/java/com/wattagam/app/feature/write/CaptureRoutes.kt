@@ -38,12 +38,14 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -56,6 +58,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.wattagam.app.R
 import com.wattagam.app.data.draft.DraftStore
+import com.wattagam.app.feature.place.placePhoto
 import com.wattagam.app.feature.capture.CaptureMode
 import com.wattagam.app.feature.capture.CaptureModeScreen
 import com.wattagam.app.feature.capture.PhotoCaptureScreen
@@ -72,6 +75,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun WriteModeRoute(
     placeId: String,
+    /** 코스 순서. 배경에 이 장소 사진을 깐다 */
+    placeOrder: Int,
     stampCount: Int,
     stampTotal: Int,
     drafts: DraftStore,
@@ -108,7 +113,18 @@ fun WriteModeRoute(
                 }
             }
         },
-        background = { Box(Modifier.matchParentSize().background(RecordingNavy)) },
+        background = {
+            // 이 장소 사진을 배경으로, 글자와 푸앙이가 잘 보이게 남색으로 덮는다
+            Box(Modifier.matchParentSize().background(RecordingNavy))
+            placePhoto(placeOrder)?.let { photo ->
+                Image(painterResource(photo), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
+                Box(
+                    Modifier.matchParentSize().background(
+                        Brush.verticalGradient(listOf(RecordingNavy.copy(alpha = 0.55f), RecordingNavy.copy(alpha = 0.35f), RecordingNavy.copy(alpha = 0.85f))),
+                    ),
+                )
+            }
+        },
         character = { Image(painterResource(R.drawable.bc_puang), stringResource(R.string.bc_puang), Modifier.size(240.dp)) },
     )
 
