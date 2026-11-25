@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -82,7 +81,7 @@ fun MapScreen(
         modifier,
         containerColor = WattagamColors.Soft,
         contentColor = WattagamColors.Ink,
-        topBar = { AppTopBar(uiState.courseName, backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding()) },
+        topBar = { AppTopBar(uiState.courseName, backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding(), showLogo = true) },
         bottomBar = { BottomNavigation(MainTab.Map, onTabSelect) },
     ) { insets ->
         Column(
@@ -145,7 +144,7 @@ private fun CampusMap(places: List<MapPlaceUiState>, onPlaceClick: (String) -> U
                 Surface(
                     onClick = { onPlaceClick(place.id) },
                     color = WattagamColors.Primary,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = WattagamShapes.Cookie,
                     border = BorderStroke(3.dp, WattagamColors.Surface),
                     modifier = Modifier
                         .offset(scale * pos.x, scale * pos.y)

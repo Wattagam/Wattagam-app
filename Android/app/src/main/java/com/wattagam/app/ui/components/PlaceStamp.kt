@@ -16,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -31,6 +33,7 @@ import com.wattagam.app.ui.theme.WattagamColors
 import com.wattagam.app.ui.theme.WattagamShapes
 import com.wattagam.app.ui.theme.WattagamSpacing
 import com.wattagam.app.ui.theme.WattagamTheme
+import com.wattagam.app.ui.theme.cookiePath
 
 /**
  * 장소 도장 · 왔다감만의 표시. 받은 도장은 인주색 이중 테두리 안에 장소 이름이 찍힌 자국으로,
@@ -52,15 +55,20 @@ fun PlaceStamp(name: String, earned: Boolean, modifier: Modifier = Modifier, siz
     ) {
         Canvas(Modifier.matchParentSize()) {
             val outer = this.size.minDimension / 2
-            if (earned) {
-                drawCircle(ink, radius = outer * 0.94f, style = Stroke(outer * 0.09f))
-                drawCircle(ink, radius = outer * 0.76f, style = Stroke(outer * 0.04f))
-            } else {
-                drawCircle(
-                    ink, radius = outer * 0.92f,
-                    style = Stroke(outer * 0.05f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(outer * 0.16f, outer * 0.12f))),
-                )
+            // 바깥 테두리는 물결 모양 인장 (로고와 같은 쿠키 모양), 안쪽은 원
+            val seal = outer * 2 * (if (earned) 0.94f else 0.92f)
+            translate((this.size.width - seal) / 2, (this.size.height - seal) / 2) {
+                val rim = cookiePath(Size(seal, seal), lobes = 12, depth = 0.06f)
+                if (earned) {
+                    drawPath(rim, ink, style = Stroke(outer * 0.09f))
+                } else {
+                    drawPath(
+                        rim, ink,
+                        style = Stroke(outer * 0.05f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(outer * 0.16f, outer * 0.12f))),
+                    )
+                }
             }
+            if (earned) drawCircle(ink, radius = outer * 0.76f, style = Stroke(outer * 0.04f))
         }
         if (showName) {
             Text(

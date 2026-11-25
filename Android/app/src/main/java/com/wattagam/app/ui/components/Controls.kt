@@ -100,6 +100,8 @@ fun AppTopBar(
     modifier: Modifier = Modifier,
     actionLabel: String? = null,
     onAction: () -> Unit = {},
+    /** 홈(지도)·마이페이지처럼 뒤로가기가 없는 첫 화면에 로고를 보인다 */
+    showLogo: Boolean = false,
 ) {
     Row(
         modifier.fillMaxWidth().heightIn(min = WattagamSizes.TopBar).padding(horizontal = WattagamSpacing.Content),
@@ -112,6 +114,7 @@ fun AppTopBar(
                 Icon(painterResource(R.drawable.bc_arrow), backLabel, Modifier.size(24.dp), tint = WattagamColors.Ink)
             }
         }
+        if (showLogo) WattagamLogo(size = 32.dp)
         Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
         if (actionLabel != null) TextButton(onClick = onAction, modifier = Modifier.heightIn(min = WattagamSizes.TouchTarget)) { Text(actionLabel) }
     }

@@ -72,6 +72,7 @@ fun MyPageScreen(
             AppTopBar(
                 stringResource(R.string.mypage_title), backLabel = null, onBack = {}, modifier = Modifier.statusBarsPadding(),
                 actionLabel = stringResource(R.string.mypage_settings), onAction = onSettingsClick,
+                showLogo = true,
             )
         },
         bottomBar = { BottomNavigation(MainTab.MyPage, onTabSelect) },

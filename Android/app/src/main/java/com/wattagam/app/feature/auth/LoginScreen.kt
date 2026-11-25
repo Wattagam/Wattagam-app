@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.ui.components.BrandMark
 import com.wattagam.app.ui.components.StatusCard
 import com.wattagam.app.ui.theme.WattagamColors
 import com.wattagam.app.ui.theme.WattagamShapes
@@ -71,7 +72,7 @@ fun LoginScreen(
                 // 장식 그라데이션 대신 캠퍼스 사진과 푸앙이 (피그마 01 의 구성)
                 Box(Modifier.fillMaxWidth().height(300.dp)) {
                     Image(
-                        painterResource(R.drawable.bc_photo_sample), stringResource(R.string.auth_login_photo),
+                        painterResource(R.drawable.login_campus), stringResource(R.string.auth_login_photo),
                         Modifier.fillMaxSize().clip(WattagamShapes.Card), contentScale = ContentScale.Crop,
                     )
                     Image(
@@ -84,7 +85,7 @@ fun LoginScreen(
                 Modifier.padding(start = WattagamSpacing.Screen, end = WattagamSpacing.Screen, bottom = WattagamSpacing.Screen),
                 verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium),
             ) {
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
+                BrandMark()
                 if (status == LoginStatus.Failed) {
                     StatusCard(stringResource(R.string.auth_login_failed), stringResource(R.string.auth_login_failed_body), Modifier.fillMaxWidth())
                 }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,7 +43,7 @@ fun PhotoEditorScreen(state: PhotoEditorUiState, onBack: () -> Unit, onClear: ()
         canvas(Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = maxCanvasHeight).aspectRatio(EDITOR_ASPECT))
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             DrawingTool.entries.forEach { tool ->
-                Column(Modifier.weight(1f).heightIn(min = 64.dp).clip(RoundedCornerShape(12.dp))
+                Column(Modifier.weight(1f).heightIn(min = 64.dp).clip(WattagamShapes.Field)
                     .background(if (tool == state.tool) StudioColors.Surface else Color.Transparent)
                     .selectable(tool == state.tool, role = Role.RadioButton, onClick = { onTool(tool) }).padding(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {

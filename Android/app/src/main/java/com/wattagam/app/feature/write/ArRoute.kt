@@ -81,6 +81,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.hypot
 import kotlin.math.roundToInt
+import com.wattagam.app.ui.theme.WattagamShapes
 
 /** 푸앙이 3D 모델 (assets, 앞이 +Z·발이 원점). 모델을 바꿀 때는 같은 이름으로 넣는다 */
 private const val PUANG_MODEL = "models/puang.glb"
@@ -346,7 +347,7 @@ fun WriteArRoute(
             Box(
                 Modifier
                     .widerThanParent(FRAME_EXTRA_WIDTH, maxFrameHeight)
-                    .border(2.dp, Color.White.copy(alpha = .7f), RoundedCornerShape(16.dp))
+                    .border(2.dp, Color.White.copy(alpha = .7f), RoundedCornerShape(28.dp))
                     .onGloballyPositioned { frameInRoot = it.boundsInRoot() }
                     .semantics { contentDescription = description }
                     .pointerInput(Unit) {
@@ -367,7 +368,7 @@ fun WriteArRoute(
                         Modifier
                             .align(Alignment.Center)
                             .padding(24.dp)
-                            .background(Color(0xCC161616), RoundedCornerShape(12.dp))
+                            .background(Color(0xCC161616), WattagamShapes.Pill)
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                         color = Color.White, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center,
                     )

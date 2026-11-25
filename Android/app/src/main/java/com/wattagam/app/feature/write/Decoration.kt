@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +42,7 @@ import com.wattagam.app.ui.theme.WattagamColors
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.roundToInt
+import com.wattagam.app.ui.theme.WattagamShapes
 
 /** 사진 한 장의 가로:세로 비율 (9:16 세로 사진). 촬영 칸·AR 칸·꾸미기 영역·저장 사진이 모두 이 비율을 쓴다 */
 internal const val EDITOR_ASPECT = 9f / 16f
@@ -146,7 +146,7 @@ internal fun DrawingCanvas(
                             (item.position.y * size.height).roundToInt() - with(density) { 36.dp.roundToPx() },
                         )
                     }
-                    .background(Color(0xCC161616), RoundedCornerShape(8.dp))
+                    .background(Color(0xCC161616), WattagamShapes.Pill)
                     .padding(horizontal = 12.dp, vertical = 4.dp),
                 color = Color.White,
                 style = MaterialTheme.typography.labelLarge,

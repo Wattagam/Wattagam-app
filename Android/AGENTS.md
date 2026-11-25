@@ -5,7 +5,13 @@
 - This repository contains a separate Spring Boot project in `backend/`. Android has its own Gradle wrapper and settings. Do not modify backend or root infrastructure for an Android-only task.
 - Product: 왔다감, a native Android campus-tour app for Chung-Ang University. Use Kotlin and Jetpack Compose, a single Activity, and initially one `app` module.
 - Current milestone: Figma-based common components and sample-data screens, then navigation, then real integrations. A showcase is development evidence, not a finished production feature.
-- Design reference: https://www.figma.com/design/YPHFpqR55vNmkvEd4T9t5I?node-id=247-101 (`Compose · 공통 디자인`). Reuse its colors, Noto Sans KR, type hierarchy and shapes. Do not redesign without a product reason.
+- Design reference: https://www.figma.com/design/YPHFpqR55vNmkvEd4T9t5I?node-id=247-101 (`Compose · 공통 디자인`). Reuse its colors, Noto Sans KR and type hierarchy (titles Bold 700, tracking -2% bold / -0.5% other). Shapes follow the default design direction below, not the older square corners.
+
+## Default design direction (기본 디자인 규칙)
+- 왔다감은 네모난 레이아웃 대신 **리퀴드** 모양을 쓴다. 기준 레퍼런스는 Material 3 Expressive (물결·쿠키 모양, 모양 대비, 경쾌한 움직임).
+- 모양 토큰은 `ui/theme/Theme.kt` 의 `WattagamShapes` 와 `ui/theme/LiquidShapes.kt` 만 쓴다: 카드 `Card`(대각선이 더 둥근 연속 곡률 36/24), 버튼·칩·하단 탭 `Pill`, 입력 `Field` 20, 작은 표시 `Small` 12, 로고·지도 핀·순서·도장 `Cookie`. 새 화면에서 `RoundedCornerShape(n.dp)` 를 직접 쓰지 않는다 (지도 약도 그림 예외).
+- 로고는 `ic_wattagam_logo` (쿠키 모양 배지 + 하트 핀 + 노란 반짝임). 홈(지도)·마이페이지 상단 바는 `AppTopBar(showLogo = true)`, 로그인 등 브랜드 자리는 `BrandMark`. 런처 아이콘은 같은 모양의 적응형 아이콘(`mipmap-anydpi-v26/ic_launcher`)이다.
+- 그라데이션은 피그마 브랜드 색 #3B7CFC → #1848D5 만 쓴다. 꾸밈보다 내용이 먼저이며, 모양만으로 정보를 구분하지 않는다.
 - Resolve conflicts in this order: explicit current user decisions, current agreed product scope, design reference, older PRD/screens. Flag unresolved behavior differences rather than silently adding features.
 
 ## Product invariants

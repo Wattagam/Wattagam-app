@@ -7,6 +7,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
@@ -14,6 +15,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.wattagam.app.R
 
@@ -40,15 +42,17 @@ object WattagamSpacing {
 }
 
 /**
- * 모서리는 크기에 따라: 작은 표시 8, 버튼·입력 12~14, 카드 16. 칩·토글처럼 정말 알약 모양인 것만 [Pill].
- * 안쪽 모서리는 바깥 모서리에서 사이 여백을 뺀 값으로 맞춘다.
+ * 리퀴드 모양 (Material 3 Expressive). 네모 대신 물처럼 흐르는 모서리:
+ * 작은 표시 12, 입력 20, 버튼·칩은 알약 [Pill], 카드는 대각선 모서리가 더 둥근 [Card] (36/24).
+ * 로고·지도 핀·순서·도장처럼 작게 눈에 띄는 표시는 [Cookie]. 안쪽 모서리는 바깥 모서리에서 사이 여백을 뺀 값.
  */
 object WattagamShapes {
-    val Small = RoundedCornerShape(8.dp)
-    val Field = RoundedCornerShape(12.dp)
-    val Button = RoundedCornerShape(14.dp)
-    val Card = RoundedCornerShape(16.dp)
+    val Small = RoundedCornerShape(12.dp)
+    val Field = RoundedCornerShape(20.dp)
+    val Button = RoundedCornerShape(percent = 50)
+    val Card: Shape = liquidCard()
     val Pill = RoundedCornerShape(percent = 50)
+    val Cookie: Shape = CookieShape()
 }
 
 object WattagamSizes {
@@ -62,18 +66,22 @@ private val NotoSansKr = FontFamily(
     Font(R.font.noto_sans_kr, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
     Font(R.font.noto_sans_kr, FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
     Font(R.font.noto_sans_kr, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
+    Font(R.font.noto_sans_kr, FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
 )
 
+// 피그마 글자 간격: 굵은 제목 -2%, 나머지 -0.5%
 private fun textStyle(size: Int, height: Int, weight: FontWeight = FontWeight.Normal) = TextStyle(
     fontFamily = NotoSansKr,
     fontWeight = weight,
     fontSize = size.sp,
     lineHeight = height.sp,
+    letterSpacing = if (weight == FontWeight.Bold) (-0.02).em else (-0.005).em,
 )
 
 private val WattagamTypography = Typography(
-    // 위계는 크기와 색으로. 가장 큰 제목도 600 까지만
-    headlineLarge = textStyle(30, 42, FontWeight.SemiBold),
+    // 피그마 공통 디자인: 화면 제목 30/Bold/42, 브랜드 24/Bold/32
+    headlineLarge = textStyle(30, 42, FontWeight.Bold),
+    headlineSmall = textStyle(24, 32, FontWeight.Bold),
     titleLarge = textStyle(18, 27, FontWeight.Medium),
     titleMedium = textStyle(16, 24, FontWeight.Medium),
     bodyLarge = textStyle(16, 24),
@@ -103,7 +111,7 @@ fun WattagamTheme(content: @Composable () -> Unit) {
             errorContainer = WattagamColors.DangerSoft,
         ),
         typography = WattagamTypography,
-        shapes = Shapes(medium = WattagamShapes.Field, large = WattagamShapes.Card),
+        shapes = Shapes(small = WattagamShapes.Small, medium = WattagamShapes.Field, large = RoundedCornerShape(28.dp), extraLarge = RoundedCornerShape(36.dp)),
         content = content,
     )
 }

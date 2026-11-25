@@ -3,7 +3,6 @@ package com.wattagam.app.feature.guestbook
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,6 +17,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.ui.theme.WattagamShapes
 
 @Composable
 internal fun FocusPublishScreen(
@@ -45,9 +45,9 @@ internal fun FocusPublishScreen(
             val label = stringResource(R.string.bc_message_label)
             Text(label, style = MaterialTheme.typography.labelMedium)
             BasicTextField(value = state.message, onValueChange = onMessageChange, enabled = !busy,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp).clip(RoundedCornerShape(12.dp))
+                modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp).clip(WattagamShapes.Field)
                     .background(StudioColors.Surface)
-                    .then(if (overLimit) Modifier.border(1.dp, StudioColors.Error, RoundedCornerShape(12.dp)) else Modifier)
+                    .then(if (overLimit) Modifier.border(1.dp, StudioColors.Error, WattagamShapes.Field) else Modifier)
                     .padding(16.dp).semantics { contentDescription = label },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White), cursorBrush = SolidColor(Color.White))
             Text(stringResource(R.string.bc_message_count, count, state.messageLimit), Modifier.align(Alignment.End),

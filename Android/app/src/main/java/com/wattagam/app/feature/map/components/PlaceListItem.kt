@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,13 +44,13 @@ fun PlaceListItem(
         modifier
             .fillMaxWidth()
             .heightIn(min = WattagamSizes.TouchTarget)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(WattagamShapes.Field)
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium),
     ) {
-        Surface(color = WattagamColors.Soft, shape = WattagamShapes.Small, modifier = Modifier.size(28.dp)) {
+        Surface(color = WattagamColors.PrimarySoft, shape = WattagamShapes.Cookie, modifier = Modifier.size(30.dp)) {
             Box(contentAlignment = Alignment.Center) {
                 Text(order.toString(), style = MaterialTheme.typography.labelSmall, color = WattagamColors.Ink)
             }

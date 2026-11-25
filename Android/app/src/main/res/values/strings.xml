@@ -68,7 +68,7 @@
     <!-- auth: 01 로그인 · 01-A 닉네임 · 01-B 위치 허용 -->
     <string name="auth_login_title">캠퍼스 세 곳을 걷고\n도장을 모아요</string>
     <string name="auth_login_body">310관, 도서관, 청룡연못에서 사진과 글을 남기면 장소마다 도장을 하나씩 받아요.</string>
-    <string name="auth_login_photo">중앙도서관 앞 풍경</string>
+    <string name="auth_login_photo">영신관 앞 풍경</string>
     <string name="auth_login_kakao">카카오로 시작하기</string>
     <string name="auth_login_failed">카카오 로그인에 실패했어요</string>
     <string name="auth_login_failed_body">네트워크를 확인하고 다시 시도해주세요.</string>

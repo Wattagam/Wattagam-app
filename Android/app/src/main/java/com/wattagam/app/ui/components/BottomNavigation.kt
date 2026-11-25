@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -22,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
 import com.wattagam.app.ui.theme.WattagamColors
+import com.wattagam.app.ui.theme.WattagamShapes
 import com.wattagam.app.ui.theme.WattagamSizes
 import com.wattagam.app.ui.theme.WattagamTheme
 
@@ -33,7 +35,7 @@ fun BottomNavigation(selected: MainTab, onSelect: (MainTab) -> Unit, modifier: M
     Surface(
         modifier = modifier.navigationBarsPadding().fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         // 떠 있는 그림자 없이 얇은 테두리로만 구분한다
-        shape = RoundedCornerShape(20.dp),
+        shape = WattagamShapes.Pill,
         color = WattagamColors.Surface,
         border = BorderStroke(1.dp, WattagamColors.Border),
     ) {
@@ -51,7 +53,9 @@ private fun TabItem(label: String, active: Boolean, modifier: Modifier, onClick:
         modifier = modifier
             .heightIn(min = WattagamSizes.TouchTarget + 20.dp)
             .semantics { selected = active; role = Role.Tab },
-        shape = RoundedCornerShape(16.dp),
+        shape = WattagamShapes.Pill,
+        // 선택된 탭은 연한 강조색 알약으로 감싼다 (Material 3 Expressive)
+        colors = ButtonDefaults.textButtonColors(containerColor = if (active) WattagamColors.PrimarySoft else Color.Transparent),
     ) {
         Text(
             label,

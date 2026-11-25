@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -47,7 +46,7 @@ fun CaptureModeScreen(stampCount: Int, stampTotal: Int, onBack: () -> Unit, onHe
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = contentHeight).padding(24.dp), verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
                 RecordingBadge(stringResource(R.string.bc_capture_verified, stampCount, stampTotal), dark = true, solidDark = true, icon = R.drawable.bc_check_light)
                 Box(Modifier.padding(vertical = 24.dp)) { character() }
-                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.fillMaxWidth().clip(WattagamShapes.Card).background(Color.White).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(stringResource(R.string.bc_choose_mode), color = WattagamColors.Ink, style = MaterialTheme.typography.titleLarge)
                     Text(stringResource(R.string.bc_choose_mode_body), style = MaterialTheme.typography.bodyMedium, color = WattagamColors.Muted)
                     WattagamButton(stringResource(R.string.bc_choose_ar), { onSelectMode(CaptureMode.Ar) }, Modifier.fillMaxWidth())
