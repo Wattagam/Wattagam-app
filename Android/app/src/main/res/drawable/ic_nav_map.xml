@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 하단 탭 · 지도 (접힌 지도 선 아이콘). 색은 화면에서 tint 로 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:pathData="M3.5,6.5L9,4.25L15,6.75L20.5,4.5V17.5L15,19.75L9,17.25L3.5,19.5Z M9,4.25V17.25 M15,6.75V19.75"
+        android:strokeColor="#FF000000" android:strokeWidth="2"
+        android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>
