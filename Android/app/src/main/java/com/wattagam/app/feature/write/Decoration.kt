@@ -47,6 +47,10 @@ import com.wattagam.app.ui.theme.WattagamShapes
 /** 사진 한 장의 가로:세로 비율 (9:16 세로 사진). 촬영 칸·AR 칸·꾸미기 영역·저장 사진이 모두 이 비율을 쓴다 */
 internal const val EDITOR_ASPECT = 9f / 16f
 
+/** 사진 전체 비율 (가로/세로). 사진이 없으면 [default] */
+internal fun ImageBitmap?.aspectOr(default: Float = EDITOR_ASPECT): Float =
+    if (this != null && width > 0 && height > 0) width.toFloat() / height else default
+
 /** 세로로 긴 사진 칸이 아래 버튼을 화면 밖으로 밀지 않게, 칸 높이를 화면 높이의 이 비율까지만 쓴다 */
 internal const val PHOTO_MAX_SCREEN_FRACTION = 0.55f
 
@@ -69,7 +73,7 @@ internal fun DrawingColor.toColor(): Color = when (this) {
 
 /**
  * 사진 위에 손가락으로 그리는 영역. 펜은 선을 더하고, 지우개는 손가락이 지나간 선을 통째로 지운다.
- * 사진은 [EDITOR_ASPECT] 비율로 가운데를 잘라 보여주며, 저장할 때([composeDecoratedPhoto])도 같은 영역을 쓴다.
+ * 사진은 자르지 않고 전체를 보여준다 (영역 비율 = 사진 비율). 저장할 때([composeDecoratedPhoto])도 사진 전체에 그린다.
  */
 @Composable
 internal fun DrawingCanvas(
@@ -120,7 +124,7 @@ internal fun DrawingCanvas(
                 )
             },
     ) {
-        if (photo != null) Image(photo, photoDescription, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        if (photo != null) Image(photo, photoDescription, Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
         Canvas(Modifier.fillMaxSize()) {
             val width = this.size.width * STROKE_WIDTH_RATIO
             fun draw(points: List<Offset>, strokeColor: Color) {
@@ -169,11 +173,10 @@ internal fun centerCrop(width: Int, height: Int, aspect: Float): CropBox {
 }
 
 /**
- * 원본 사진을 편집 영역 비율로 가운데를 잘라 선과 글자를 그려 넣은 한 장을 만든다 (백그라운드 스레드에서 호출).
+ * 원본 사진 전체에 선과 글자를 그려 넣은 한 장을 만든다 (백그라운드 스레드에서 호출). 사진은 자르지 않는다.
  */
 internal fun composeDecoratedPhoto(source: Bitmap, strokes: List<DrawnStroke>, texts: List<PlacedText>): Bitmap {
-    val crop = centerCrop(source.width, source.height, EDITOR_ASPECT)
-    val output = Bitmap.createBitmap(source, crop.left, crop.top, crop.width, crop.height).copy(Bitmap.Config.ARGB_8888, true)
+    val output = source.copy(Bitmap.Config.ARGB_8888, true)
     val canvas = android.graphics.Canvas(output)
     val w = output.width.toFloat()
     val h = output.height.toFloat()

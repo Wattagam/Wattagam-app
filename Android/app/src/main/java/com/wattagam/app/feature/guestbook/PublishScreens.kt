@@ -10,11 +10,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.feature.write.EDITOR_ASPECT
+import com.wattagam.app.feature.write.PHOTO_MAX_SCREEN_FRACTION
 import com.wattagam.app.ui.components.*
 import com.wattagam.app.ui.theme.*
 
@@ -34,10 +37,13 @@ data class PublishUiState(
 
 @Composable
 fun PublishScreen(state: PublishUiState, onBack: () -> Unit, onMessageChange: (String) -> Unit, onEditPhoto: () -> Unit, onRecheck: () -> Unit, onPublish: () -> Unit,
-    modifier: Modifier = Modifier, photo: @Composable (Modifier) -> Unit,
+    modifier: Modifier = Modifier,
+    /** 사진 전체 비율 (가로/세로). 사진이 잘리지 않게 이 비율로 보여준다 */
+    photoAspect: Float = EDITOR_ASPECT,
+    photo: @Composable (Modifier) -> Unit,
 ) {
     if (state.status != PublishStatus.Failed) {
-        FocusPublishScreen(state, onBack, onMessageChange, onEditPhoto, onRecheck, onPublish, modifier, photo)
+        FocusPublishScreen(state, onBack, onMessageChange, onEditPhoto, onRecheck, onPublish, modifier, photoAspect = photoAspect, photo = photo)
         return
     }
     val messageLength = state.message.codePointCount(0, state.message.length)
@@ -49,7 +55,7 @@ fun PublishScreen(state: PublishUiState, onBack: () -> Unit, onMessageChange: (S
     }) {
         RecordingNotice(stringResource(R.string.bc_publish_failed), stringResource(R.string.bc_publish_failed_body), R.drawable.bc_alert, danger = true)
         RecordingAuthor(state.authorName, state.placeName, stringResource(R.string.bc_draft_badge))
-        photo(Modifier.fillMaxWidth().height(192.dp))
+        photo(Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * PHOTO_MAX_SCREEN_FRACTION).aspectRatio(photoAspect))
         val label = stringResource(R.string.bc_message_label)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -84,7 +90,7 @@ fun PublishSuccessScreen(state: PublishSuccessUiState, onBack: () -> Unit, onGal
     }) {
         RecordingNotice(stringResource(R.string.bc_published), stringResource(R.string.bc_published_body), R.drawable.bc_check_circle, highlighted = true)
         RecordingAuthor(state.authorName, state.createdAt, stringResource(R.string.bc_place_public))
-        photo(Modifier.fillMaxWidth().height(210.dp))
+        photo(Modifier.fillMaxWidth())
         if (state.message.isNotBlank()) Text(state.message, style = MaterialTheme.typography.bodyLarge)
         HorizontalDivider(color = WattagamColors.Border)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {

@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -112,7 +114,12 @@ fun PhotoPreviewScreen(placeName: String, photo: Painter, onBack: () -> Unit, on
         CreationSteps(0)
         RecordingBadge(stringResource(R.string.bc_one_photo, placeName), icon = R.drawable.bc_image)
         Text(stringResource(R.string.bc_preview_heading), style = MaterialTheme.typography.headlineLarge)
-        RecordingPhoto(photo, stringResource(R.string.bc_selected_photo), Modifier.fillMaxWidth().height(320.dp))
+        // 찍은 사진 전체를 원래 비율로 (세로로 길면 화면 높이의 55% 안에서 폭을 줄인다)
+        val aspect = photo.intrinsicSize.let { if (it.isSpecified && it.height > 0f) it.width / it.height else 9f / 16f }
+        RecordingPhoto(
+            photo, stringResource(R.string.bc_selected_photo),
+            Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.55f).aspectRatio(aspect),
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             WattagamButton(stringResource(R.string.bc_retake), onRetake, Modifier.weight(1f), kind = ButtonKind.Secondary)
             WattagamButton(stringResource(R.string.bc_gallery_change), onGallery, Modifier.weight(1f), kind = ButtonKind.Secondary)

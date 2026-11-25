@@ -104,6 +104,7 @@ fun WriteEditorRoute(
                 }
             }
         },
+        photoAspect = photo.aspectOr(),
         canvas = { modifier ->
             DrawingCanvas(photo, strokes, texts, tool, color, stringResource(R.string.bc_selected_photo), modifier)
         },
@@ -254,9 +255,10 @@ fun WritePublishRoute(
                 check.start()
             }
         },
+        photoAspect = photo.aspectOr(),
         photo = { modifier ->
             Box(modifier.background(Color.Black)) {
-                photo?.let { Image(it, stringResource(R.string.bc_selected_photo), Modifier.matchParentSize(), contentScale = ContentScale.Crop) }
+                photo?.let { Image(it, stringResource(R.string.bc_selected_photo), Modifier.matchParentSize(), contentScale = ContentScale.Fit) }
             }
         },
     )

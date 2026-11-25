@@ -11,19 +11,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.feature.write.EDITOR_ASPECT
+import com.wattagam.app.feature.write.PHOTO_MAX_SCREEN_FRACTION
 import com.wattagam.app.ui.theme.WattagamShapes
 
 @Composable
 internal fun FocusPublishScreen(
     state: PublishUiState, onBack: () -> Unit, onMessageChange: (String) -> Unit,
     onEditPhoto: () -> Unit, onRecheck: () -> Unit, onPublish: () -> Unit,
-    modifier: Modifier = Modifier, photo: @Composable (Modifier) -> Unit,
+    modifier: Modifier = Modifier,
+    /** 사진 전체 비율 (가로/세로). 사진이 잘리지 않게 이 비율로 보여준다 */
+    photoAspect: Float = EDITOR_ASPECT,
+    photo: @Composable (Modifier) -> Unit,
 ) {
     val busy = state.status == PublishStatus.CheckingLocation || state.status == PublishStatus.Uploading
     val count = state.message.codePointCount(0, state.message.length)
@@ -40,7 +46,7 @@ internal fun FocusPublishScreen(
         },
     ) {
         StudioLocation(state.placeName)
-        photo(Modifier.fillMaxWidth().aspectRatio(1.4f))
+        photo(Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * PHOTO_MAX_SCREEN_FRACTION).aspectRatio(photoAspect))
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             val label = stringResource(R.string.bc_message_label)
             Text(label, style = MaterialTheme.typography.labelMedium)

@@ -115,7 +115,8 @@ fun GuestbookGrid(items: List<GuestbookCardUiState>, onClick: (String) -> Unit, 
 @Composable
 fun GuestbookCard(item: GuestbookCardUiState, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
-        modifier.clip(WattagamShapes.Card).clickable(onClick = onClick).padding(bottom = 4.dp),
+        // 글자까지 리퀴드 모양으로 자르면 왼쪽 아래 글자가 잘린다. 둥근 모양은 사진에만 쓴다
+        modifier.clickable(onClick = onClick).padding(bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Small),
     ) {
         GuestbookPhoto(item.imageUrl, item.title)

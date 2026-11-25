@@ -29,8 +29,8 @@ android {
         applicationId = "com.wattagam.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4
-        versionName = "1.1.2"
+        versionCode = 5
+        versionName = "1.1.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", "\"$kakaoNativeAppKey\"")
         buildConfigField("String", "WATTAGAM_API_URL", "\"$wattagamApiUrl\"")

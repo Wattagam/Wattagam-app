@@ -68,7 +68,7 @@ private fun TabItem(label: String, @DrawableRes icon: Int, active: Boolean, modi
     Column(
         modifier
             .heightIn(min = WattagamSizes.TouchTarget + 16.dp)
-            .clip(WattagamShapes.Card)
+            .clip(WattagamShapes.Field)
             .selectable(selected = active, onClick = onClick, role = Role.Tab)
             .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

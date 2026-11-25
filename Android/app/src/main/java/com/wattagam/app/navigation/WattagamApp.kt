@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,7 @@ import com.wattagam.app.feature.write.WriteEditorRoute
 import com.wattagam.app.feature.write.WriteModeRoute
 import com.wattagam.app.feature.write.WritePreviewRoute
 import com.wattagam.app.feature.write.WritePublishRoute
-import com.wattagam.app.ui.components.GuestbookPhoto
+import com.wattagam.app.ui.components.GuestbookFullPhoto
 import com.wattagam.app.ui.components.LocalAccountProblemHandler
 import com.wattagam.app.ui.components.MainTab
 import com.wattagam.app.ui.components.RemoteContent
@@ -403,7 +404,9 @@ fun WattagamApp() {
                             if (backStack.lastOrNull() != Gallery(key.placeId)) backStack.add(Gallery(key.placeId))
                         },
                         onMyPage = { backStack.selectTab(MainTab.MyPage) },
-                        photo = { modifier -> GuestbookPhoto(key.imageUrl, stringResource(R.string.bc_selected_photo), modifier, height = 210.dp) },
+                        photo = { modifier ->
+                            GuestbookFullPhoto(key.imageUrl, stringResource(R.string.bc_selected_photo), modifier, maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.45f)
+                        },
                     )
                 }
                 entry<GuestbookDetail> { key ->

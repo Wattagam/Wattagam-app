@@ -31,7 +31,10 @@ data class PhotoEditorUiState(val placeName: String, val tool: DrawingTool = Dra
 
 @Composable
 fun PhotoEditorScreen(state: PhotoEditorUiState, onBack: () -> Unit, onClear: () -> Unit, onTool: (DrawingTool) -> Unit, onColor: (DrawingColor) -> Unit,
-    onAddText: () -> Unit, onDone: () -> Unit, modifier: Modifier = Modifier, canvas: @Composable (Modifier) -> Unit,
+    onAddText: () -> Unit, onDone: () -> Unit, modifier: Modifier = Modifier,
+    /** 사진 전체 비율 (가로/세로). 꾸미는 영역을 이 비율로 만들어 사진이 잘리지 않게 한다 */
+    photoAspect: Float = EDITOR_ASPECT,
+    canvas: @Composable (Modifier) -> Unit,
 ) {
     FocusStudioScaffold(stringResource(R.string.bc_editor_title), onBack, modifier,
         action = { TextButton(onClick = onClear) { Text(stringResource(R.string.bc_clear_drawing), style = MaterialTheme.typography.bodySmall) } },
@@ -40,7 +43,7 @@ fun PhotoEditorScreen(state: PhotoEditorUiState, onBack: () -> Unit, onClear: ()
         StudioLocation(state.placeName)
         // 세로로 긴 사진이 아래 도구를 화면 밖으로 밀지 않게 높이를 제한하고 가운데에 둔다
         val maxCanvasHeight = LocalConfiguration.current.screenHeightDp.dp * PHOTO_MAX_SCREEN_FRACTION
-        canvas(Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = maxCanvasHeight).aspectRatio(EDITOR_ASPECT))
+        canvas(Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = maxCanvasHeight).aspectRatio(photoAspect))
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             DrawingTool.entries.forEach { tool ->
                 Column(Modifier.weight(1f).heightIn(min = 64.dp).clip(WattagamShapes.Field)

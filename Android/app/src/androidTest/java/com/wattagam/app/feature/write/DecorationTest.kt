@@ -9,13 +9,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
-/** 꾸민 사진은 편집 화면과 같은 비율로 잘리고, 그린 선이 같은 위치에 들어가야 한다 */
+/** 꾸민 사진은 원본 사진 전체를 자르지 않고 쓰고, 그린 선이 같은 위치에 들어가야 한다 */
 class DecorationTest {
     private fun whitePhoto(w: Int, h: Int) = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.WHITE) }
 
-    @Test fun outputUsesEditorAspect() {
+    @Test fun outputKeepsWholePhoto() {
         val out = composeDecoratedPhoto(whitePhoto(1200, 800), emptyList(), emptyList())
-        assertEquals(EDITOR_ASPECT, out.width.toFloat() / out.height, 0.01f)
+        assertEquals(1200, out.width)
+        assertEquals(800, out.height)
     }
 
     @Test fun strokeIsDrawnAtNormalizedPosition() {
