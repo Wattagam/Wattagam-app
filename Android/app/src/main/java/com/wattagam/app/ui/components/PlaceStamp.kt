@@ -102,7 +102,7 @@ private fun StampBoardPreview() {
         StampBoard(
             listOf(
                 StampUiState("310", "310관", true), StampUiState("library", "도서관", true),
-                StampUiState("pond", "청룡탕", false),
+                StampUiState("pond", "청룡연못", false),
             ),
             Modifier.padding(16.dp),
         )

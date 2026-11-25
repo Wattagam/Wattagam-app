@@ -41,13 +41,14 @@
     <string name="earned">획득</string>
     <string name="unearned">미수집</string>
     <string name="library">도서관</string>
-    <string name="pond">청룡탕</string>
+    <string name="pond">청룡연못</string>
     <string name="building">310관</string>
     <string name="stamp_sample">샘플: 310관·도서관 도장을 획득한 상태입니다.</string>
     <string name="stamp_earned_description">%1$s 도장 받음</string>
     <string name="stamp_empty_description">%1$s 도장 아직 없음</string>
     <string name="place_stamp_caption_earned">이 장소의 도장을 받았어요</string>
     <string name="place_stamp_caption_empty">아직 받지 않은 도장이에요</string>
+    <string name="place_photo">%1$s 사진</string>
     <string name="stamp_rule">공개 방명록 저장 성공 시에만 장소별 도장을 받아요.</string>
     <string name="public_title">앱 사용자에게 공개</string>
     <string name="public_body">사진·손그림·글·표시명·작성 시각이 로그인한 앱 사용자에게 공개돼요.</string>
@@ -66,7 +67,7 @@
 
     <!-- auth: 01 로그인 · 01-A 닉네임 · 01-B 위치 허용 -->
     <string name="auth_login_title">캠퍼스 세 곳을 걷고\n도장을 모아요</string>
-    <string name="auth_login_body">310관, 도서관, 청룡탕에서 사진과 글을 남기면 장소마다 도장을 하나씩 받아요.</string>
+    <string name="auth_login_body">310관, 도서관, 청룡연못에서 사진과 글을 남기면 장소마다 도장을 하나씩 받아요.</string>
     <string name="auth_login_photo">중앙도서관 앞 풍경</string>
     <string name="auth_login_kakao">카카오로 시작하기</string>
     <string name="auth_login_failed">카카오 로그인에 실패했어요</string>

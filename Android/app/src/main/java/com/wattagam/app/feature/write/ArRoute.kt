@@ -40,6 +40,7 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -89,14 +90,15 @@ private val FRAME_EXTRA_WIDTH = 12.dp
 
 /**
  * 부모 폭보다 양옆으로 [extra] 만큼 넓게, [EDITOR_ASPECT] 비율로 그린다 (부모가 준 안쪽 여백을 일부 쓴다).
+ * 높이가 [maxHeight] 를 넘으면 그 높이에 맞춰 폭을 줄이고 가운데에 둔다.
  * 늘어난 높이만큼 아래 버튼·안내는 그대로 아래로 밀려 겹치지 않는다.
  */
-private fun Modifier.widerThanParent(extra: Dp) = layout { measurable, constraints ->
+private fun Modifier.widerThanParent(extra: Dp, maxHeight: Dp) = layout { measurable, constraints ->
     val extraPx = extra.roundToPx()
-    val width = constraints.maxWidth + extraPx * 2
+    val width = minOf(constraints.maxWidth + extraPx * 2, (maxHeight.toPx() * EDITOR_ASPECT).roundToInt())
     val height = (width / EDITOR_ASPECT).roundToInt()
     val placeable = measurable.measure(Constraints.fixed(width, height))
-    layout(constraints.maxWidth, height) { placeable.place(-extraPx, 0) }
+    layout(constraints.maxWidth, height) { placeable.place((constraints.maxWidth - width) / 2, 0) }
 }
 
 /** 바닥에 놓았을 때 푸앙이 키 (m) */
@@ -340,9 +342,10 @@ fun WriteArRoute(
         },
         arContent = {
             val description = stringResource(R.string.write_ar_frame)
+            val maxFrameHeight = LocalConfiguration.current.screenHeightDp.dp * PHOTO_MAX_SCREEN_FRACTION
             Box(
                 Modifier
-                    .widerThanParent(FRAME_EXTRA_WIDTH)
+                    .widerThanParent(FRAME_EXTRA_WIDTH, maxFrameHeight)
                     .border(2.dp, Color.White.copy(alpha = .7f), RoundedCornerShape(16.dp))
                     .onGloballyPositioned { frameInRoot = it.boundsInRoot() }
                     .semantics { contentDescription = description }

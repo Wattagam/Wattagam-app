@@ -1,6 +1,9 @@
 package com.wattagam.app.feature.place
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -17,6 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -81,20 +89,36 @@ fun PlaceDetailScreen(
         },
     ) { insets ->
         Column(Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState())) {
-            // 장소 사진이 서버에서 오기 전까지는 '사진' 자리 대신 이 장소에서 받을 수 있는 도장을 보여준다
-            Surface(
-                Modifier.padding(horizontal = WattagamSpacing.Screen).fillMaxWidth().height(200.dp),
-                shape = WattagamShapes.Card, color = WattagamColors.Soft,
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+            val photo = placePhoto(uiState.order)
+            val stampCaption = stringResource(if (uiState.stamped) R.string.place_stamp_caption_earned else R.string.place_stamp_caption_empty)
+            if (photo != null) {
+                // 장소 사진 위 오른쪽 아래에 이 장소에서 받을 수 있는 도장을 겹쳐 보여준다
+                Column(Modifier.padding(horizontal = WattagamSpacing.Screen), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Box(Modifier.fillMaxWidth().height(200.dp).clip(WattagamShapes.Card)) {
+                        Image(
+                            painterResource(photo), stringResource(R.string.place_photo, uiState.name),
+                            Modifier.fillMaxSize(), contentScale = ContentScale.Crop,
+                        )
+                        // 사진 위에서도 도장이 보이게 흰 바탕을 깐다
+                        Box(Modifier.align(Alignment.BottomEnd).padding(12.dp).background(Color.White.copy(alpha = .9f), CircleShape)) {
+                            PlaceStamp(uiState.name, uiState.stamped, size = 72.dp)
+                        }
+                    }
+                    Text(stampCaption, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
+                }
+            } else {
+                // 사진이 없는 장소는 '사진' 자리 대신 이 장소에서 받을 수 있는 도장을 보여준다
+                Surface(
+                    Modifier.padding(horizontal = WattagamSpacing.Screen).fillMaxWidth().height(200.dp),
+                    shape = WattagamShapes.Card, color = WattagamColors.Soft,
                 ) {
-                    PlaceStamp(uiState.name, uiState.stamped, size = 112.dp)
-                    Text(
-                        stringResource(if (uiState.stamped) R.string.place_stamp_caption_earned else R.string.place_stamp_caption_empty),
-                        style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted,
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(WattagamSpacing.Medium, Alignment.CenterVertically),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        PlaceStamp(uiState.name, uiState.stamped, size = 112.dp)
+                        Text(stampCaption, style = MaterialTheme.typography.bodySmall, color = WattagamColors.Muted)
+                    }
                 }
             }
             Column(

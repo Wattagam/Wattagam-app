@@ -10,7 +10,7 @@
 
 ## Product invariants
 - No proximity notifications, notification permission or background location monitoring.
-- Exactly three tour places, in course order: 310관, 도서관, 청룡탕 (정문 removed; server order and radius 75/40/30 m). Selection only opens information; it does not prove a visit.
+- Exactly three tour places, in course order: 310관, 도서관, 청룡연못 (정문 removed; server order and radius 75/40/30 m). Selection only opens information; it does not prove a visit.
 - Kakao-only login. No password or guest-auth implementation. Nickname setup remains a UI proposal until its account contract is confirmed.
 - Valid current GPS is required at writing start and final submission. The provisional visit radius is 30 m; freshness/accuracy thresholds require field validation. A previous visit never grants current write access.
 - A successful server guestbook save grants at most one stamp per account/place, four total. Visiting or taking a photo alone grants none. Server results determine real eligibility and stamp state.

@@ -37,7 +37,7 @@ import com.kakao.vectormap.label.LabelStyles
 import com.wattagam.app.R
 import com.wattagam.app.ui.theme.WattagamColors
 
-/** 서울캠퍼스 세 장소(310관·도서관·청룡탕)가 한 화면에 들어오는 중심과 확대 수준 */
+/** 서울캠퍼스 세 장소(310관·도서관·청룡연못)가 한 화면에 들어오는 중심과 확대 수준 */
 private val CampusCenter = LatLng.from(37.50463, 126.95700)
 private const val CAMPUS_ZOOM = 16
 private const val MY_LOCATION_LAYER = "my_location"

@@ -14,10 +14,11 @@ class CenterCropTest {
     }
 
     @Test fun tallPortraitPhotoKeepsFullWidthAndCropsTopAndBottomEvenly() {
-        val crop = centerCrop(3000, 4000, EDITOR_ASPECT)
-        assertEquals(3000, crop.width)
+        // 9:16 보다 더 길쭉한 사진 (예: 1080×2400 화면 캡처)
+        val crop = centerCrop(1080, 2400, EDITOR_ASPECT)
+        assertEquals(1080, crop.width)
         assertEquals(0, crop.left)
-        assertEquals((4000 - crop.height) / 2, crop.top)
+        assertEquals((2400 - crop.height) / 2, crop.top)
     }
 
     @Test fun cropStaysInsidePhotoAndMatchesEditorAspect() {

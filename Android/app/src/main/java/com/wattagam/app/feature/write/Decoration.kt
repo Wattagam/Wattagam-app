@@ -44,8 +44,11 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-/** 06-A 편집 영역의 가로:세로 비율 (사진 꾸미기 화면이 정한 값과 같게) */
-internal const val EDITOR_ASPECT = 0.96f
+/** 사진 한 장의 가로:세로 비율 (9:16 세로 사진). 촬영 칸·AR 칸·꾸미기 영역·저장 사진이 모두 이 비율을 쓴다 */
+internal const val EDITOR_ASPECT = 9f / 16f
+
+/** 세로로 긴 사진 칸이 아래 버튼을 화면 밖으로 밀지 않게, 칸 높이를 화면 높이의 이 비율까지만 쓴다 */
+internal const val PHOTO_MAX_SCREEN_FRACTION = 0.55f
 
 /** 선 하나. 좌표는 편집 영역 기준 0~1 비율이라 화면 크기와 저장 해상도가 달라도 같은 위치에 그려진다 */
 internal data class DrawnStroke(val points: List<Offset>, val color: DrawingColor)

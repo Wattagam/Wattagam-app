@@ -237,14 +237,16 @@ fun WriteCameraRoute(
     error?.let { MessageDialog(null, it) { error = null } }
 }
 
-/** 미리보기 위에 사진에 담길 칸(가로 꽉, [EDITOR_ASPECT] 비율, 가운데)을 보여주고 칸 밖은 어둡게 한다 */
+/** 미리보기 위에 사진에 담길 칸([EDITOR_ASPECT] 비율, 미리보기 안에 꽉 차게, 가운데)을 보여주고 칸 밖은 어둡게 한다 */
 @Composable
 private fun CaptureGuide(modifier: Modifier = Modifier) {
     Canvas(modifier) {
-        val frameHeight = size.width / EDITOR_ASPECT
+        val frameWidth = minOf(size.width, size.height * EDITOR_ASPECT)
+        val frameHeight = frameWidth / EDITOR_ASPECT
+        val left = (size.width - frameWidth) / 2
         val top = (size.height - frameHeight) / 2
         val corner = CornerRadius(16.dp.toPx())
-        val frame = RoundRect(0f, top, size.width, top + frameHeight, corner)
+        val frame = RoundRect(left, top, left + frameWidth, top + frameHeight, corner)
         val outside = Path().apply {
             fillType = PathFillType.EvenOdd
             addRect(Rect(Offset.Zero, size))
@@ -257,13 +259,15 @@ private fun CaptureGuide(modifier: Modifier = Modifier) {
 
 /**
  * 찍은 사진을 미리보기의 칸([CaptureGuide])만큼 잘라 같은 파일에 다시 저장한다 (백그라운드 스레드에서 호출).
- * 미리보기는 사진 가운데를 화면 비율([viewAspect])로 채워 보여주므로, 보이던 영역의 가로 전체를 칸 비율로 자른다.
+ * 미리보기는 사진 가운데를 화면 비율([viewAspect])로 채워 보여주므로, 보이던 영역 안에서 칸과 같은 가운데 영역을 자른다.
  */
 private fun cropToGuide(file: java.io.File, viewAspect: Float): Boolean = runCatching {
     val source = decodePhoto(file, OUTPUT_MAX_SIDE) ?: return false
     val visibleWidth = minOf(source.width.toFloat(), source.height * viewAspect)
-    val cropWidth = visibleWidth.toInt()
-    val cropHeight = minOf(source.height.toFloat(), visibleWidth / EDITOR_ASPECT).toInt()
+    val visibleHeight = visibleWidth / viewAspect
+    val frame = centerCrop(visibleWidth.toInt(), visibleHeight.toInt(), EDITOR_ASPECT)
+    val cropWidth = frame.width
+    val cropHeight = frame.height
     val cropped = Bitmap.createBitmap(source, (source.width - cropWidth) / 2, (source.height - cropHeight) / 2, cropWidth, cropHeight)
     file.outputStream().use { cropped.compress(Bitmap.CompressFormat.JPEG, 92, it) }
 }.getOrDefault(false)

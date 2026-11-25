@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -20,6 +21,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.wattagam.app.R
+import com.wattagam.app.feature.write.EDITOR_ASPECT
+import com.wattagam.app.feature.write.PHOTO_MAX_SCREEN_FRACTION
 import com.wattagam.app.ui.components.*
 import com.wattagam.app.ui.theme.*
 
@@ -36,7 +39,9 @@ fun PhotoEditorScreen(state: PhotoEditorUiState, onBack: () -> Unit, onClear: ()
         bottom = { StudioPrimaryButton(stringResource(R.string.bc_studio_next), onDone) },
     ) {
         StudioLocation(state.placeName)
-        canvas(Modifier.fillMaxWidth().aspectRatio(.96f))
+        // 세로로 긴 사진이 아래 도구를 화면 밖으로 밀지 않게 높이를 제한하고 가운데에 둔다
+        val maxCanvasHeight = LocalConfiguration.current.screenHeightDp.dp * PHOTO_MAX_SCREEN_FRACTION
+        canvas(Modifier.fillMaxWidth().wrapContentWidth().heightIn(max = maxCanvasHeight).aspectRatio(EDITOR_ASPECT))
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             DrawingTool.entries.forEach { tool ->
                 Column(Modifier.weight(1f).heightIn(min = 64.dp).clip(RoundedCornerShape(12.dp))

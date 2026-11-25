@@ -132,7 +132,7 @@ private fun MyPagePreview() {
                 "하늘",
                 listOf(
                     StampUiState("310", "310관", true), StampUiState("library", "도서관", true),
-                    StampUiState("pond", "청룡탕", false),
+                    StampUiState("pond", "청룡연못", false),
                 ),
                 listOf(
                     MyGuestbookUiState("library", GuestbookCardUiState("g1", "햇살까지 기억할 오후", "도서관 · 2026. 10. 27.")),

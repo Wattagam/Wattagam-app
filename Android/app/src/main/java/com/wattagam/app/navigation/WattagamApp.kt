@@ -120,7 +120,8 @@ private data class BcDetail(val sample: BcSample) : NavKey
  */
 @Composable
 fun WattagamApp() {
-    val backStack = rememberNavBackStack(ShowcaseHome)
+    // 출시용 앱은 로그인(저장된 로그인이 있으면 자동 로그인)부터, 개발용(디버그) 앱은 부품 목록부터 연다
+    val backStack = rememberNavBackStack(if (BuildConfig.DEBUG) ShowcaseHome else Login)
     val context = LocalContext.current
     val repository = remember { AppRepository.get(context) }
     // 지금 로그인한 계정의 닉네임 (로그인·닉네임 저장 때 정해진다)
